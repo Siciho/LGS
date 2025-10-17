@@ -40,19 +40,23 @@ export default function ChallengeNotification({ challenges, onDismiss }: Challen
   };
 
   return (
-    <div className="fixed top-24 right-4 z-50 w-80 space-y-2 animate-slide-in-right">
+    <div className="fixed top-24 right-4 z-50 w-80 space-y-2">
       {challenges.map(challenge => (
-        <Card key={challenge.id} className="shadow-lg border-primary/20 bg-card">
+        <Card key={challenge.id} className="shadow-lg border-primary/20 bg-card animate-slide-up">
           <CardHeader className="p-4">
             <div className="flex items-start justify-between">
               <div>
+                {/* --- DEĞİŞİKLİK BURADA BAŞLIYOR --- */}
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
                   <Swords className="h-4 w-4 text-primary" />
-                  Sana Meydan Okudu!
+                  {/* Başlığa meydan okuyanın adı eklendi */}
+                  {challenge.challenger_name}
                 </CardTitle>
                 <CardDescription className="text-xs mt-1">
-                  <strong>{challenge.challenger_name}</strong>, seni Ünite {challenge.unit_id} testine davet ediyor.
+                  {/* Açıklama sadeleştirildi */}
+                  Seni Ünite {challenge.unit_id} testine davet ediyor.
                 </CardDescription>
+                {/* --- DEĞİŞİKLİK BURADA BİTİYOR --- */}
               </div>
               <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onDismiss(challenge.id)}>
                 <X className="h-4 w-4" />
