@@ -40,9 +40,9 @@ export default function ChallengeNotification({ challenges, onDismiss }: Challen
   };
 
   return (
-    <div className="fixed top-24 right-4 z-50 w-80 space-y-2">
+    <div className="fixed top-24 right-4 z-50 w-80 space-y-2 animate-slide-in-right">
       {challenges.map(challenge => (
-        <Card key={challenge.id} className="shadow-lg border-primary/20 bg-card animate-slide-up">
+        <Card key={challenge.id} className="shadow-lg border-primary/20 bg-card">
           <CardHeader className="p-4">
             <div className="flex items-start justify-between">
               <div>
@@ -50,7 +50,7 @@ export default function ChallengeNotification({ challenges, onDismiss }: Challen
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
                   <Swords className="h-4 w-4 text-primary" />
                   {/* Başlığa meydan okuyanın adı eklendi */}
-                  {challenge.challenger_name}
+                  {challenge.challenger_name} Sana Meydan Okudu!
                 </CardTitle>
                 <CardDescription className="text-xs mt-1">
                   {/* Açıklama sadeleştirildi */}
