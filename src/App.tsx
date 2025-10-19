@@ -16,7 +16,7 @@ import Statistics from "@/components/Statistics";
 import AchievementsList from "@/components/AchievementsList";
 import PracticePage from "./pages/PracticePage";
 import { MarketPage } from "./pages/MarketPage";
-import ProfilePage  from "./pages/ProfilePage";
+import ProfilePage from "./pages/ProfilePage";
 import { SettingsPage } from "./pages/SettingsPage";
 import GecmisKayitlarSayfasi from "./pages/GecmisKayitlarSayfasi";
 import StudentDetailPage from "./pages/StudentDetailPage";
@@ -24,7 +24,8 @@ import SchedulePage from "./pages/SchedulePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import WordQuizPage from "./pages/WordQuizPage";
 import AdminPage from "./pages/AdminPage";
-import UpdatePasswordPage from "./pages/UpdatePasswordPage"; // YENİ SAYFAYI İÇE AKTARDIK
+import UpdatePasswordPage from "./pages/UpdatePasswordPage";
+import DenemeKayitlarimPage from "./pages/DenemeKayitlarimPage"; // YENİ SAYFAYI İÇE AKTARDIK
 
 const StatisticsPage = () => {
   const context = useAppContext();
@@ -38,7 +39,6 @@ const AchievementsPage = () => {
 };
 
 const LoginPage = () => {
-    // ... Bu fonksiyonun içeriğinde değişiklik yok, olduğu gibi kalıyor ...
     const auth = useAuthContext();
     const location = useLocation();
     const [activeTab, setActiveTab] = useState(location.state?.openRegister ? "register" : "login");
@@ -148,7 +148,6 @@ const LoginPage = () => {
 };
 
 const ProtectedRoute = () => {
-    // ... Bu fonksiyonun içeriğinde değişiklik yok ...
     const { session, profile, authLoading } = useAuthContext();
     if (authLoading) {
         return <div className="fixed inset-0 flex items-center justify-center bg-background"><p>Yükleniyor...</p></div>;
@@ -180,11 +179,12 @@ function App() {
         <Route path="leaderboard" element={<LeaderboardPage />} />
         <Route path="word-quiz/:unitId" element={<WordQuizPage />} />
         <Route path="student/:studentId" element={<StudentDetailPage />} />
+        {/* --- YENİ ROTA BURAYA EKLENDİ --- */}
+        <Route path="deneme-kayitlarim" element={<DenemeKayitlarimPage />} />
         <Route path="coach" element={<SchedulePage />} />
         <Route path="admin/reset-password" element={<AdminPage />} />
+        <Route path="update-password" element={<UpdatePasswordPage />} />
       </Route>
-      {/* YENİ ROTA AŞAĞIYA EKLENDİ */}
-      <Route path="/update-password" element={<UpdatePasswordPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
