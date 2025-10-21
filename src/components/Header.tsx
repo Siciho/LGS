@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Moon, Sun, Trophy, Flame, Target, Star, Volume2, VolumeX, ShoppingCart, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import { avatars } from "@/data/avatars";
-import { cn } from "@/lib/utils"; // cn utility'sini import ediyoruz
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   userName: string | null;
@@ -72,15 +72,17 @@ export default function Header({
         <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 md:h-9 md:w-9" onClick={toggleMute} title={isMuted ? "Sesi Aç" : "Sesi Kapat"}>
           {isMuted ? <VolumeX className="h-4 w-4 md:h-5 md:w-5" /> : <Volume2 className="h-4 w-4 md:h-5 md:w-5" />}
         </Button>
-        <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 md:h-9 md:w-9" onClick={toggleTheme} title="Temayı Değiştir">
+        {/* Tema butonu artık işlevsiz olduğu için kaldırılabilir veya gizlenebilir */}
+        {/* <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 md:h-9 md:w-9" onClick={toggleTheme} title="Temayı Değiştir">
           {theme === 'light' ? <Moon className="h-4 w-4 md:h-5 md:w-5" /> : <Sun className="h-4 w-4 md:h-5 md:w-5" />}
-        </Button>
+        </Button> */}
       </div>
     </div>
   );
 
   const renderStatsCards = () => (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+      {/* İstatistik kartlarına da glass efekti eklendi */}
       <div className="bg-card backdrop-blur-sm p-3 md:p-4 rounded-lg border border-border transition-all duration-300">
         <div className="flex items-center gap-2 md:gap-3">
           <div className="bg-primary/10 p-1.5 md:p-2 rounded-lg"><Target className="h-4 w-4 md:h-5 md:w-5 text-primary" /></div>

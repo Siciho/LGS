@@ -5,8 +5,7 @@
 /* NEON & GLASSMORPHISM DESIGN SYSTEM */
 
 @layer base {
-  :root {
-    /* Ana Arka Plan ve Yazı Renkleri */
+  :root, .dark {
     --background: 258 35% 8%;   /* Koyu Mor Arka Plan */
     --foreground: 260 100% 98%; /* Neredeyse Beyaz Yazı Rengi */
 
@@ -14,15 +13,14 @@
     --card: 260 100% 95% / 0.08; /* Çok hafif beyaz, %8 opaklık */
     --card-foreground: 260 100% 98%;
 
-    /* Popover/Açılır Pencereler */
-    --popover: 258 35% 12%; /* Karttan biraz daha koyu */
+    --popover: 258 35% 12%;
     --popover-foreground: 260 100% 98%;
 
     /* Ana Renk - Neon Lila/Mor */
-    --primary: 265 100% 75%; /* Canlı Lila */
-    --primary-foreground: 260 100% 10%; /* Çok Koyu Mor (Lila üstündeki yazılar için) */
-    --primary-glow: 270 100% 80%; /* Parlama için daha açık bir ton */
-
+    --primary: 265 100% 75%;
+    --primary-foreground: 260 100% 10%;
+    --primary-glow: 270 100% 80%;
+    
     /* Diğer Renkler */
     --secondary: 260 100% 80% / 0.1;
     --secondary-foreground: 0 0% 98%;
@@ -49,7 +47,6 @@
 
   body {
     @apply bg-background text-foreground;
-    /* Arka plana daha belirgin, dinamik bir gradyan */
     background-image: radial-gradient(circle at 10% 20%, hsl(280 100% 70% / 0.15), transparent 50%),
                       radial-gradient(circle at 80% 90%, hsl(var(--primary) / 0.15), transparent 50%);
     background-attachment: fixed;

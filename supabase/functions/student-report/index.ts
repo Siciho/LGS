@@ -1,35 +1,35 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
-// Gelen isteklere doğru yanıt vermek için CORS başlıkları
+// --- DEĞİŞİKLİK BURADA: Gelen isteklere daha esnek yanıt vermek için CORS başlıklarını güncelliyoruz ---
 const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 serve(async (req) => {
-  // Gelen isteğin Origin'ini kontrol et ve izin verilenler listesine ekle
+  // Gelen isteğin Origin'ini (kaynağını) kontrol et
   const origin = req.headers.get("Origin") || "";
   const allowedOrigins = [
-    'http://localhost:8080',      // Yerel geliştirme ortamı
-    'capacitor://localhost',      // Capacitor iOS/Android
-    'http://localhost',           // Capacitor Android
+    'http://localhost:8080',      // Yerel geliştirme ortamı (Vite)
+    'capacitor://localhost',      // Capacitor iOS/Android için standart Origin
+    'http://localhost',           // Capacitor Android için ek Origin
     // Buraya Vercel'deki canlı site adreslerini de ekleyebilirsin
-    // 'https://okul-a.vercel.app',
-    // 'https://okul-b.vercel.app'
+    // 'https://siciho2026.vercel.app' 
   ];
 
   const headers = { ...corsHeaders };
+  // Eğer istek, izin verilen bir adresten geliyorsa VEYA bir Vercel deploy'u ise, ona izin ver
   if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
     headers['Access-Control-Allow-Origin'] = origin;
   }
 
-  // Tarayıcının gönderdiği OPTIONS isteğini doğru başlıklarla yanıtla
+  // Tarayıcının gönderdiği OPTIONS (ön kontrol) isteğini doğru başlıklarla yanıtla
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers });
   }
 
   try {
-    // 1. İstek yapan kullanıcının kimliğini ve yetkisini doğrula
+    // 1. İstek yapan kullanıcının kimliğini doğrula
     const userSupabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -38,6 +38,7 @@ serve(async (req) => {
     const { data: { user } } = await userSupabaseClient.auth.getUser();
     if (!user) throw new Error("Authentication error: User not found.");
 
+    // 2. İstek yapan kullanıcının rolünü kontrol et (koç veya admin mi?)
     const { data: userProfile, error: profileError } = await userSupabaseClient
       .from('kullanicilar')
       .select('rol, koc_kodu')
@@ -49,17 +50,17 @@ serve(async (req) => {
       throw new Error("Authorization error: Not an admin or a coach.");
     }
     
-    // 2. İstekten öğrenci ID'sini al
+    // 3. İstekten öğrenci ID'sini al
     const { student_id } = await req.json();
     if (!student_id) throw new Error("Request error: 'student_id' is required.");
 
-    // 3. Admin yetkileriyle yeni bir Supabase istemcisi oluştur (SERVICE_ROLE_KEY kullanarak)
+    // 4. Admin yetkileriyle yeni bir Supabase istemcisi oluştur
     const adminSupabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // 4. Öğrencinin bilgilerini ve soru kayıtlarını güvenli bir şekilde çek
+    // 5. Öğrencinin bilgilerini ve soru kayıtlarını güvenli bir şekilde çek
     const studentPromise = adminSupabaseClient.from('kullanicilar').select('ad_soyad, koc_kodu').eq('id', student_id).single();
     const recordsPromise = adminSupabaseClient.from('cozulen_sorular').select('*').eq('kullanici_id', student_id);
     
@@ -68,12 +69,12 @@ serve(async (req) => {
     if (studentError) throw studentError;
     if (recordsError) throw recordsError;
 
-    // 5. Koçun, sadece kendi öğrencisini görebildiğini doğrula
+    // 6. Koçun, sadece kendi öğrencisini görebildiğini doğrula
     if (userProfile.rol === 'koç' && userProfile.koc_kodu !== studentData.koc_kodu) {
         throw new Error("Authorization error: Coach can only view their own students.");
     }
 
-    // 6. Başarılı yanıtı gönder
+    // 7. Başarılı yanıtı gönder
     return new Response(JSON.stringify({ records: records, student_name: studentData.ad_soyad }), {
       headers: { ...headers, "Content-Type": "application/json" },
       status: 200,
