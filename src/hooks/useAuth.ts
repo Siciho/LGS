@@ -65,14 +65,14 @@ export const useAuth = (isMuted: boolean) => {
     };
   }, []);
 
-  // --- DEĞİŞİKLİK BURADA BAŞLIYOR ---
+  // --- DEĞİŞİKLİK BURADA: RLS GÜVENLİĞİNE UYGUN GİRİŞ İŞLEMİ ---
   const handleLogin = async () => {
     if (!username || !password) {
       toast.error("Kullanıcı adı ve şifre alanları boş bırakılamaz.");
       return;
     }
     try {
-      // Adım 1: Kullanıcı adına karşılık gelen e-postayı güvenli fonksiyon ile al
+      // Adım 1: Kullanıcı adına karşılık gelen e-postayı güvenli fonksiyondan al
       const { data: email, error: rpcError } = await supabase.rpc('get_email_for_username', {
         p_username: username.toLowerCase()
       });
@@ -97,7 +97,7 @@ export const useAuth = (isMuted: boolean) => {
       toast.error(error.message);
     }
   };
-  // --- DEĞİŞİKLİK BURADA BİTİYOR ---
+  // --- DEĞİŞİKLİK SONA ERDİ ---
   
   const handleNewStudentRegistration = async (): Promise<boolean> => {
     if (!regFullName || !regClassName || !regCoachCode || !regEmail || !regPassword || !regConfirmPassword) {
