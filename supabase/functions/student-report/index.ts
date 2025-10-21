@@ -1,13 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
-// --- DEĞİŞİKLİK BURADA: Gelen isteklere daha esnek yanıt vermek için CORS başlıklarını güncelliyoruz ---
+// Gelen isteklere doğru yanıt vermek için CORS başlıkları
 const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 serve(async (req) => {
-  // Gelen isteğin Origin'ini (kaynağını) kontrol et
+  // Gelen isteğin Origin'ini kontrol et ve izin verilenler listesine ekle
   const origin = req.headers.get("Origin") || "";
   const allowedOrigins = [
     'http://localhost:8080',      // Yerel geliştirme ortamı (Vite)
@@ -17,7 +17,9 @@ serve(async (req) => {
     // 'https://siciho2026.vercel.app' 
   ];
 
-  const headers = { ...corsHeaders };
+  // --- DÜZELTME BURADA: 'headers' değişkenine esnek bir tip atıyoruz ---
+  const headers: { [key: string]: string } = { ...corsHeaders };
+  
   // Eğer istek, izin verilen bir adresten geliyorsa VEYA bir Vercel deploy'u ise, ona izin ver
   if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
     headers['Access-Control-Allow-Origin'] = origin;
@@ -82,7 +84,7 @@ serve(async (req) => {
 
   } catch (error) {
     // Hata durumunda yanıt gönder
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: (error as Error).message }), { // 'error' tipini 'Error' olarak belirttik
       headers: { ...headers, "Content-Type": "application/json" },
       status: 400,
     });
