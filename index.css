@@ -21,7 +21,6 @@
     --primary-foreground: 260 100% 10%;
     --primary-glow: 270 100% 80%;
     
-    /* Diğer Renkler */
     --secondary: 260 100% 80% / 0.1;
     --secondary-foreground: 0 0% 98%;
     --muted: 250 50% 100% / 0.05;
@@ -41,10 +40,7 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
+  /* Hatalı olan '@apply border-border' komutunu buradan kaldırdık */
   body {
     @apply bg-background text-foreground;
     background-image: radial-gradient(circle at 10% 20%, hsl(280 100% 70% / 0.15), transparent 50%),

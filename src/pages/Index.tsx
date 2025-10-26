@@ -1,5 +1,3 @@
-// src/pages/Index.tsx
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '@/pages/AppLayout';
@@ -8,39 +6,36 @@ import DailyQuote from '@/components/ui/DailyQuote';
 import LgsCountdown from '@/components/ui/LgsCountdown';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Briefcase, BookCopy, BarChart, Loader2 } from 'lucide-react';
+import { Briefcase, BookCopy, BarChart } from 'lucide-react';
 import { DenemeSinaviDialog, DenemeSonucu } from '@/components/DenemeSinaviDialog';
-import { supabase } from '@/supabaseClient'; // supabase import edildi
-import { toast } from 'sonner'; // toast import edildi
+import { supabase } from '@/supabaseClient';
+import { toast } from 'sonner';
 
 const Index = () => {
   const { subjects, handleAddQuestions, tomorrowSubjects, isEvening, userId } = useAppContext();
   const navigate = useNavigate();
   const [isDenemeDialogOpen, setIsDenemeDialogOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false); // Kaydetme durumu için state eklendi
+  const [isSaving, setIsSaving] = useState(false);
 
-  // --- YENİ EKLENEN KOD BAŞLANGICI: Veritabanına kaydetme mantığı ---
-  const handleSaveDeneme = async (sonuclar: DenemeSonucu, denemeAdi: string) => {
+  const handleSaveDeneme = async (sonuclar: DenemeSonucu, denemeAdi: string, denemeTarihi: Date) => {
     if (!userId) {
-      toast.error("Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.");
+      toast.error("Kullanıcı oturumu bulunamadı.");
       return;
     }
-
     setIsSaving(true);
     try {
-      // 1. Ana deneme kaydını 'deneme_sinavlari' tablosuna ekle
       const { data: denemeData, error: denemeError } = await supabase
         .from('deneme_sinavlari')
         .insert({
           kullanici_id: userId,
-          deneme_adi: denemeAdi
+          deneme_adi: denemeAdi,
+          deneme_tarihi: denemeTarihi.toISOString().split('T')[0]
         })
         .select()
         .single();
 
       if (denemeError) throw denemeError;
 
-      // 2. Her bir dersin sonucunu 'deneme_sonuclari' tablosuna ekle
       const sonuclarToInsert = Object.keys(sonuclar).map(dersId => ({
         deneme_id: denemeData.id,
         ders_id: dersId,
@@ -48,15 +43,11 @@ const Index = () => {
         yanlis_sayisi: sonuclar[dersId].incorrect || 0,
       }));
 
-      const { error: sonuclarError } = await supabase
-        .from('deneme_sonuclari')
-        .insert(sonuclarToInsert);
-
+      const { error: sonuclarError } = await supabase.from('deneme_sonuclari').insert(sonuclarToInsert);
       if (sonuclarError) throw sonuclarError;
 
       toast.success(`"${denemeAdi}" deneme sınavı başarıyla kaydedildi!`);
       setIsDenemeDialogOpen(false);
-
     } catch (error: any) {
       console.error("Deneme kaydedilirken hata:", error);
       toast.error("Deneme kaydedilirken bir hata oluştu:", { description: error.message });
@@ -64,7 +55,6 @@ const Index = () => {
       setIsSaving(false);
     }
   };
-  // --- YENİ EKLENEN KOD SONU ---
 
   return (
     <div className="space-y-6">
@@ -114,7 +104,7 @@ const Index = () => {
         open={isDenemeDialogOpen}
         onOpenChange={setIsDenemeDialogOpen}
         onSave={handleSaveDeneme}
-        isSaving={isSaving} // isSaving prop'u eklendi
+        isSaving={isSaving}
       />
     </div>
   );
