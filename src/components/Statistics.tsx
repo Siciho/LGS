@@ -1,7 +1,9 @@
+// src/components/Statistics.tsx
+
 import { useState, useMemo } from 'react';
 import { Subject, StudySession } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronDown, BarChart3, TrendingUp, TrendingDown } from "lucide-react";
+import { ChevronDown, BarChart3, TrendingUp, TrendingDown, Info } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
@@ -11,24 +13,25 @@ interface StatisticsProps {
 }
 
 export default function Statistics({ subjects, sessions }: StatisticsProps) {
-  // =================================================================
-  // KONTROL NOKTASI: Bileşene gelen verileri kontrol et
-  console.log("Statistics bileşenine gelen 'subjects':", subjects);
-  console.log("Statistics bileşenine gelen 'sessions':", sessions);
-  // =================================================================
-
   const [openSubjectId, setOpenSubjectId] = useState<string | null>(null);
 
-  const getTopicStats = useMemo(() => {
-    return (subjectId: string, topic: string) => {
-      const topicSessions = sessions.filter(s => s.subjectId === subjectId && s.topic === topic);
-      const correct = topicSessions.reduce((sum, s) => sum + s.correctCount, 0);
-      const incorrect = topicSessions.reduce((sum, s) => sum + s.incorrectCount, 0);
-      const total = correct + incorrect;
-      const accuracy = total > 0 ? (correct / total) * 100 : 0;
-      return { correct, incorrect, total, accuracy };
-    };
+  // --- DEĞİŞİKLİK: 'sessions' dizisi artık 'subjectId'ye göre gruplanıyor ---
+  // Bu işlem, 'sessions' dizisi üzerinde SADECE BİR KEZ çalışır.
+  // Eski 'getTopicStats' fonksiyonu gibi her konu için tekrar tekrar çalışmaz.
+  const sessionsBySubject = useMemo(() => {
+    // KONTROL NOKTASI: Gelen 'sessions' verisini kontrol et
+    // console.log("Statistics bileşenine gelen 'sessions':", sessions);
+
+    return sessions.reduce((acc, session) => {
+      const { subjectId } = session;
+      if (!acc[subjectId]) {
+        acc[subjectId] = [];
+      }
+      acc[subjectId].push(session);
+      return acc;
+    }, {} as Record<string, StudySession[]>);
   }, [sessions]);
+  // --- DEĞİŞİKLİK SONU ---
 
   return (
     <div className="space-y-6 animate-slide-up">
@@ -45,14 +48,19 @@ export default function Statistics({ subjects, sessions }: StatisticsProps) {
         {subjects.map(subject => {
           const totalSolved = subject.correct + subject.incorrect;
           const overallProgress = subject.targetQuestions > 0 ? (totalSolved / subject.targetQuestions) * 100 : 0;
-
+          
+          // --- DEĞİŞİKLİK: Gruplanmış 'sessions' verisi buradan alınıyor ---
+          const subjectSessions = sessionsBySubject[subject.id] || [];
+          
           return (
             <Card
               key={subject.id}
-              className="shadow-card border border-border/50 dark:border-white/10 cursor-pointer"
-              onClick={() => setOpenSubjectId(openSubjectId === subject.id ? null : subject.id)}
+              className="shadow-card border border-border/50 dark:border-white/10"
             >
-              <CardHeader className="py-4 px-6 flex flex-row items-center justify-between">
+              <CardHeader 
+                className="py-4 px-6 flex flex-row items-center justify-between cursor-pointer"
+                onClick={() => setOpenSubjectId(openSubjectId === subject.id ? null : subject.id)}
+              >
                 <div className="flex flex-col flex-1 gap-2">
                   <div className="flex items-center gap-3">
                     <div className="text-3xl">{subject.icon}</div>
@@ -86,31 +94,46 @@ export default function Statistics({ subjects, sessions }: StatisticsProps) {
                   <hr className="border-t border-border/50" />
                   <h4 className="font-semibold text-foreground">Konulara Göre İstatistikler</h4>
                   <div className="space-y-3">
-                    {subject.topics.map(topic => {
-                      const stats = getTopicStats(subject.id, topic);
-                      const progressValue = stats.total > 0 ? (stats.correct / stats.total) * 100 : 0;
-                      return (
-                        <div key={topic} className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg">
-                          <div className="flex justify-between items-center text-sm">
-                            <span className="font-medium">{topic}</span>
-                            <span className="font-semibold">%{Math.round(progressValue)}</span>
-                          </div>
-                          <Progress value={progressValue} className={cn("h-2", {
-                            "bg-primary": subject.color === "primary",
-                            "bg-success": subject.color === "success",
-                            "bg-warning": subject.color === "warning"
-                          })} />
-                          <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                            <div className="flex items-center gap-1 text-success">
-                              <TrendingUp className="h-3 w-3" /> {stats.correct} Doğru
+                    {/* --- DEĞİŞİKLİK: 'subject.topics.map' yerine 'subjectSessions.map' kullanılıyor --- */}
+                    {subjectSessions.length > 0 ? (
+                      subjectSessions.map(session => {
+                        // Veriler artık doğrudan 'session' objesinden alınıyor.
+                        const { topic, correctCount, incorrectCount } = session;
+                        const total = correctCount + incorrectCount;
+                        const progressValue = total > 0 ? (correctCount / total) * 100 : 0;
+                        
+                        // 'Günlük Test' kayıtlarını filtrele (isteğe bağlı, ama rapor için temiz)
+                        if (topic === 'Günlük Test') return null;
+
+                        return (
+                          <div key={topic} className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg">
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="font-medium">{topic}</span>
+                              <span className="font-semibold">%{Math.round(progressValue)}</span>
                             </div>
-                            <div className="flex items-center gap-1 text-destructive">
-                              <TrendingDown className="h-3 w-3" /> {stats.incorrect} Yanlış
+                            <Progress value={progressValue} className={cn("h-2", {
+                              "bg-primary": subject.color === "primary",
+                              "bg-success": subject.color === "success",
+                              "bg-warning": subject.color === "warning"
+                            })} />
+                            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                              <div className="flex items-center gap-1 text-success">
+                                <TrendingUp className="h-3 w-3" /> {correctCount} Doğru
+                              </div>
+                              <div className="flex items-center gap-1 text-destructive">
+                                <TrendingDown className="h-3 w-3" /> {incorrectCount} Yanlış
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    ) : (
+                      // Eğer 'subjectSessions' boşsa (hiç soru girilmemişse)
+                      <div className="flex items-center justify-center gap-2 text-center text-muted-foreground p-4">
+                        <Info className="h-4 w-4" />
+                        <p>Bu ders için henüz manuel konu girişi yapılmamış.</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               )}

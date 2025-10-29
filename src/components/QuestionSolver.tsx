@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+// src/components/QuestionSolver.tsx
+
+import { useState } from "react";
 import { Question, Subject, SolvedStat } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { X, CheckCircle, XCircle } from "lucide-react"; // Clock ikonu kaldırıldı
+import { X, CheckCircle, XCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { playYaySound, playFailSound } from "@/utils/sounds";
 import { useAppContext } from "@/pages/AppLayout";
@@ -21,8 +23,6 @@ export default function QuestionSolver({ questions, subjects, onFinish, onClose 
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [solvedStats, setSolvedStats] = useState<SolvedStat[]>([]);
-  // --- DEĞİŞİKLİK: Zamanlayıcı ile ilgili state kaldırıldı ---
-  // const [timeLeft, setTimeLeft] = useState(30); 
   const [isFinished, setIsFinished] = useState(false);
   const [showExplanationModal, setShowExplanationModal] = useState(false);
 
@@ -37,26 +37,10 @@ export default function QuestionSolver({ questions, subjects, onFinish, onClose 
   
   const isCorrect = selectedAnswer !== null && selectedAnswer === currentQuestion.correctAnswer;
 
-  // --- DEĞİŞİKLİK: Zamanlayıcıyı çalıştıran useEffect kaldırıldı ---
-  /*
-  useEffect(() => {
-    if (isFinished || showResult) return;
-    if (timeLeft === 0) {
-      handleSelectAnswer(null); 
-      return;
-    }
-    const timer = setInterval(() => {
-      setTimeLeft(prev => prev - 1);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [timeLeft, isFinished, showResult]);
-  */
-
   const handleNext = () => {
     setShowExplanationModal(false);
     setShowResult(false);
     setSelectedAnswer(null);
-    // setTimeLeft(30); // Zamanlayıcı sıfırlaması kaldırıldı
 
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
@@ -96,12 +80,6 @@ export default function QuestionSolver({ questions, subjects, onFinish, onClose 
         <CardHeader>
           <div className="flex justify-between items-center mb-4">
             <Badge variant="secondary">{getSubjectName(currentQuestion.subjectId)}</Badge>
-            {/* --- DEĞİŞİKLİK: Zamanlayıcı göstergesi kaldırıldı --- */}
-            {/* <div className={`flex items-center gap-2 font-bold ${timeLeft <= 5 ? 'text-destructive animate-pulse' : 'text-muted-foreground'}`}>
-              <Clock className="h-5 w-5" />
-              <span>{timeLeft}</span>
-            </div>
-            */}
             <Button variant="ghost" size="icon" onClick={onClose}><X /></Button>
           </div>
           <Progress value={progress} />

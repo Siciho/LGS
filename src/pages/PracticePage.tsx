@@ -1,5 +1,7 @@
+// src/pages/PracticePage.tsx
+
 import { useState, useMemo } from "react";
-import { Question, SolvedStat } from "@/types";
+import { Question, SolvedStat, Subject } from "@/types"; // Subject tipi eklendi
 import { questions as allQuestions } from "@/data/questions";
 import { useAppContext } from "./AppLayout";
 import QuestionSolver from "@/components/QuestionSolver";
@@ -15,6 +17,9 @@ import { Swords, Trophy, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { dailyWords } from "@/data/dailywords";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+// --- YENİ İMPORT: Müfredat kontrolü için ---
+import { isTopicActive } from "@/curriculum";
 
 const badges = [
   { wins: 0, image: '/assets/default.png', name: 'Başlangıç Ligi' },
@@ -31,25 +36,60 @@ export default function PracticePage() {
   const [isSolving, setIsSolving] = useState(false);
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { handleQuizCompletion, subjects, dailySolvedSubjects, challengeWins } = useAppContext();
+  // --- DEĞİŞİKLİK: 'subjects' prop'unu context'ten alıyoruz (tam liste gerekli olabilir) ---
+  const { handleQuizCompletion, subjects: allSubjectsFromContext, dailySolvedSubjects, challengeWins } = useAppContext();
 
+  // --- DEĞİŞİKLİK BURADA BAŞLIYOR: handleSelectSubject güncellendi ---
   const handleSelectSubject = (subjectId: string) => {
-    const questionsForSubject = allQuestions.filter(q => q.subjectId === subjectId);
-    const shuffledQuestions = [...questionsForSubject].sort(() => 0.5 - Math.random()).slice(0, 6);
+    // Seçilen dersin tam adını bul (isTopicActive için gerekli)
+    const subject = allSubjectsFromContext.find(s => s.id === subjectId);
+    const subjectName = subject ? subject.name : "";
+
+    // O derse ait VE bugünün tarihi itibarıyla "aktif" olan konulardan gelen soruları filtrele
+    const availableQuestions = allQuestions.filter(q =>
+        q.subjectId === subjectId && q.topic && isTopicActive(subjectName, q.topic, new Date())
+    );
+
+    // Yeterli sayıda (6) soru var mı kontrol et
+    if (availableQuestions.length < 6) {
+      toast.info("Bu ders için henüz yeterli sayıda aktif soru bulunmuyor.", {
+        description: "Lütfen daha sonra tekrar deneyin veya başka bir ders seçin.",
+      });
+      return; // Testi başlatma
+    }
+
+    // Filtrelenmiş sorulardan rastgele 6 tane seç
+    const shuffledQuestions = [...availableQuestions].sort(() => 0.5 - Math.random()).slice(0, 6);
+
     setDailyQuestions(shuffledQuestions);
     setSelectedSubjectId(subjectId);
     setIsSolving(true);
   };
+  // --- DEĞİŞİKLİK BURADA BİTİYOR ---
+
 
   const handleFinishSolving = (solvedStats: SolvedStat[]) => {
     setIsSolving(false);
     if (selectedSubjectId) {
-      handleQuizCompletion(solvedStats, selectedSubjectId);
+      handleQuizCompletion(selectedSubjectId, solvedStats);
     }
     setSelectedSubjectId(null);
   };
 
-  const availableSubjects = subjects.filter(s => 
+  const handleForfeitSolving = () => {
+    setIsSolving(false);
+    if (selectedSubjectId) {
+      toast.error("Görevden ayrıldın!", {
+        description: "Bu ders bugünkü görevlerden tamamlandı sayıldı.",
+      });
+      handleQuizCompletion(selectedSubjectId, null);
+    }
+    setSelectedSubjectId(null);
+  };
+  
+  // DailyQuestions bileşenine gönderilecek 'availableSubjects' listesi
+  // Sadece çözülmemiş olanları içerir (Bu mantık aynı kalıyor)
+  const availableSubjectsForSelection = allSubjectsFromContext.filter(s =>
     (s.id === 'turkish' || s.id === 'math' || s.id === 'science' || s.id === 'religion' || s.id === 'english' || s.id === 'revolution') &&
     !dailySolvedSubjects.includes(s.id)
   );
@@ -73,12 +113,17 @@ export default function PracticePage() {
   const currentBadge = getCurrentBadge(challengeWins || 0);
 
   if (isSolving) {
-    return <QuestionSolver questions={dailyQuestions} subjects={subjects} onFinish={handleFinishSolving} onClose={() => setIsSolving(false)} />;
+    // --- DEĞİŞİKLİK: QuestionSolver'a tüm subject listesini gönderiyoruz (isimleri bulabilmesi için) ---
+    return <QuestionSolver 
+      questions={dailyQuestions} 
+      subjects={allSubjectsFromContext} // Tam liste gönderiliyor
+      onFinish={handleFinishSolving} 
+      onClose={handleForfeitSolving} 
+    />;
   }
 
   return (
     <div className="space-y-6 animate-slide-up">
-      {/* === DEĞİŞİKLİK BURADA YAPILDI: defaultValue "vocab-world" olarak ayarlandı === */}
       <Tabs defaultValue="vocab-world" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="gunluk-gorev">Günlük Görev</TabsTrigger>
@@ -92,8 +137,8 @@ export default function PracticePage() {
 
         <TabsContent value="gunluk-gorev" className="mt-6 space-y-6">
           <DailyQuestions 
-            dailyQuestionsCount={36}
-            availableSubjects={availableSubjects} 
+            dailyQuestionsCount={36} // Bu sabit kalabilir (hedef)
+            availableSubjects={availableSubjectsForSelection} // Sadece seçilebilir olanlar gönderiliyor
             onSelectSubject={handleSelectSubject}
             solvedCount={dailySolvedSubjects.length}
           />

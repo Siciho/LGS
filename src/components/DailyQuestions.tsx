@@ -1,10 +1,13 @@
+// src/components/DailyQuestions.tsx
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Play, Target, CheckCircle, Book } from "lucide-react";
 import { Subject } from "@/types";
-import { cn } from "@/lib/utils"; // cn utility'sini import ediyoruz
+import { cn } from "@/lib/utils";
 
+// --- DÜZELTME: Prop'ları almak için interface burada tanımlandı ---
 interface DailyQuestionsProps {
   dailyQuestionsCount: number;
   availableSubjects: Subject[];
@@ -12,6 +15,7 @@ interface DailyQuestionsProps {
   solvedCount: number;
 }
 
+// --- DÜZELTME: Fonksiyon, tanımlanan interface'i kullanacak şekilde güncellendi ---
 export default function DailyQuestions({ dailyQuestionsCount, availableSubjects, onSelectSubject, solvedCount }: DailyQuestionsProps) {
   const totalSubjects = 3;
 
@@ -29,7 +33,7 @@ export default function DailyQuestions({ dailyQuestionsCount, availableSubjects,
 
   return (
     <Card className={cn(
-      "bg-card backdrop-blur-sm border border-border", // GLASS EFEKTİ EKLENDİ
+      "bg-card backdrop-blur-sm border border-border", // GLASS EFEKTİ
       "animate-slide-up"
     )}>
       <CardHeader>
@@ -61,7 +65,7 @@ export default function DailyQuestions({ dailyQuestionsCount, availableSubjects,
               <Card 
                 key={subject.id} 
                 className={cn(
-                  "bg-muted/30 hover:bg-muted/50", // Arka planı biraz daha belirgin yaptık
+                  "bg-muted/30 hover:bg-muted/50",
                   "transition-all duration-300 cursor-pointer",
                   "border border-border hover:border-primary/50",
                   "flex flex-col justify-between"

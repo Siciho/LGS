@@ -13,7 +13,6 @@ type QuizCompletionResult = {
   incorrect: number;
 };
 
-// --- DEĞİŞİKLİK: Standart tarih formatı için yardımcı fonksiyon ---
 const getTodayDateString = () => new Date().toISOString().split('T')[0];
 
 export const useStudyData = (
@@ -30,15 +29,13 @@ export const useStudyData = (
   useEffect(() => {
     if (userId) {
       const fetchDailyData = async () => {
-        const todayStr = getTodayDateString(); // DEĞİŞİKLİK: Standart fonksiyonu kullanıyoruz.
+        const todayStr = getTodayDateString();
         
-        // Dün çözülmemişse günlük görevleri temizle (Supabase tablosu değil, sadece lokal state)
         const storedLastActiveDate = storage.loadLastActiveDate(userId);
         if (storedLastActiveDate && storedLastActiveDate !== todayStr) {
           storage.clearDailySolvedSubjects(userId);
         }
         
-        // Supabase'ten bugünkü tamamlanmış görevleri çek
         const { data, error } = await supabase
           .from('tamamlanan_gunluk_gorevler')
           .select('ders_id')
@@ -129,17 +126,32 @@ export const useStudyData = (
     await supabase.from('cozulen_sorular').insert({ kullanici_id: userId, ders_id: subjectId, dogru_sayisi: correct, yanlis_sayisi: incorrect, konu: topic });
   };
 
-  const handleQuizCompletion = async (solvedStats: SolvedStat[], subjectId: string) => {
+  // --- DEĞİŞİKLİK BURADA BAŞLIYOR ---
+  // Fonksiyon imzası (solvedStats: SolvedStat[]) iken (subjectId: string, solvedStats: SolvedStat[] | null) olarak değiştirildi.
+  // solvedStats 'null' gelirse, bu görevin terk edildiği (forfeit) anlamına gelir.
+  const handleQuizCompletion = async (subjectId: string, solvedStats: SolvedStat[] | null) => {
     if (!userId) return;
-    const todayStr = getTodayDateString(); // DEĞİŞİKLİK: Standart fonksiyonu kullanıyoruz.
+    const todayStr = getTodayDateString();
     
+    // Bu ders zaten o gün çözülmüşse (veya terk edilmişse) tekrar işlem yapma
     if (dailySolvedSubjects.includes(subjectId)) return;
     
     const newDailySolved = [...dailySolvedSubjects, subjectId];
     setDailySolvedSubjects(newDailySolved);
     
-    const correctCount = solvedStats.filter(s => s.correct).length;
-    const incorrectCount = 6 - correctCount;
+    let correctCount: number;
+    let incorrectCount: number;
+
+    if (solvedStats === null) {
+      // Görev terk edildi (Forfeit durumu)
+      correctCount = 0;
+      incorrectCount = 6;
+    } else {
+      // Görev normal tamamlandı
+      correctCount = solvedStats.filter(s => s.correct).length;
+      incorrectCount = 6 - correctCount;
+    }
+
     setSubjects(prev => prev.map(s => s.id === subjectId ? { ...s, correct: s.correct + correctCount, incorrect: s.incorrect + incorrectCount } : s));
     const newSession: StudySession = {
       id: Date.now().toString(), subjectId, correctCount, incorrectCount, questionsCompleted: 6,
@@ -148,14 +160,16 @@ export const useStudyData = (
     setSessions(prev => [...prev, newSession]);
     setLastActiveDate(todayStr);
     
+    // 'onQuizCompleted' prop'u normal tamamlanma ve terk etme durumlarında çağrılır.
     onQuizCompleted({ correct: correctCount, incorrect: incorrectCount }, newDailySolved.length);
     
+    // Supabase'e hem çözülen soruları (0'a 6 olsa bile) hem de görevin tamamlandığını kaydet
     await supabase.from('cozulen_sorular').insert({ kullanici_id: userId, ders_id: subjectId, dogru_sayisi: correctCount, yanlis_sayisi: incorrectCount, konu: "Günlük Test" });
-    
     await supabase.from('tamamlanan_gunluk_gorevler').insert({ kullanici_id: userId, ders_id: subjectId, tamamlanma_tarihi: todayStr });
     
     storage.saveDailySolvedSubjects(userId, newDailySolved);
   };
+  // --- DEĞİŞİKLİK BURADA BİTİYOR ---
 
   return {
     subjects,

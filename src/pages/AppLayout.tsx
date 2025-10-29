@@ -1,3 +1,5 @@
+// src/pages/AppLayout.tsx
+
 import { Outlet, useOutletContext, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import { storage } from "@/utils/storage";
@@ -22,7 +24,8 @@ export type AppContextType =
   ReturnType<typeof useStudyData> &
   ReturnType<typeof useScheduler> &
   {
-    handleQuizCompletion: (solvedStats: SolvedStat[], subjectId: string) => Promise<void>;
+    // --- DEĞİŞİKLİK 1: Fonksiyonun imzası (tipi) düzeltildi ---
+    handleQuizCompletion: (subjectId: string, solvedStats: SolvedStat[] | null) => Promise<void>;
     handleEnglishUnitUnlocked: () => void;
     isMuted: boolean;
     toggleMute: () => void;
@@ -115,21 +118,23 @@ export default function AppLayout() {
       const { lastActiveDate, setLastActiveDate } = studyData;
       const { streak, streakFreezes, setStreak, setStreakFreezes } = coreData;
       const today = new Date();
-      const todayStr = today.toLocaleDateString();
+      // --- DÜZELTME: Tarih formatı 'useStudyData' ile aynı olmalı ---
+      const todayStr = today.toISOString().split('T')[0]; 
+      
       if (lastActiveDate !== todayStr) {
-        const lastDate = new Date();
-        try {
-          const dateParts = lastActiveDate.split('.').map(Number);
-          lastDate.setFullYear(dateParts[2], dateParts[1] - 1, dateParts[0]);
-        } catch (e) { console.error("Tarih formatı hatası:", e); return; }
+        // --- DÜZELTME: lastActiveDate artık 'YYYY-MM-DD' formatında, parsing düzeltildi ---
+        const lastDate = new Date(lastActiveDate);
+        
         const yesterday = new Date();
         yesterday.setDate(today.getDate() - 1);
         const yesterdayStart = new Date(yesterday.setHours(0, 0, 0, 0));
+        
         if (lastDate.getTime() < yesterdayStart.getTime()) {
           if (streak > 0) {
             if (streakFreezes > 0) {
               setStreakFreezes(prev => prev - 1);
-              setLastActiveDate(yesterday.toLocaleDateString());
+              // --- DÜZELTME: Dünün tarihi de standart formatta kaydedilmeli ---
+              setLastActiveDate(yesterday.toISOString().split('T')[0]);
               toast.info("Bir gün ara verdin ama Seri Dondurma serini kurtardı! ❄️");
             } else {
               setStreak(0);
@@ -169,12 +174,21 @@ export default function AppLayout() {
 
   const toggleMute = () => setIsMuted(prev => !prev);
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
-  const handleQuizCompletion = async (solvedStats: SolvedStat[], subjectId: string) => {
+  
+  // --- DEĞİŞİKLİK 2: Fonksiyonun imzası (tanımı) düzeltildi ---
+  const handleQuizCompletion = async (subjectId: string, solvedStats: SolvedStat[] | null) => {
     if (!studyData.handleQuizCompletion || !coreData.checkAchievements) return;
-    await studyData.handleQuizCompletion(solvedStats, subjectId);
-    const incorrectCount = solvedStats.filter(s => !s.correct).length;
-    coreData.checkAchievements(studyData.subjects, { type: 'quiz', data: { quizResult: { correct: 6 - incorrectCount, incorrect: incorrectCount } } });
+    
+    // --- DEĞİŞİKLİK 3: Fonksiyona yapılan çağrı (call) düzeltildi ---
+    await studyData.handleQuizCompletion(subjectId, solvedStats);
+    
+    // --- DEĞİŞİKLİK 4: 'null' durumu (terk etme) hesaba katıldı ---
+    const correctCount = solvedStats ? solvedStats.filter(s => s.correct).length : 0;
+    const incorrectCount = solvedStats ? 6 - correctCount : 6;
+    
+    coreData.checkAchievements(studyData.subjects, { type: 'quiz', data: { quizResult: { correct: correctCount, incorrect: incorrectCount } } });
   };
+  
   const handleEnglishUnitUnlocked = () => {
     if (coreData.checkAchievements) { coreData.checkAchievements(studyData.subjects, { type: 'english_unit' }); }
   };
@@ -211,7 +225,6 @@ export default function AppLayout() {
           userRole={userRole}
         />
         <main>
-          {/* --- DEĞİŞİKLİK BURADA: Bildirimler sadece ayar açıksa gösterilecek --- */}
           {scheduler.notificationSettings.challengeReminder && (
             <ChallengeNotification challenges={pendingChallenges} onDismiss={dismissChallenge} />
           )}

@@ -1,3 +1,5 @@
+// supabase/functions/student-report/index.ts
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
@@ -30,7 +32,7 @@ serve(async (req) => {
   }
 
   try {
-    // 1. Kullanıcıyı ve rolünü doğrula (Aynı kaldı)
+    // 1. Kullanıcıyı ve rolünü doğrula
     const userSupabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
@@ -48,7 +50,7 @@ serve(async (req) => {
     const { student_id, time_frame } = await req.json(); // time_frame: 'all', 'week', 'month-9', 'month-10' vb.
     if (!student_id) throw new Error("Request error: 'student_id' is required.");
 
-    // 3. Admin istemcisini oluştur (Aynı kaldı)
+    // 3. Admin istemcisini oluştur
     const adminSupabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
@@ -56,12 +58,12 @@ serve(async (req) => {
     // 4. Veritabanı sorgusunu hazırla
     const studentPromise = adminSupabaseClient.from('kullanicilar').select('ad_soyad, koc_kodu').eq('id', student_id).single();
     
-    // --- DEĞİŞİKLİK BURADA: Sorguya dinamik zaman filtresi ekleniyor ---
+    // --- DEĞİŞİKLİK BURADA: ".neq('konu', 'Günlük Test')" filtresi kaldırıldı ---
     let recordsQuery = adminSupabaseClient
       .from('cozulen_sorular')
       .select('*')
-      .eq('kullanici_id', student_id)
-      .neq('konu', 'Günlük Test');
+      .eq('kullanici_id', student_id);
+      // .neq('konu', 'Günlük Test'); // BU SATIR KALDIRILDI
 
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -72,19 +74,15 @@ serve(async (req) => {
       recordsQuery = recordsQuery.gte('eklenme_zamani', startOfWeek.toISOString());
     } else if (time_frame && time_frame.startsWith('month-')) {
       // Filtre: Belirli bir ay (Örn: 'month-9' = Eylül)
-      // JavaScript'te aylar 0'dan başlar (Ocak=0, Eylül=8)
       const monthIndex = parseInt(time_frame.split('-')[1]) - 1;
-      
-      // O ayın ilk gününü bul
       const startDate = new Date(currentYear, monthIndex, 1);
-      // Bir sonraki ayın ilk gününü bul (bu, bitiş sınırımız olacak)
       const endDate = new Date(currentYear, monthIndex + 1, 1);
 
       recordsQuery = recordsQuery
         .gte('eklenme_zamani', startDate.toISOString()) // Ayın 1'inden büyük veya eşit
         .lt('eklenme_zamani', endDate.toISOString());   // Bir sonraki ayın 1'inden küçük
     }
-    // Eğer time_frame 'all' ise, ekstra filtre eklenmez.
+    // Eğer time_frame 'all' ise, ekstra filtre eklenmez (Bu zaten doğruydu)
 
     const recordsPromise = recordsQuery;
     // --- DEĞİŞİKLİK SONU ---
@@ -94,7 +92,7 @@ serve(async (req) => {
     if (studentError) throw studentError;
     if (recordsError) throw recordsError;
 
-    // 5. Yetki kontrolü ve yanıt (Aynı kaldı)
+    // 5. Yetki kontrolü ve yanıt
     if (userProfile.rol === 'koç' && userProfile.koc_kodu !== studentData.koc_kodu) {
         throw new Error("Authorization error: Coach can only view their own students.");
     }

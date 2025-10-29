@@ -1,4 +1,6 @@
-import { useState, useEffect, useMemo } from 'react'; // useMemo eklendi
+// src/hooks/useCoreData.ts
+
+import { useState, useEffect, useMemo } from 'react';
 import { storage } from '@/utils/storage';
 import { supabase } from '@/supabaseClient';
 import { toast } from 'sonner';
@@ -22,13 +24,10 @@ export const useCoreData = (
   const [challengeWins, setChallengeWins] = useState(0);
   const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
 
-  // --- YENİDEN DÜZENLEME (REFACTORING) BAŞLANGICI ---
-  // Rol kontrolünü tek bir yerde yapıyoruz.
   const isPrivilegedUser = useMemo(() => {
     const lowerCaseRole = userRole?.toLowerCase();
     return lowerCaseRole === 'koç' || lowerCaseRole === 'admin' || lowerCaseRole === 'hoca';
   }, [userRole]);
-  // --- YENİDEN DÜZENLEME (REFACTORING) SONU ---
 
 
   const updateUserCloudData = async (dataToUpdate: object) => {
@@ -65,7 +64,6 @@ export const useCoreData = (
         if (!error && cloudData) {
             const isTestAccount = cloudData.is_test_account === true;
             
-            // --- DÜZENLEME: Tek değişkeni kullanıyoruz ---
             if (isPrivilegedUser || isTestAccount) {
                 let savedAvatarCurrent = 'default';
                 if (cloudData.avatar) {
@@ -126,12 +124,14 @@ export const useCoreData = (
     };
     fetchCoreData();
 
-  }, [userId, userRole, userName, isPrivilegedUser]); // isPrivilegedUser eklendi
+  }, [userId, userRole, userName, isPrivilegedUser]);
 
   useEffect(() => {
-    // --- DÜZENLEME: Tek değişkeni kullanıyoruz ---
     if (!isInitialized || !userId || isPrivilegedUser) return;
     
+    // NOT: Bu zamanlayıcı, puan kazanma (quiz sonrası) veya seri artışı gibi
+    // anlık olmayan durumlar için DEVAM ETMELİDİR.
+    // Ancak 'harcama' işlemleri (handleBuyAvatar) GECİKMEZ.
     const debounceTimer = setTimeout(() => {
         storage.savePoints(userId, totalPoints);
         storage.saveStreak(userId, streak);
@@ -145,16 +145,15 @@ export const useCoreData = (
     }, 1500);
 
     return () => clearTimeout(debounceTimer);
-  }, [totalPoints, streak, streakFreezes, isInitialized, userId, isPrivilegedUser]); // userRole yerine isPrivilegedUser
+  }, [totalPoints, streak, streakFreezes, isInitialized, userId, isPrivilegedUser]);
 
   useEffect(() => {
-    // --- DÜZENLEME: Tek değişkeni kullanıyoruz ---
     if (isInitialized && userId && achievements.length > 0 && !isPrivilegedUser) {
       storage.saveAchievements(userId, achievements);
       const unlockedIds = achievements.filter(a => a.unlocked).map(a => a.id);
       updateUserCloudData({ kazanilan_basarimlar: unlockedIds });
     }
-  }, [achievements, isInitialized, userId, isPrivilegedUser]); // userRole yerine isPrivilegedUser
+  }, [achievements, isInitialized, userId, isPrivilegedUser]);
 
   const handleSetAvatar = (avatarId: string) => {
     if (!userId) return;
@@ -171,21 +170,35 @@ export const useCoreData = (
     }
   };
 
+  // --- HATA DÜZELTMESİ BURADA (AVATAR SATIN ALMA) ---
   const handleBuyAvatar = (avatarId: string) => {
-    // --- DÜZENLEME: Tek değişkeni kullanıyoruz ---
     if (!userId || isPrivilegedUser) return;
     const avatar = allAvatars.find(a => a.id === avatarId);
     if (!avatar || avatar.unlockMethod !== 'purchase') return;
     const price = avatar.price || 0;
+    
     if (totalPoints >= price && !(userAvatars?.unlocked || []).includes(avatarId)) {
-      setTotalPoints(prev => prev - price);
+      
+      // 1. Yeni puanı ve avatar listesini hesapla
+      const newTotalPoints = totalPoints - price;
       const newAvatarsState: UserAvatars = {
         current: userAvatars?.current || 'default',
         unlocked: [...(userAvatars?.unlocked || []), avatarId]
       };
+
+      // 2. Lokal React state'ini hemen güncelle
+      setTotalPoints(newTotalPoints);
       setUserAvatars(newAvatarsState);
+
+      // 3. Lokal depolamayı hemen güncelle (özellikle avatar için)
       storage.saveUserAvatars(userId, newAvatarsState);
-      updateUserCloudData({ avatar: newAvatarsState });
+
+      // 4. Buluta (Supabase) HEM YENİ AVATARLARI HEM DE YENİ PUANI AYNI ANDA, GECİKMESİZ GÖNDER
+      updateUserCloudData({ 
+        avatar: newAvatarsState,
+        puan: newTotalPoints 
+      });
+      
       toast.success(`${avatar.name} avatarı satın alındı!`);
       playPurchaseSound(isMuted);
     } else {
@@ -193,13 +206,27 @@ export const useCoreData = (
     }
   };
   
+  // --- HATA DÜZELTMESİ BURADA (SERİ DONDURMA SATIN ALMA) ---
   const handleBuyStreakFreeze = () => {
-    // --- DÜZENLEME: Tek değişkeni kullanıyoruz ---
     if (!userId || isPrivilegedUser) return;
-    const price = 200;
+    const price = 200; // Fiyatı buradan yönetebilirsiniz
+    
     if (totalPoints >= price) {
-      setTotalPoints(prev => prev - price);
-      setStreakFreezes(prev => prev + 1);
+      
+      // 1. Yeni değerleri hesapla
+      const newTotalPoints = totalPoints - price;
+      const newStreakFreezes = streakFreezes + 1;
+
+      // 2. Lokal React state'ini hemen güncelle
+      setTotalPoints(newTotalPoints);
+      setStreakFreezes(newStreakFreezes);
+
+      // 3. Buluta (Supabase) HEM YENİ PUANI HEM DE YENİ DONDURMA SAYISINI GECİKMESİZ GÖNDER
+      updateUserCloudData({
+        puan: newTotalPoints,
+        seri_dondurma: newStreakFreezes
+      });
+      
       playPurchaseSound(isMuted);
     } else {
       toast.error("Yetersiz puan!");
@@ -207,7 +234,6 @@ export const useCoreData = (
   };
 
   const checkAchievements = (subjects: Subject[], trigger: { type: 'quiz' | 'questions' | 'english_unit', data?: any }) => {
-    // --- DÜZENLEME: Tek değişkeni kullanıyoruz ---
     if (!userId || isPrivilegedUser) return;
     
     const totalQuestions = subjects.reduce((sum, s) => sum + s.correct + s.incorrect, 0);
