@@ -1,3 +1,5 @@
+// src/components/ChallengeDialog.tsx
+
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/supabaseClient";
 import { useAppContext } from "@/pages/AppLayout";
@@ -95,8 +97,8 @@ export function ChallengeDialog({ open, onOpenChange, unitId, score, time }: Cha
         </div>
         
         {/* --- DEĞİŞİKLİK BURADA YAPILDI --- */}
-        {/* Liste alanına, ekran yüksekliğine göre değil, sabit bir yükseklik veriyoruz. */}
-        <ScrollArea className="h-72 pr-4 mt-4"> {/* `h-full` yerine `h-72` (veya `h-[40vh]`) gibi bir değer kullanıyoruz. */}
+        {/* Sabit yükseklik (h-72) yerine esnek (h-[40vh]) kullanıldı */}
+        <ScrollArea className="h-[40vh] pr-4 mt-4">
           <div className="space-y-2">
             {loading && <p className="text-center text-muted-foreground py-4">Yükleniyor...</p>}
             {!loading && filteredOpponents.length === 0 && (

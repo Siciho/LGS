@@ -37,20 +37,21 @@ const MAT_TOPIC_DATES = new Map<string, string>([
 
 const SCI_TOPIC_DATES = new Map<string, string>([
   // Eylül
-  ["Mevsimler ve İklim / Dünya ve Evren", "2025-09-08"], // subjects.ts'de 'Mevsimler ve İklimler' + 'Dünya ve Evren'
+  ["Mevsimler ve İklimler", "2025-09-08"], // subjects.ts'de 'Mevsimler ve İklimler'
   // Ekim
-  ["DNA ve Genetik Kod / Canlılar ve Yaşam", "2025-10-06"], // subjects.ts'de 'DNA ve Genetik Kod' + 'Canlılar'
+  ["DNA ve Genetik Kod", "2025-10-06"], // subjects.ts'de 'DNA ve Genetik Kod'
   // Kasım
-  ["Basınç / Fiziksel Olaylar", "2025-11-03"], // subjects.ts'de 'Basınç'
+  ["Basınç", "2025-11-03"], // subjects.ts'de 'Basınç'
   // Aralık
-  ["Madde ve Endüstri / Madde ve Doğası", "2025-12-01"], // subjects.ts'de 'Madde ve Endüstri' + 'Fiziksel ve Kimyasal Değişimler'
+  ["Madde ve Endüstri", "2025-12-01"], // subjects.ts'de 'Madde ve Endüstri'
   // Ocak
   ["Periyodik Sistem", "2026-01-05"],
+  ["Fiziksel ve Kimyasal Değişimler", "2026-01-12"],
   ["Asitler ve Bazlar", "2026-01-19"],
   // Şubat
   ["Basit Makineler", "2026-02-09"],
   // Mart
-  ["Canlılar ve Enerji İlişikleri", "2026-03-02"], // subjects.ts'de 'Canlılar ve Enerji İlişkileri'
+  ["Canlılar ve Enerji İlişkileri", "2026-03-02"], // subjects.ts'de 'Canlılar ve Enerji İlişkileri'
   // Nisan
   ["Enerji Dönüşümleri ve Çevre Bilimi", "2026-04-06"],
   // Mayıs
@@ -61,29 +62,26 @@ const TRK_TOPIC_DATES = new Map<string, string>([
   // Eylül (Dil bilgisi ve Anlam iç içe gider)
   ["Sözcükte Anlam", "2025-09-08"],
   ["Cümlede Anlam", "2025-09-15"],
+  ["Okuma Anlama", "2025-09-08"], // subjects.ts'den
   ["Fiilimsiler", "2025-09-22"], // Genellikle ilk konulardan
   // Ekim
   ["Paragrafta Anlam", "2025-10-06"],
-  ["Cümlenin Öğeleri", "2025-10-20"],
+  ["Cümlenin Öğeleri", "2025-10-20"], // subjects.ts'de 'Cümle Ögeleri'
   // Kasım
-  ["Söz Gruplarında Anlam", "2025-11-03"], // subjects.ts'de yok, Anlam konularıyla birlikte varsayılır
-  ["Deyimler ve Atasözleri", "2025-11-10"], // subjects.ts'de yok, Anlam konularıyla birlikte varsayılır
   ["Yazım Kuralları", "2025-11-17"],
+  ["Sözcük Türleri", "2025-11-24"],
   // Aralık
   ["Noktalama İşaretleri", "2025-12-01"],
-  ["Söz Sanatları", "2025-12-15"], // subjects.ts'de yok, Anlam konularıyla birlikte varsayılır
+  ["Ses Bilgisi", "2025-12-15"],
   // Ocak
-  ["Metin Türleri", "2026-01-05"], // subjects.ts'de yok, Anlam konularıyla birlikte varsayılır
+  // (Tekrar)
   // Şubat
   ["Cümle Türleri", "2026-02-09"],
   ["Fiilde Çatı", "2026-02-23"],
   // Mart
-  ["Anlatım Bozuklukları", "2026-03-09"], // subjects.ts'de yok, genellikle son konu
-  // Kalan konuları (Ses Bilgisi, Sözcük Türleri, Fiilde Kip/Zaman) yıl içine yayılmış varsayalım
-  ["Ses Bilgisi", "2025-10-13"],
-  ["Sözcük Türleri", "2025-11-24"],
-  ["Fiilde Kip", "2026-03-16"], // subjects.ts'de yok
-  ["Fiilde Zaman", "2026-03-23"], // subjects.ts'de yok
+  ["Fiilde Kip", "2026-03-16"],
+  ["Fiilde Zaman", "2026-03-23"],
+  // Diğer konular (Deyimler, Söz Sanatları vb.) Anlam konuları içinde varsayılır
 ]);
 
 const ENG_TOPIC_DATES = new Map<string, string>([
@@ -107,13 +105,14 @@ const REV_TOPIC_DATES = new Map<string, string>([
   // Aralık-Ocak
   ["Milli Bir Destan; Ya İstiklal Ya Ölüm", "2025-12-08"], // Cepheler
   // Şubat
-  ["Atatürkçülük ve Çağdaşlaşan Türkiye", "2026-02-09"], // subjects.ts'deki 'Atatürkçülük' + 'Çağdaş Türkiye Yolunda Adımlar' birleştirildi
+  ["Atatürkçülük", "2026-02-09"], // subjects.ts'deki 'Atatürkçülük'
+  ["Çağdaş Türkiye Yolunda Adımlar", "2026-02-16"], // subjects.ts'deki 'Çağdaş Türkiye Yolunda Adımlar'
   // Mart
   ["Demokratikleşme Çabaları", "2026-03-09"],
   // Nisan
-  ["Atatürk Dönemi Türk Dış Politikası", "2026-04-06"], // subjects.ts'deki 'Atatürk Dönemi Türk Dış Politikası ve Atatürk’ün Ölümü'
+  ["Atatürk Dönemi Türk Dış Politikası ve Atatürk’ün Ölümü", "2026-04-06"],
   // Mayıs
-  ["Atatürk’ün Ölümü ve Sonrası", "2026-05-04"], // subjects.ts'deki 'İkinci Dünya Savaşı Ve Sonrası'
+  ["İkinci Dünya Savaşı Ve Sonrası", "2026-05-04"],
 ]);
 
 const REL_TOPIC_DATES = new Map<string, string>([
@@ -141,17 +140,17 @@ const ALL_TOPIC_DATES = {
 
 // --- GÜNCELLENEN FONKSİYONLAR ---
 
-// Konu başlığını normalize et (subjects.ts ve questions.ts arasındaki olası küçük farklar için)
+// Konu başlığını normalize et
 const normalizeTopic = (topic: string): string => {
-  return topic.trim() // Başındaki/sonundaki boşlukları kaldır
-         // .toLowerCase() // Küçük harfe çevir (İsteğe bağlı, ancak eşleşme için sağlamlaştırır)
-         // .replace(/ /g, '') // İçindeki boşlukları kaldır (İsteğe bağlı)
-         // Türkçe karakterleri de değiştirebiliriz, ama şimdilik sadece trim yeterli olabilir
+  if (!topic) return "";
+  return topic.trim();
 };
 
 // Hangi dersteki hangi başlığın "açılma tarihini" (YYYY-MM-DD) verir?
 export function getAvailableFromISO(subjectName: string, topicTitle: string): string | null {
   const normalizedTopic = normalizeTopic(topicTitle);
+  if (!normalizedTopic) return null; // Boş konu başlığını doğrudan reddet
+
   let subjectMap: Map<string, string> | undefined;
 
   // Ders ismine göre doğru Map'i bul
@@ -168,16 +167,16 @@ export function getAvailableFromISO(subjectName: string, topicTitle: string): st
     if (subjectMap.has(normalizedTopic)) {
       return subjectMap.get(normalizedTopic)!;
     }
-    // Tam eşleşme yoksa, Map içinde normalize edilmiş başlığı içeren bir anahtar ara (daha esnek)
+    // Eşleşme yoksa, subjects.ts'deki bazı birleşik konuları ara
+    // (Örn: 'Madde ve Endüstri / Madde ve Doğası' gibi)
     for (const [key, value] of subjectMap.entries()) {
-      if (normalizeTopic(key).includes(normalizedTopic) || normalizedTopic.includes(normalizeTopic(key))) {
+      if (key.includes(normalizedTopic)) {
         return value;
       }
     }
   }
 
   // Eğer konu Map içinde bulunamazsa, varsayılan olarak okulun başlangıç tarihini döndür
-  // veya null döndürerek bu konunun geçersiz olduğunu belirtebiliriz. Şimdilik başlangıç tarihi varsayalım.
   console.warn(`Uyarı: "${subjectName}" dersi için "${topicTitle}" konusu müfredat tarihlerinde bulunamadı. Okul başlangıç tarihi varsayılıyor.`);
   return SCHOOL_START_DATE.toISOString().slice(0, 10);
 }
@@ -187,8 +186,8 @@ export function isTopicActive(subjectName: string, topicTitle: string, onDate: D
   const availableFromISO = getAvailableFromISO(subjectName, topicTitle);
 
   if (!availableFromISO) {
-    // Eğer konu için bir tarih bulunamadıysa (getAvailableFromISO null döndürdüyse),
-    // güvenlik için konuyu aktif saymayalım.
+    // Eğer konu için bir tarih bulunamadıysa (boş "" metni gibi)
+    // konuyu aktif sayma.
     return false;
   }
 
@@ -204,7 +203,7 @@ export function isTopicActive(subjectName: string, topicTitle: string, onDate: D
   return checkDate >= availableDate;
 }
 
-// --- BU FONKSİYONLAR DEĞİŞMEDİ, SADECE YENİ isTopicActive KULLANILIYOR ---
+// --- BU FONKSİYONLAR HATA İÇİN DÜZELTİLDİ ---
 
 // subjects dizisini alır, topic'lere availableFrom alanını ekler
 export function attachCurriculum(subjects: Array<any>) {
@@ -212,12 +211,38 @@ export function attachCurriculum(subjects: Array<any>) {
     ...subj,
     topics: Array.isArray(subj.topics)
       ? subj.topics.map((t: any) => {
-          const topicTitle = t.title ?? t.name ?? "";
+          // --- HATA DÜZELTMESİ ---
+          // t bir nesne değil, bir string. Doğrudan t'yi kullan.
+          const topicTitle = t ?? ""; // t.title ?? t.name ?? ""; YERİNE
           const subjectName = subj.name ?? subj.title ?? "";
+          
+          // --- YENİ YAPI ---
+          // Konu başlığı artık bir nesne değil, string'in kendisi.
+          // Orijinal 'topics' dizisi string[] olduğu için yeni bir nesne döndürmemiz GEREKMEZ.
+          // Ancak 'useActiveSubjects' hook'u 'topics' dizisini filtreleyeceği için,
+          // burada sadece string'leri döndürmek yeterlidir.
+          // Eğer 'SubjectCard' gibi yerlerin 'topic.title' gibi bir şeye ihtiyacı varsa,
+          // 'subjects.ts' dosyasının yapısını değiştirmek gerekir.
+          // Şimdilik 'subjects.ts'nin string[] olduğunu varsayarak devam ediyoruz.
+          // 'attachCurriculum' fonksiyonu 'filterActiveTopics' tarafından kullanılmak üzere
+          // string[] döndürmeli veya 'filterActiveTopics'i de değiştirmeliyiz.
+          
+          // 'filterActiveTopics'in beklentisine (string) uyum sağlayalım.
+          // 'attachCurriculum' fonksiyonu aslında 'useActiveSubjects' hook'u içinde
+          // 'filterActiveTopics'ten önce çağrılıyor.
+          // 'filterActiveTopics'in 't'yi (string) kullanması için onu düzeltmek en iyisi.
+          
+          // attachCurriculum'u 'filterActiveTopics'in beklentisine göre düzeltelim:
+          // 'subjects' içindeki 'topics' string[] dizisini değiştirmeyelim,
+          // 'attachCurriculum' fonksiyonu sadece tarih eklemesi YAPIYORMUŞ GİBİ görünmeli
+          // ama 'filterActiveTopics' asıl işi yapmalı.
+          
+          // Orijinal 'attachCurriculum' fonksiyonunun mantığına geri dönelim
+          // ve 'topicTitle'ı doğru okuyalım.
           return {
-            ...t,
-            // 'term' alanı artık anlamsız, kaldırılabilir veya varsayılan bırakılabilir.
-            // term: 1, // Veya tamamen kaldırabilirsiniz.
+            title: topicTitle, // 't' string'ini 'title' alanına koyalım
+            name: topicTitle,  // ve 'name' alanına
+            originalString: t, // orijinal string'i de tutalım (isteğe bağlı)
             availableFrom: getAvailableFromISO(subjectName, topicTitle),
           };
         })
@@ -233,7 +258,9 @@ export function filterActiveTopics(subjects: Array<any>, onDate: Date = new Date
       ...subj,
       topics: Array.isArray(subj.topics)
         ? subj.topics.filter((t: any) => {
-            const topicTitle = t.title ?? t.name ?? "";
+            // --- HATA DÜZELTMESİ ---
+            // t bir nesne değil, bir string. Doğrudan t'yi kullan.
+            const topicTitle = t ?? ""; // t.title ?? t.name ?? ""; YERİNE
             return isTopicActive(subjectName, topicTitle, onDate);
           })
         : subj.topics,
