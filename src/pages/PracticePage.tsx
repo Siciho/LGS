@@ -1,7 +1,7 @@
 // src/pages/PracticePage.tsx
 
 import { useState, useMemo } from "react";
-import { Question, SolvedStat, Subject } from "@/types"; // Subject tipi eklendi
+import { Question, SolvedStat, Subject } from "@/types";
 import { questions as allQuestions } from "@/data/questions";
 import { useAppContext } from "./AppLayout";
 import QuestionSolver from "@/components/QuestionSolver";
@@ -18,7 +18,6 @@ import { useNavigate } from "react-router-dom";
 import { dailyWords } from "@/data/dailywords";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-// --- YENİ İMPORT: Müfredat kontrolü için ---
 import { isTopicActive } from "@/curriculum";
 
 const badges = [
@@ -36,37 +35,25 @@ export default function PracticePage() {
   const [isSolving, setIsSolving] = useState(false);
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const navigate = useNavigate();
-  // --- DEĞİŞİKLİK: 'subjects' prop'unu context'ten alıyoruz (tam liste gerekli olabilir) ---
   const { handleQuizCompletion, subjects: allSubjectsFromContext, dailySolvedSubjects, challengeWins } = useAppContext();
 
-  // --- DEĞİŞİKLİK BURADA BAŞLIYOR: handleSelectSubject güncellendi ---
   const handleSelectSubject = (subjectId: string) => {
-    // Seçilen dersin tam adını bul (isTopicActive için gerekli)
     const subject = allSubjectsFromContext.find(s => s.id === subjectId);
     const subjectName = subject ? subject.name : "";
-
-    // O derse ait VE bugünün tarihi itibarıyla "aktif" olan konulardan gelen soruları filtrele
     const availableQuestions = allQuestions.filter(q =>
         q.subjectId === subjectId && q.topic && isTopicActive(subjectName, q.topic, new Date())
     );
-
-    // Yeterli sayıda (6) soru var mı kontrol et
     if (availableQuestions.length < 6) {
       toast.info("Bu ders için henüz yeterli sayıda aktif soru bulunmuyor.", {
         description: "Lütfen daha sonra tekrar deneyin veya başka bir ders seçin.",
       });
-      return; // Testi başlatma
+      return;
     }
-
-    // Filtrelenmiş sorulardan rastgele 6 tane seç
     const shuffledQuestions = [...availableQuestions].sort(() => 0.5 - Math.random()).slice(0, 6);
-
     setDailyQuestions(shuffledQuestions);
     setSelectedSubjectId(subjectId);
     setIsSolving(true);
   };
-  // --- DEĞİŞİKLİK BURADA BİTİYOR ---
-
 
   const handleFinishSolving = (solvedStats: SolvedStat[]) => {
     setIsSolving(false);
@@ -87,8 +74,6 @@ export default function PracticePage() {
     setSelectedSubjectId(null);
   };
   
-  // DailyQuestions bileşenine gönderilecek 'availableSubjects' listesi
-  // Sadece çözülmemiş olanları içerir (Bu mantık aynı kalıyor)
   const availableSubjectsForSelection = allSubjectsFromContext.filter(s =>
     (s.id === 'turkish' || s.id === 'math' || s.id === 'science' || s.id === 'religion' || s.id === 'english' || s.id === 'revolution') &&
     !dailySolvedSubjects.includes(s.id)
@@ -113,10 +98,9 @@ export default function PracticePage() {
   const currentBadge = getCurrentBadge(challengeWins || 0);
 
   if (isSolving) {
-    // --- DEĞİŞİKLİK: QuestionSolver'a tüm subject listesini gönderiyoruz (isimleri bulabilmesi için) ---
     return <QuestionSolver 
       questions={dailyQuestions} 
-      subjects={allSubjectsFromContext} // Tam liste gönderiliyor
+      subjects={allSubjectsFromContext}
       onFinish={handleFinishSolving} 
       onClose={handleForfeitSolving} 
     />;
@@ -137,8 +121,8 @@ export default function PracticePage() {
 
         <TabsContent value="gunluk-gorev" className="mt-6 space-y-6">
           <DailyQuestions 
-            dailyQuestionsCount={36} // Bu sabit kalabilir (hedef)
-            availableSubjects={availableSubjectsForSelection} // Sadece seçilebilir olanlar gönderiliyor
+            dailyQuestionsCount={36}
+            availableSubjects={availableSubjectsForSelection}
             onSelectSubject={handleSelectSubject}
             solvedCount={dailySolvedSubjects.length}
           />
@@ -194,13 +178,21 @@ export default function PracticePage() {
                     </div>
                 </div>
               </div>
+
+              {/* Sadece "Teste Gir" butonları burada */}
               <div className="grid grid-cols-2 gap-4">
                 {wordUnits.map(unit => (
-                  <Button key={unit} onClick={() => navigate(`/word-quiz/${unit}`)}>
+                  <Button 
+                    key={unit} 
+                    onClick={() => navigate(`/word-quiz/${unit}`)}
+                    variant="default"
+                    className="h-16"
+                  >
                     Ünite {unit} Testi
                   </Button>
                 ))}
               </div>
+
             </CardContent>
           </Card>
           <WordSwiper />

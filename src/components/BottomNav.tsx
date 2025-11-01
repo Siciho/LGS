@@ -31,7 +31,6 @@ export default function BottomNav({ isMuted, userRole }: BottomNavProps) {
   const location = useLocation();
   const activePath = location.pathname;
 
-  // Role göre hangi menünün gösterileceğini seçen mantık
   let visibleNavItems;
   const lowerCaseRole = userRole?.toLowerCase();
 
@@ -48,7 +47,8 @@ export default function BottomNav({ isMuted, userRole }: BottomNavProps) {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 gradient-subtle border-t border-border/50 backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
+    // --- DEĞİŞİKLİK 1: Glassmorphism için 'gradient-subtle' yerine 'bg-background/80' eklendi ---
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 border-t border-border/50 backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-around py-2">
           {visibleNavItems.map((item) => {
@@ -60,14 +60,17 @@ export default function BottomNav({ isMuted, userRole }: BottomNavProps) {
                 key={item.id}
                 to={item.path}
                 onClick={() => playConfirmSound(isMuted)}
-                className={`flex flex-col items-center justify-center gap-1 h-auto py-2 px-3 min-w-[60px] rounded-lg transition-all duration-300 ${
+                // --- DEĞİŞİKLİK 2: Stil "icon only" (sadece ikon) olarak güncellendi ---
+                className={`flex items-center justify-center h-12 w-12 rounded-lg transition-all duration-300 ${
                   isActive 
-                    ? "gradient-primary text-primary-foreground shadow-glow scale-105" 
+                    ? "gradient-primary text-primary-foreground shadow-glow scale-110" // Aktifken biraz daha büyüt
                     : "hover:bg-primary/10 hover:scale-105 text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <Icon className={`h-5 w-5 ${isActive ? "animate-bounce" : ""}`} />
-                <span className="text-xs font-medium">{item.label}</span>
+                {/* --- DEĞİŞİKLİK 3: İkon boyutu büyütüldü --- */}
+                <Icon className={`h-6 w-6 ${isActive ? "animate-bounce" : ""}`} />
+                {/* --- DEĞİŞİKLİK 4: İsim etiketi (label) kaldırıldı --- */}
+                {/* <span className="text-xs font-medium">{item.label}</span> */}
               </Link>
             );
           })}

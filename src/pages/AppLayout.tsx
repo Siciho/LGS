@@ -24,7 +24,6 @@ export type AppContextType =
   ReturnType<typeof useStudyData> &
   ReturnType<typeof useScheduler> &
   {
-    // --- DEĞİŞİKLİK 1: Fonksiyonun imzası (tipi) düzeltildi ---
     handleQuizCompletion: (subjectId: string, solvedStats: SolvedStat[] | null) => Promise<void>;
     handleEnglishUnitUnlocked: () => void;
     isMuted: boolean;
@@ -118,11 +117,9 @@ export default function AppLayout() {
       const { lastActiveDate, setLastActiveDate } = studyData;
       const { streak, streakFreezes, setStreak, setStreakFreezes } = coreData;
       const today = new Date();
-      // --- DÜZELTME: Tarih formatı 'useStudyData' ile aynı olmalı ---
       const todayStr = today.toISOString().split('T')[0]; 
       
       if (lastActiveDate !== todayStr) {
-        // --- DÜZELTME: lastActiveDate artık 'YYYY-MM-DD' formatında, parsing düzeltildi ---
         const lastDate = new Date(lastActiveDate);
         
         const yesterday = new Date();
@@ -133,7 +130,6 @@ export default function AppLayout() {
           if (streak > 0) {
             if (streakFreezes > 0) {
               setStreakFreezes(prev => prev - 1);
-              // --- DÜZELTME: Dünün tarihi de standart formatta kaydedilmeli ---
               setLastActiveDate(yesterday.toISOString().split('T')[0]);
               toast.info("Bir gün ara verdin ama Seri Dondurma serini kurtardı! ❄️");
             } else {
@@ -175,14 +171,11 @@ export default function AppLayout() {
   const toggleMute = () => setIsMuted(prev => !prev);
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
   
-  // --- DEĞİŞİKLİK 2: Fonksiyonun imzası (tanımı) düzeltildi ---
   const handleQuizCompletion = async (subjectId: string, solvedStats: SolvedStat[] | null) => {
     if (!studyData.handleQuizCompletion || !coreData.checkAchievements) return;
     
-    // --- DEĞİŞİKLİK 3: Fonksiyona yapılan çağrı (call) düzeltildi ---
     await studyData.handleQuizCompletion(subjectId, solvedStats);
     
-    // --- DEĞİŞİKLİK 4: 'null' durumu (terk etme) hesaba katıldı ---
     const correctCount = solvedStats ? solvedStats.filter(s => s.correct).length : 0;
     const incorrectCount = solvedStats ? 6 - correctCount : 6;
     
@@ -209,7 +202,8 @@ export default function AppLayout() {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto p-4 pb-24">
+      {/* --- DEĞİŞİKLİK BURADA: Mobil için kenar boşluğu 'p-2' (daha dar), tablet/PC için 'sm:p-4' yapıldı --- */}
+      <div className="max-w-7xl mx-auto p-2 sm:p-4 pb-24">
         <Header
           userName={userName}
           totalQuestions={totalQuestions}

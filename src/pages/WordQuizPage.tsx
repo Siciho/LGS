@@ -8,14 +8,22 @@ import { useAppContext } from './AppLayout';
 import { supabase } from '@/supabaseClient';
 import { toast } from 'sonner';
 import { ChallengeDialog } from '@/components/ChallengeDialog';
-import { Swords, Trophy, Shield, User, Clock } from 'lucide-react';
+import { Swords, Trophy, Shield, User, Clock, Loader2, Shuffle, CheckCircle } from 'lucide-react';
+import { Dialog, DialogContent } from "@/components/ui/dialog"; 
 import { Challenge } from '@/types';
+import { cn } from '@/lib/utils';
+
+// Listenizi buraya yapıştırın
+const DUMMY_NAMES = [
+  "HİRANUR GÜCÜK", "ECRİN SEL", "MERVE HELLI", "Z. KÜBRA ALBAYRAK", "SAFA HELLI", "RUMEYSA TAYCI", "BUĞLEM OSMANOĞLU", "ESLEM AKGÜL", "ELİF KIZILBOĞA", "SÜMEYYE DÖNMEZ", "ESLEM BULGUR", "MERYEM N. YOĞURTCU", "TUBA BERRA TURAN", "ECRİN BULUT", "ECRİN KILIÇ", "BEREN AYŞE TURAN", "FATMA YILMAZ", "BÜŞRA GÜRKAN", "ŞEVVAL HİRA ERDEM", "EDA NUR ALTAY", "TOLIB AL ELLAWI", "ASELMİNA MUTLUTÜRK", "MELİS ÇAKICI", "ZEYNEP DAĞCI", "EGE TÜRKMEN", "M. HALİT HELLİ", "MUSA CAN ERDEN", "MEHMET SAİT FİDAN", "MUSA TÜRTÜK", "ÖMER HATTAP", "M.EBUBEKİR BAŞGÖYNÜK", "KAHRAMAN ZOBU", "TALHA KÜLCÜ", "EREN KAŞ", "İSMAİL ÇAKIR", "YAŞAR ÇINAR KARNAK", "ERDEM KARAYEL", "AYAZ TOSUN", "AHMET EMİR YILDIZ", "EYÜP TALHA KILINÇ", "ALİ DEVRAN GÜNEŞ", "ERDEM UZUN", "EMİR KURUÇAY", "MUSTAFA KEMAL KURT", "M.ÖMER DEMİRBAŞ", "HAMZA TOPAL", "EYMEN AYTEN", "RESUL TANYEL", "YAZAN HIŞFE", "UFUK TAHA YILDIZ", "METEHAN KURT", "BERAT DİNİBÜTÜNOĞLU", "ÖMER TAHA CAN", "KAYRA AĞBULAK", "MUSA ÖRGEL", "YİĞİT H. TOKTEMÜR", "CİHAT C. ÖZVATAN", "EYMEN H. YOĞURTCU", "M. BERA BAŞ", "MERVE SERRA GÜNEŞ", "MELEK NUR ÖZTÜRK", "BERİKA EROL", "MERVE HAMMEDE", "BUĞLEM KANBAL", "MERYEM BİLTEKİN", "RÜVEYDA KAFA", "SEMA YILDIZOĞLU", "RÜMEYSA ÇATLI", "ECEM MELEK MEMİŞ", "ÖYKÜ BERRA CİHAN", "İREM YILMAZ", "AYSHA ABDULLAYEVA", "ZEYNEP KURT", "RÜMEYSA ARSLAN", "MERDA GÜLFER", "BUSENUR ZOLAN", "DAMLA NUR KAYA", "ELİSA AŞIK", "SARE HELLI", "AZRA KÜÇÜKOĞLU", "HAVVANUR ÇAKICI", "ELA BEREN YILMAZ", "HİRANUR KAYA", "ECE FATMA YÜCE", "ÜMRAN DEMİR", "MUSTAFA SAİT CEVİZCİ", "ARİF ASLAN", "M. MİRAÇ ÖZTÜRK", "MURAT BALCI", "MUHAMMED YALVAÇ", "MÜCAHİD M.IŞIK", "İSMAİL EFE DELDAK", "FATİH ARICAN", "AHMET BURAK YILMAZ", "M.NOUR AL JOHMANI", "OSMAN MELİH KAYMAK", "POYRAZ EFE KAYAOĞLU", "SELAHADDİN A. ZENGİN", "EMİR EFE AKSEL", "RAMAZAN AYAZ EVREM", "HOCA TEST"
+];
+
 
 export default function WordQuizPage() {
   const { unitId } = useParams<{ unitId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { dismissChallenge } = useAppContext();
+  const { dismissChallenge, userId } = useAppContext();
 
   const challengeId = location.state?.challengeId;
 
@@ -30,6 +38,12 @@ export default function WordQuizPage() {
   const [finalTime, setFinalTime] = useState(0);
 
   const [challengeResult, setChallengeResult] = useState<Challenge | null>(null);
+  const [isSendingChallenge, setIsSendingChallenge] = useState(false);
+  const [sentOpponentName, setSentOpponentName] = useState<string | null>(null);
+  
+  const [isSpinningModalOpen, setIsSpinningModalOpen] = useState(false);
+  const [spinningName, setSpinningName] = useState("Rakip Aranıyor...");
+
 
   useEffect(() => {
     const numericUnitId = parseInt(unitId || '1');
@@ -55,6 +69,77 @@ export default function WordQuizPage() {
     setStartTime(Date.now());
   }, [unitId, navigate]);
 
+  useEffect(() => {
+    let spinInterval: NodeJS.Timeout | null = null;
+
+    if (isSendingChallenge && !sentOpponentName) {
+      spinInterval = setInterval(() => {
+        const randomIndex = Math.floor(Math.random() * DUMMY_NAMES.length);
+        setSpinningName(DUMMY_NAMES[randomIndex]);
+      }, 90); 
+    }
+
+    return () => {
+      if (spinInterval) {
+        clearInterval(spinInterval);
+      }
+    };
+  }, [isSendingChallenge, sentOpponentName]);
+
+
+  const sendRandomChallenge = async (score: number, time: number) => {
+    if (!userId) {
+        toast.error("Rastgele düello göndermek için giriş yapmalısınız.");
+        return;
+    }
+    
+    setIsSendingChallenge(true);    
+    setIsSpinningModalOpen(true); 
+    setSentOpponentName(null);   
+    setSpinningName("Rakip Aranıyor...");
+
+    try {
+      const { data, error: rpcError } = await supabase.rpc('get_random_opponent', {
+        p_user_id: userId
+      });
+
+      if (rpcError || !data || data.length === 0) {
+        throw new Error(rpcError?.message || "Gönderilecek rastgele bir rakip bulunamadı.");
+      }
+
+      const { opponent_id, opponent_name } = data[0];
+      
+      await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1500)); 
+
+      setIsSendingChallenge(false); // Animasyonu durdur
+      setSpinningName(opponent_name); 
+      setSentOpponentName(opponent_name); 
+      toast.info(`Rakip bulundu: ${opponent_name}! Düello gönderiliyor...`);
+      
+      const { error: insertError } = await supabase.from('challenges').insert({
+        challenger_id: userId,
+        opponent_id: opponent_id,
+        unit_id: parseInt(unitId || '1'),
+        challenger_score: score,
+        challenger_time_seconds: time,
+        status: 'pending'
+      });
+      
+      if (insertError) throw insertError;
+
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setIsSpinningModalOpen(false); 
+      toast.success(`${opponent_name} adlı rakibe düello gönderildi! 🚀`);
+
+    } catch (error: any) {
+      setIsSendingChallenge(false); 
+      setIsSpinningModalOpen(false);
+      toast.error("Düello gönderilemedi.", { description: error.message });
+      setSentOpponentName(null); 
+    } 
+  };
+
+
   const handleAnswerClick = async (option: string) => {
     if (showResult) return;
     setSelectedAnswer(option);
@@ -72,10 +157,11 @@ export default function WordQuizPage() {
       } else {
         const endTime = Date.now();
         const timeTaken = Math.round((endTime - startTime) / 1000);
+        const finalCorrectCount = isCorrectNow ? correctCount + 1 : correctCount;
+        
         setFinalTime(timeTaken);
 
         if (challengeId) {
-          const finalCorrectCount = isCorrectNow ? correctCount + 1 : correctCount;
           const { data, error } = await supabase.from('challenges').update({
             opponent_score: finalCorrectCount,
             opponent_time_seconds: timeTaken,
@@ -83,9 +169,8 @@ export default function WordQuizPage() {
             completed_at: new Date().toISOString()
           }).eq('id', challengeId).select(`*, challenger:challenger_id(ad_soyad), opponent:opponent_id(ad_soyad)`).single();
 
-          if (error) {
-            toast.error("Meydan okuma sonucu kaydedilemedi.");
-          } else if (data) {
+          if (error) { toast.error("Meydan okuma sonucu kaydedilemedi."); } 
+          else if (data) {
             toast.success("Meydan okuma tamamlandı! Sonuçlar gösteriliyor.");
             setChallengeResult({
                 ...data,
@@ -94,8 +179,11 @@ export default function WordQuizPage() {
             });
             dismissChallenge(challengeId);
           }
+          setIsFinished(true); 
+
+        } else {
+          setIsFinished(true);
         }
-        setIsFinished(true);
       }
     }, 400);
   };
@@ -154,12 +242,69 @@ export default function WordQuizPage() {
                         <div><p className="font-bold text-lg text-red-500">{questions.length - correctCount}</p><p className="text-sm text-muted-foreground">Yanlış</p></div>
                         <div><p className="font-bold text-lg">{finalTime} sn</p><p className="text-sm text-muted-foreground">Süre</p></div>
                       </div>
-                      {!challengeId && (<Button onClick={() => setShowChallengeDialog(true)} className="w-full" variant="outline"><Swords className="h-4 w-4 mr-2" />Bir Arkadaşına Meydan Oku</Button>)}
+                      
+                      {!challengeId && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <Button 
+                            onClick={() => setShowChallengeDialog(true)} 
+                            variant="outline"
+                            disabled={isSendingChallenge || !!sentOpponentName} 
+                          >
+                            <Swords className="h-4 w-4 mr-2" />Arkadaşına Gönder
+                          </Button>
+                          
+                          <Button 
+                            onClick={() => sendRandomChallenge(correctCount, finalTime)}
+                            disabled={isSendingChallenge || !!sentOpponentName}
+                            variant={sentOpponentName ? "success" : "default"}
+                          >
+                            {isSendingChallenge ? (
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : sentOpponentName ? (
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                            ) : (
+                              <Shuffle className="h-4 w-4 mr-2" />
+                            )}
+                            
+                            {sentOpponentName 
+                                ? `${sentOpponentName}'a Gönderildi` 
+                                : 'Rastgele Rakip'}
+                          </Button>
+                        </div>
+                      )}
+                      
                       <Button onClick={() => navigate('/practice')} className="w-full">Geri Dön</Button>
+                      
                   </CardContent>
               </Card>
           </div>
+          
           <ChallengeDialog open={showChallengeDialog} onOpenChange={setShowChallengeDialog} unitId={parseInt(unitId || '1')} score={score} time={finalTime} />
+
+          {/* --- DEĞİŞİKLİK 8: YENİ ANİMASYON MODALI --- */}
+          <Dialog open={isSpinningModalOpen}>
+            <DialogContent 
+              className="max-w-xs" 
+              onInteractOutside={(e) => e.preventDefault()}
+              // --- HATA DÜZELTMESİ: Hatalı prop kaldırıldı ---
+              // showCloseButton={false} <-- BU SATIR HATALIYDI, KALDIRILDI
+              // (X butonunu gizlemek için index.css'e kural ekleyeceğiz)
+              id="spinning-modal-content" // CSS ile hedeflemek için ID eklendi
+            >
+              <div className="flex flex-col items-center justify-center p-6 space-y-4 min-h-[150px]">
+                <Shuffle className="h-12 w-12 text-primary animate-spin" />
+                <p className="text-sm text-muted-foreground">Rakip Aranıyor...</p>
+                
+                <div className={cn(
+                    "text-2xl font-bold text-center h-8 transition-all duration-100",
+                    sentOpponentName && "text-success" 
+                )}>
+                  {spinningName}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
         </>
     );
   }
@@ -172,7 +317,6 @@ export default function WordQuizPage() {
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
             <Progress value={progress} className="h-2 mb-4" />
-            {/* === DEĞİŞİKLİK BURADA === */}
             <CardTitle className="text-center text-4xl font-bold tracking-wider notranslate" translate="no">
               {currentQuestion.word}
             </CardTitle>
