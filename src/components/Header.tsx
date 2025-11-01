@@ -54,7 +54,7 @@ export default function Header({
           <h1 className="text-xl md:text-2xl font-bold text-foreground truncate">Hey, {firstName}!</h1>
           {isHomePage && userRole !== 'koç' && (
             <p className="text-xs md:text-sm text-muted-foreground">
-              Bugünkü hedeflerine ulaşmaya hazır mısın?
+             
             </p>
           )}
         </div>
