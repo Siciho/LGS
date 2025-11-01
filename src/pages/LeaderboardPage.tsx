@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Crown, Star, Target, Flame, X } from 'lucide-react';
+// --- DEĞİŞİKLİK 1: 'Swords' ikonu eklendi ---
+import { Crown, Star, Target, Flame, X, Swords } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { avatars } from '@/data/avatars';
 import { UserAvatars } from '@/types';
@@ -20,6 +21,7 @@ interface LeaderboardEntry {
   total_score: number;
   total_questions: number;
   seri: number;
+  challenge_wins: number; // <-- DEĞİŞİKLİK 2: Düello galibiyeti alanı eklendi
 }
 
 const defaultAvatar = avatars.find(a => a.id === 'default')?.image || '';
@@ -29,7 +31,6 @@ const getAvatarImage = (avatarData: UserAvatars | null) => {
   return avatars.find(a => a.id === currentAvatarId)?.image || defaultAvatar;
 };
 
-// --- YENİ EKLENEN YARDIMCI FONKSİYON ---
 const getRankText = (rank: number) => {
   if (rank === 1) return 'Lider!';
   if (rank === 2) return 'Yakın Takipte!';
@@ -37,7 +38,6 @@ const getRankText = (rank: number) => {
   if (rank <= 10) return 'İlk 10\'da';
   return 'Sıralamada';
 };
-// --- BİTİŞ ---
 
 export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -140,11 +140,9 @@ export default function LeaderboardPage() {
                               />
                               <div>
                                 <p className="font-semibold text-foreground">{entry.user_name}</p>
-                                {/* --- DEĞİŞİKLİK BURADA: Yeni 'getRankText' fonksiyonu kullanıldı --- */}
                                 <p className="text-sm text-muted-foreground">
                                   {getRankText(entry.rank)}
                                 </p>
-                                {/* --- DEĞİŞİKLİK SONA ERDİ --- */}
                               </div>
                             </div>
                             {entry.rank === 1 && <Crown className="h-5 w-5 text-yellow-400" />}
@@ -183,7 +181,8 @@ export default function LeaderboardPage() {
             )}
           </DialogHeader>
           {selectedStudent && (
-            <div className="grid grid-cols-3 gap-4 text-center py-4">
+            // --- DEĞİŞİKLİK 3: Düzen 2x2 olması için grid-cols-2 yapıldı ---
+            <div className="grid grid-cols-2 gap-3 text-center py-4">
               <div className="flex flex-col items-center p-2 bg-muted/50 rounded-lg">
                 <Star className="h-6 w-6 text-yellow-500 mb-1" />
                 <p className="text-xl font-bold">{selectedStudent.total_score}</p>
@@ -198,6 +197,13 @@ export default function LeaderboardPage() {
                 <Flame className="h-6 w-6 text-amber-500 mb-1" />
                 <p className="text-xl font-bold">{selectedStudent.seri || 0}</p>
                 <p className="text-xs text-muted-foreground">Seri</p>
+              </div>
+              
+              {/* --- DEĞİŞİKLİK 4: Yeni düello galibiyeti kartı eklendi --- */}
+              <div className="flex flex-col items-center p-2 bg-muted/50 rounded-lg">
+                <Swords className="h-6 w-6 text-primary mb-1" />
+                <p className="text-xl font-bold">{selectedStudent.challenge_wins || 0}</p>
+                <p className="text-xs text-muted-foreground">Düello Galibiyeti</p>
               </div>
             </div>
           )}

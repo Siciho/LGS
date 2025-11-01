@@ -73,9 +73,9 @@ export default function Header({
           {isMuted ? <VolumeX className="h-4 w-4 md:h-5 md:w-5" /> : <Volume2 className="h-4 w-4 md:h-5 md:w-5" />}
         </Button>
         {/* Tema butonu artık işlevsiz olduğu için kaldırılabilir veya gizlenebilir */}
-        {/* <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 md:h-9 md:w-9" onClick={toggleTheme} title="Temayı Değiştir">
+        <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 md:h-9 md:w-9" onClick={toggleTheme} title="Temayı Değiştir">
           {theme === 'light' ? <Moon className="h-4 w-4 md:h-5 md:w-5" /> : <Sun className="h-4 w-4 md:h-5 md:w-5" />}
-        </Button> */}
+        </Button> 
       </div>
     </div>
   );

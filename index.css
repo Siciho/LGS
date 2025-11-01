@@ -1,26 +1,55 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* NEON & GLASSMORPHISM DESIGN SYSTEM */
-
 @layer base {
-  :root, .dark {
-    --background: 258 35% 8%;   /* Koyu Mor Arka Plan */
-    --foreground: 260 100% 98%; /* Neredeyse Beyaz Yazı Rengi */
+  /* 1. LIGHT MODE (AçIK MOD)
+     Burası sizin "çok beyaz ve sade" olan ve renklendirmek istediğiniz tema.
+     Değerleri konuştuğumuz gibi yumuşattım (örn: hafif gri arka plan).
+     (Renkleri HSL formatına çevirdim, sizin kodunuzla tutarlı olması için)
+  */
+  :root {
+    --background: 210 17% 98%;    /* #F8F9FA (Hafif Gri Arka Plan) */
+    --foreground: 210 10% 23%;    /* #212529 (Koyu Gri Yazı) */
+    --card: 0 0% 100%;            /* #FFFFFF (Beyaz Kartlar) */
+    --card-foreground: 210 10% 23%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 10% 23%;
+    
+    --primary: 211 100% 50%;      /* #007bff (Mavi Vurgu Rengi) */
+    --primary-foreground: 0 0% 100%; /* Beyaz */
+    --primary-glow: 211 100% 60%;
+    
+    --secondary: 210 16% 93%;
+    --secondary-foreground: 210 10% 23%;
+    
+    --muted: 210 16% 93%;
+    --muted-foreground: 210 5% 45%;
+    
+    --accent: 210 16% 96%;
+    --accent-foreground: 210 10% 23%;
+    
+    --destructive: 350 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 210 16% 90%;       /* #E9ECEF (Açık Gri Kenarlık) */
+    --input: 210 16% 90%;
+    --ring: 211 100% 50%;
 
-    /* Glassmorphism Kart Stili */
-    --card: 260 100% 95% / 0.08; /* Çok hafif beyaz, %8 opaklık */
+    --radius: 0.75rem;
+  }
+
+  /* 2. DARK MODE (KOYU MOD)
+     Burası sizin gönderdiğiniz NEON & GLASSMORPHISM temanız.
+     Hiçbir değişiklik yapmadım, sadece .dark seçicisi altına aldım.
+  */
+  .dark {
+    --background: 258 35% 8%;
+    --foreground: 260 100% 98%;
+    --card: 260 100% 95% / 0.08;
     --card-foreground: 260 100% 98%;
-
     --popover: 258 35% 12%;
     --popover-foreground: 260 100% 98%;
-
-    /* Ana Renk - Neon Lila/Mor */
     --primary: 265 100% 75%;
     --primary-foreground: 260 100% 10%;
     --primary-glow: 270 100% 80%;
-    
     --secondary: 260 100% 80% / 0.1;
     --secondary-foreground: 0 0% 98%;
     --muted: 250 50% 100% / 0.05;
@@ -29,26 +58,9 @@
     --accent-foreground: 265 100% 80%;
     --destructive: 350 100% 70%;
     --destructive-foreground: 0 0% 98%;
-    
-    /* Kenarlık, Input ve Ring Renkleri */
-    --border: 260 100% 70% / 0.15; /* Yarı saydam lila kenarlık */
+    --border: 260 100% 70% / 0.15;
     --input: 260 100% 70% / 0.1;
     --ring: 265 100% 80%;
-
     --radius: 0.75rem;
-  }
-}
-
-@layer base {
-  /* Hatalı olan '@apply border-border' komutunu buradan kaldırdık */
-  body {
-    @apply bg-background text-foreground;
-    background-image: radial-gradient(circle at 10% 20%, hsl(280 100% 70% / 0.15), transparent 50%),
-                      radial-gradient(circle at 80% 90%, hsl(var(--primary) / 0.15), transparent 50%);
-    background-attachment: fixed;
-  }
-
-  html {
-    scroll-behavior: smooth;
   }
 }

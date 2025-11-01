@@ -1,12 +1,11 @@
-import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+// src/App.tsx
+
+import { Routes, Route, Navigate } from "react-router-dom";
+// --- DEĞİŞİKLİK: Gereksiz importlar kaldırıldı (useState, useEffect, ui bileşenleri vb.) ---
 import { useAuthContext } from "./contexts/AuthContext";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+
+// --- DEĞİŞİKLİK: Yeni LoginPage import edildi ---
+import LoginPage from "./pages/LoginPage";
 
 import AppLayout, { useAppContext } from "./pages/AppLayout";
 import Index from "./pages/Index";
@@ -25,8 +24,9 @@ import LeaderboardPage from "./pages/LeaderboardPage";
 import WordQuizPage from "./pages/WordQuizPage";
 import AdminPage from "./pages/AdminPage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
-import DenemeKayitlarimPage from "./pages/DenemeKayitlarimPage"; // YENİ SAYFAYI İÇE AKTARDIK
+import DenemeKayitlarimPage from "./pages/DenemeKayitlarimPage";
 
+// Bu küçük bileşenler burada kalabilir
 const StatisticsPage = () => {
   const context = useAppContext();
   if (!context) return null;
@@ -38,115 +38,9 @@ const AchievementsPage = () => {
   return <AchievementsList achievements={context.achievements} />;
 };
 
-const LoginPage = () => {
-    const auth = useAuthContext();
-    const location = useLocation();
-    const [activeTab, setActiveTab] = useState(location.state?.openRegister ? "register" : "login");
-    const [isRegisterSuccess, setIsRegisterSuccess] = useState(false);
-    const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
-    const [resetEmail, setResetEmail] = useState("");
-    const navigate = useNavigate();
+// --- DEĞİŞİKLİK: Kocaman LoginPage bileşeni buradan kaldırıldı ---
 
-    useEffect(() => {
-        if (!auth.authLoading && auth.session) {
-            navigate("/", { replace: true });
-        }
-    }, [auth.session, auth.authLoading, navigate]);
-
-    const handleRegister = async () => {
-        const success = await auth.handleNewStudentRegistration();
-        if (success) {
-            setIsRegisterSuccess(true);
-        }
-    };
-
-    const handleResetRequest = async () => {
-        const success = await auth.handlePasswordResetRequest(resetEmail);
-        if (success) {
-            setIsResetDialogOpen(false);
-        }
-    };
-
-    if (isRegisterSuccess) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-background p-4">
-                <Card className="w-full max-w-md text-center">
-                    <CardHeader><CardTitle>Kayıt Başarılı!</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                        <p className="text-muted-foreground">Hesabın başarıyla oluşturuldu. Şimdi seni giriş ekranına yönlendiriyoruz.</p>
-                        <Button onClick={() => {setIsRegisterSuccess(false); setActiveTab("login");}} className="w-full">Giriş Ekranına Git</Button>
-                    </CardContent>
-                </Card>
-            </div>
-        )
-    }
-
-    return (
-        <>
-            <div className="min-h-screen flex items-center justify-center bg-background p-4">
-                <Card className="w-full max-w-md">
-                    <CardHeader><CardTitle className="text-2xl text-center">LGS Asistanı</CardTitle></CardHeader>
-                    <CardContent>
-                        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="login">Giriş Yap</TabsTrigger>
-                                <TabsTrigger value="register">Kayıt Ol</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="login" className="pt-4">
-                                <p className="text-center mb-4 text-sm text-muted-foreground">Kullanıcı adın ve şifrenle giriş yap.</p>
-                                <div className="space-y-4">
-                                    <Input placeholder="Kullanıcı Adı (örn: aliyesil)" value={auth.username} onChange={(e) => auth.setUsername(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && auth.handleLogin()} />
-                                    <Input type="password" placeholder="Şifre" value={auth.password} onChange={(e) => auth.setPassword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && auth.handleLogin()} />
-                                    <Button onClick={auth.handleLogin} className="w-full">Giriş Yap</Button>
-                                </div>
-                                <div className="text-center mt-4">
-                                    <Button variant="link" className="text-xs" onClick={() => setIsResetDialogOpen(true)}>
-                                        Şifremi Unuttum
-                                    </Button>
-                                </div>
-                            </TabsContent>
-                            <TabsContent value="register" className="pt-4">
-                                <p className="text-center mb-4 text-sm text-muted-foreground">Sisteme ön kaydını tamamlamak için aşağıdaki bilgileri doldur.</p>
-                                <div className="space-y-3">
-                                    <Input placeholder="Adın Soyadın (örn: ALİ YEŞİL)" value={auth.regFullName} onChange={(e) => auth.setRegFullName(e.target.value)} />
-                                    <Input placeholder="Sınıfın (örn: 8D)" value={auth.regClassName} onChange={(e) => auth.setRegClassName(e.target.value)} />
-                                    <Input placeholder="Koç Kodu (örn: COSKUNHOCA)" value={auth.regCoachCode} onChange={(e) => auth.setRegCoachCode(e.target.value)} />
-                                    <hr className="my-2"/>
-                                    <Input type="email" placeholder="Kendi E-posta Adresin" value={auth.regEmail} onChange={(e) => auth.setRegEmail(e.target.value)} />
-                                    <Input type="password" placeholder="Yeni Şifreni Gir" value={auth.regPassword} onChange={(e) => auth.setRegPassword(e.target.value)} />
-                                    <Input type="password" placeholder="Yeni Şifreni Tekrar Gir" value={auth.regConfirmPassword} onChange={(e) => auth.setRegConfirmPassword(e.target.value)} />
-                                    <Button onClick={handleRegister} className="w-full">Hesabımı Oluştur</Button>
-                                </div>
-                            </TabsContent>
-                        </Tabs>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Şifre Sıfırla</DialogTitle>
-                        <DialogDescription>
-                            Hesabınıza ait e-posta adresini girin. Size şifrenizi sıfırlamanız için bir link göndereceğiz.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid w-full items-center gap-1.5">
-                            <Label htmlFor="email">E-posta</Label>
-                            <Input type="email" id="email" placeholder="ornek@eposta.com" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button type="button" variant="secondary" onClick={() => setIsResetDialogOpen(false)}>İptal</Button>
-                        <Button type="submit" onClick={handleResetRequest}>Sıırlama Linki Gönder</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </>
-    );
-};
-
+// ProtectedRoute aynı kalıyor
 const ProtectedRoute = () => {
     const { session, profile, authLoading } = useAuthContext();
     if (authLoading) {
@@ -161,6 +55,7 @@ const ProtectedRoute = () => {
     return <AppLayout />;
 };
 
+// App fonksiyonu artık çok daha temiz
 function App() {
   return (
     <Routes>
@@ -179,7 +74,6 @@ function App() {
         <Route path="leaderboard" element={<LeaderboardPage />} />
         <Route path="word-quiz/:unitId" element={<WordQuizPage />} />
         <Route path="student/:studentId" element={<StudentDetailPage />} />
-        {/* --- YENİ ROTA BURAYA EKLENDİ --- */}
         <Route path="deneme-kayitlarim" element={<DenemeKayitlarimPage />} />
         <Route path="coach" element={<SchedulePage />} />
         <Route path="admin/reset-password" element={<AdminPage />} />
