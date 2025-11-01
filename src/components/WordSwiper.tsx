@@ -10,16 +10,13 @@ import { useAppContext } from "@/pages/AppLayout";
 import { LearnedWords } from '@/types';
 
 const WordSwiper: React.FC = () => {
-  // === DÜZELTME 1: Başlangıç state'i boş olarak ayarlandı ===
   const [learned, setLearned] = useState<LearnedWords>({ known: [], unknown: [] });
   const [mode, setMode] = useState<'learn' | 'review'>('learn');
   const [wordIndex, setWordIndex] = useState(-1);
   const [isFlipped, setIsFlipped] = useState(false);
   
-  // === DÜZELTME 2: Gerekli bilgiler ve userId context'ten alınıyor ===
   const { userId, isMuted, handleEnglishUnitUnlocked } = useAppContext();
 
-  // === DÜZELTME 3: Veri yükleme işlemi artık useEffect içinde ve userId'ye bağlı yapılıyor ===
   useEffect(() => {
     if (userId) {
       setLearned(storage.loadLearnedWords(userId));
@@ -65,9 +62,8 @@ const WordSwiper: React.FC = () => {
     setIsFlipped(false);
   }, [deck]);
 
-  // === DÜZELTME 4: Kaydetme işlemi (storage.saveLearnedWords) artık userId ile yapılıyor ===
   const swiped = useCallback((direction: 'up' | 'down' | 'left' | 'right', wordId: string) => {
-    if (!userId) return; // Kullanıcı yoksa işlem yapma
+    if (!userId) return; 
 
     playSwipeSound(isMuted);
     
@@ -80,13 +76,13 @@ const WordSwiper: React.FC = () => {
         updated.unknown = [...new Set([...prev.unknown, wordId])];
         updated.known = prev.known.filter(id => id !== wordId);
       }
-      storage.saveLearnedWords(userId, updated); // userId eklendi
+      storage.saveLearnedWords(userId, updated);
       return updated;
     });
 
     setIsFlipped(false);
     setWordIndex(prevIndex => prevIndex - 1);
-  }, [isMuted, userId]); // userId bağımlılıklara eklendi
+  }, [isMuted, userId]); 
 
   const currentWord = deck[wordIndex];
 
@@ -147,9 +143,8 @@ const WordSwiper: React.FC = () => {
             className="absolute w-full h-full"
           >
             <div 
-              className={`relative w-full h-full rounded-xl shadow-lg transition-transform duration-500 cursor-pointer`} 
+              className={`relative w-full h-full rounded-xl shadow-lg transition-transform duration-500`} 
               style={{ transformStyle: 'preserve-3d', transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
-              onClick={() => setIsFlipped(prev => !prev)}
             >
               <div className="absolute inset-0 w-full h-full bg-sky-500 text-white flex flex-col items-center justify-center rounded-xl p-4 text-center" style={{ backfaceVisibility: 'hidden' }}>
                 <p className="text-2xl font-bold capitalize notranslate" translate="no">{currentWord.word}</p>
@@ -182,15 +177,18 @@ const WordSwiper: React.FC = () => {
         </div>
       </div>
       
-      {currentWord && (
-        <Button 
-          onClick={() => setIsFlipped(prev => !prev)} 
-          className="mt-4 px-4 py-2 text-sm font-semibold rounded-lg"
-          variant="outline"
-        >
-          {isFlipped ? "Kelimeyi Gizle" : "Anlamı Gör"}
-        </Button>
-      )}
+      {/* --- DEĞİŞİKLİK BURADA: Buton artık 'currentWord'e bağlı değil --- */}
+      <Button 
+        onClick={() => setIsFlipped(prev => !prev)} 
+        className="mt-4 px-4 py-2 text-sm font-semibold rounded-lg"
+        variant="outline"
+        // Butonu her zaman render et, ama kelime yoksa (veya deste bittiyse) devre dışı bırak
+        disabled={!currentWord} 
+      >
+        {isFlipped ? "Kelimeyi Gizle" : "Anlamı Gör"}
+      </Button>
+      {/* --- DEĞİŞİKLİK SONU --- */}
+
     </Card>
   );
 };
