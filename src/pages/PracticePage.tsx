@@ -8,17 +8,19 @@ import QuestionSolver from "@/components/QuestionSolver";
 import DailyQuestions from "@/components/DailyQuestions";
 import MotivationalQuote from "@/components/MotivationalQuote";
 import WordSwiper from "@/components/WordSwiper";
-import { Stopwatch } from "@/components/Stopwatch";
+// --- DEĞİŞİKLİK 1: Stopwatch import'u kaldırıldı ---
+// import { Stopwatch } from "@/components/Stopwatch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Swords, Trophy, Lock } from "lucide-react";
+import { Swords, Trophy, Lock, History } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { dailyWords } from "@/data/dailywords";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { isTopicActive } from "@/curriculum";
+import ChallengeHistory from "@/components/ChallengeHistory";
 
 const badges = [
   { wins: 0, image: '/assets/default.png', name: 'Başlangıç Ligi' },
@@ -108,11 +110,14 @@ export default function PracticePage() {
 
   return (
     <div className="space-y-6 animate-slide-up">
+      {/* --- DEĞİŞİKLİK 2: Varsayılan sekme 'vocab-world' oldu --- */}
       <Tabs defaultValue="vocab-world" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        {/* --- DEĞİŞİKLİK 3: grid-cols-3 -> grid-cols-2 oldu --- */}
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="gunluk-gorev">Günlük Görev</TabsTrigger>
           <TabsTrigger value="vocab-world">Vocab World</TabsTrigger>
-          <TabsTrigger value="araclar">Araçlar</TabsTrigger>
+          {/* --- DEĞİŞİKLİK 4: "Araçlar" sekmesi kaldırıldı --- */}
+          {/* <TabsTrigger value="araclar">Araçlar</TabsTrigger> */}
         </TabsList>
 
         <div className="mt-6">
@@ -179,7 +184,6 @@ export default function PracticePage() {
                 </div>
               </div>
 
-              {/* Sadece "Teste Gir" butonları burada */}
               <div className="grid grid-cols-2 gap-4">
                 {wordUnits.map(unit => (
                   <Button 
@@ -195,14 +199,31 @@ export default function PracticePage() {
 
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <History className="h-5 w-5 text-primary" />
+                Son Düellolar
+              </CardTitle>
+              <CardDescription>Tamamlanan meydan okumalarının sonuçları.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChallengeHistory />
+            </CardContent>
+          </Card>
+
           <WordSwiper />
         </TabsContent>
 
+        {/* --- DEĞİŞİKLİK 5: "Araçlar" sekmesinin içeriği kaldırıldı --- */}
+        {/*
         <TabsContent value="araclar" className="mt-6">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Stopwatch />
            </div>
         </TabsContent>
+        */}
       </Tabs>
     </div>
   );

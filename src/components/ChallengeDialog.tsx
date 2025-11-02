@@ -14,7 +14,10 @@ import { avatars } from "@/data/avatars";
 
 interface ChallengeDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  // --- DEĞİŞİKLİK 1: Prop'lar güncellendi ---
+  onClose: () => void; // onOpenChange yerine
+  onChallengeSent: (opponentName: string) => void; // Yeni prop eklendi
+  // --- DEĞİŞİKLİK 1 SONU ---
   unitId: number;
   score: number;
   time: number;
@@ -22,7 +25,7 @@ interface ChallengeDialogProps {
 
 const defaultAvatar = avatars.find(a => a.id === 'default')?.image || '';
 
-export function ChallengeDialog({ open, onOpenChange, unitId, score, time }: ChallengeDialogProps) {
+export function ChallengeDialog({ open, onClose, onChallengeSent, unitId, score, time }: ChallengeDialogProps) {
   const { userId } = useAppContext();
   const [opponents, setOpponents] = useState<ChallengeOpponent[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,12 +54,13 @@ export function ChallengeDialog({ open, onOpenChange, unitId, score, time }: Cha
     );
   }, [opponents, searchTerm]);
 
-  const handleChallenge = async (opponentId: string) => {
+  // --- DEĞİŞİKLİK 2: Fonksiyon tüm 'opponent' objesini alacak şekilde güncellendi ---
+  const handleChallenge = async (opponent: ChallengeOpponent) => {
     if (!userId) return;
 
     const { error } = await supabase.from('challenges').insert({
       challenger_id: userId,
-      opponent_id: opponentId,
+      opponent_id: opponent.user_id, // opponent.user_id kullan
       unit_id: unitId,
       challenger_score: score,
       challenger_time_seconds: time,
@@ -68,7 +72,8 @@ export function ChallengeDialog({ open, onOpenChange, unitId, score, time }: Cha
       console.error("Meydan okuma hatası:", error);
     } else {
       toast.success("Meydan okuma gönderildi! 🚀");
-      onOpenChange(false);
+      // --- DEĞİŞİKLİK 3: 'onOpenChange' yerine yeni prop çağrıldı ---
+      onChallengeSent(opponent.user_name); // İsmi ana sayfaya bildir
     }
   };
 
@@ -78,7 +83,8 @@ export function ChallengeDialog({ open, onOpenChange, unitId, score, time }: Cha
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    // --- DEĞİŞİKLİK 4: 'onOpenChange' (X butonuna basma) artık 'onClose'u tetikliyor ---
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
       <DialogContent className="max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Bir Arkadaşına Meydan Oku</DialogTitle>
@@ -96,8 +102,6 @@ export function ChallengeDialog({ open, onOpenChange, unitId, score, time }: Cha
           />
         </div>
         
-        {/* --- DEĞİŞİKLİK BURADA YAPILDI --- */}
-        {/* Sabit yükseklik (h-72) yerine esnek (h-[40vh]) kullanıldı */}
         <ScrollArea className="h-[40vh] pr-4 mt-4">
           <div className="space-y-2">
             {loading && <p className="text-center text-muted-foreground py-4">Yükleniyor...</p>}
@@ -114,7 +118,8 @@ export function ChallengeDialog({ open, onOpenChange, unitId, score, time }: Cha
                   />
                   <span className="font-medium">{opponent.user_name}</span>
                 </div>
-                <Button size="sm" onClick={() => handleChallenge(opponent.user_id)}>
+                {/* --- DEĞİŞİKLİK 5: Tüm 'opponent' objesi gönderiliyor --- */}
+                <Button size="sm" onClick={() => handleChallenge(opponent)}>
                   <Send className="h-4 w-4 mr-2" />
                   Gönder
                 </Button>
@@ -122,8 +127,6 @@ export function ChallengeDialog({ open, onOpenChange, unitId, score, time }: Cha
             ))}
           </div>
         </ScrollArea>
-        {/* --- DEĞİŞİKLİK BURADA BİTTİ --- */}
-
       </DialogContent>
     </Dialog>
   );

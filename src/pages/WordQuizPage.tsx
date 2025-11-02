@@ -13,9 +13,9 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Challenge } from '@/types';
 import { cn } from '@/lib/utils';
 
-// Listenizi buraya yapıştırın
+// Listenizi (onkayit_ogrenciler_rows.csv) buraya yapıştırın
 const DUMMY_NAMES = [
-  "HİRANUR GÜCÜK", "ECRİN SEL", "MERVE HELLI", "Z. KÜBRA ALBAYRAK", "SAFA HELLI", "RUMEYSA TAYCI", "BUĞLEM OSMANOĞLU", "ESLEM AKGÜL", "ELİF KIZILBOĞA", "SÜMEYYE DÖNMEZ", "ESLEM BULGUR", "MERYEM N. YOĞURTCU", "TUBA BERRA TURAN", "ECRİN BULUT", "ECRİN KILIÇ", "BEREN AYŞE TURAN", "FATMA YILMAZ", "BÜŞRA GÜRKAN", "ŞEVVAL HİRA ERDEM", "EDA NUR ALTAY", "TOLIB AL ELLAWI", "ASELMİNA MUTLUTÜRK", "MELİS ÇAKICI", "ZEYNEP DAĞCI", "EGE TÜRKMEN", "M. HALİT HELLİ", "MUSA CAN ERDEN", "MEHMET SAİT FİDAN", "MUSA TÜRTÜK", "ÖMER HATTAP", "M.EBUBEKİR BAŞGÖYNÜK", "KAHRAMAN ZOBU", "TALHA KÜLCÜ", "EREN KAŞ", "İSMAİL ÇAKIR", "YAŞAR ÇINAR KARNAK", "ERDEM KARAYEL", "AYAZ TOSUN", "AHMET EMİR YILDIZ", "EYÜP TALHA KILINÇ", "ALİ DEVRAN GÜNEŞ", "ERDEM UZUN", "EMİR KURUÇAY", "MUSTAFA KEMAL KURT", "M.ÖMER DEMİRBAŞ", "HAMZA TOPAL", "EYMEN AYTEN", "RESUL TANYEL", "YAZAN HIŞFE", "UFUK TAHA YILDIZ", "METEHAN KURT", "BERAT DİNİBÜTÜNOĞLU", "ÖMER TAHA CAN", "KAYRA AĞBULAK", "MUSA ÖRGEL", "YİĞİT H. TOKTEMÜR", "CİHAT C. ÖZVATAN", "EYMEN H. YOĞURTCU", "M. BERA BAŞ", "MERVE SERRA GÜNEŞ", "MELEK NUR ÖZTÜRK", "BERİKA EROL", "MERVE HAMMEDE", "BUĞLEM KANBAL", "MERYEM BİLTEKİN", "RÜVEYDA KAFA", "SEMA YILDIZOĞLU", "RÜMEYSA ÇATLI", "ECEM MELEK MEMİŞ", "ÖYKÜ BERRA CİHAN", "İREM YILMAZ", "AYSHA ABDULLAYEVA", "ZEYNEP KURT", "RÜMEYSA ARSLAN", "MERDA GÜLFER", "BUSENUR ZOLAN", "DAMLA NUR KAYA", "ELİSA AŞIK", "SARE HELLI", "AZRA KÜÇÜKOĞLU", "HAVVANUR ÇAKICI", "ELA BEREN YILMAZ", "HİRANUR KAYA", "ECE FATMA YÜCE", "ÜMRAN DEMİR", "MUSTAFA SAİT CEVİZCİ", "ARİF ASLAN", "M. MİRAÇ ÖZTÜRK", "MURAT BALCI", "MUHAMMED YALVAÇ", "MÜCAHİD M.IŞIK", "İSMAİL EFE DELDAK", "FATİH ARICAN", "AHMET BURAK YILMAZ", "M.NOUR AL JOHMANI", "OSMAN MELİH KAYMAK", "POYRAZ EFE KAYAOĞLU", "SELAHADDİN A. ZENGİN", "EMİR EFE AKSEL", "RAMAZAN AYAZ EVREM", "HOCA TEST"
+  "HİRANUR GÜCÜK", "ECRİN SEL", "MERVE HELLI", "Z. KÜBRA ALBAYRAK", "SAFA HELLI", "RUMEYSA TAYCI", "BUĞLEM OSMANOĞLU", "ESLEM AKGÜL", "ELİF KIZILBOĞA", "SÜMEYYE DÖNMEZ", "ESLEM BULGUR", "MERYEM N. YOĞURTCU", "TUBA BERRA TURAN", "ECRİN BULUT", "ECRİN KILIÇ", "BEREN AYŞE TURAN", "FATMA YILMAZ", "BÜŞRA GÜRKAN", "ŞEVVAL HİRA ERDEM", "EDA NUR ALTAY", "TOLIB AL ELLAWI", "ASELMİNA MUTLUTÜRK", "MELİS ÇAKICI", "ZEYNEP DAĞCI", "EGE TÜRKMEN", "M. HALİT HELLİ", "MUSA CAN ERDEN", "MEHMET SAİT FİDAN", "MUSA TÜRTÜK", "ÖMER HATTAP", "M.EBUBEKİR BAŞGÖYNÜK", "KAHRAMAN ZOBU", "TALHA KÜLCÜ", "EREN KAŞ", "İSMAİL ÇAKIR", "YAŞAR ÇINAR KARNAK", "ERDEM KARAYEL", "AYAZ TOSUN", "AHMET EMİR YILDIZ", "EYÜP TALHA KILINÇ", "ALİ DEVRAN GÜNEŞ", "ERDEM UZUN", "EMİR KURUÇAY", "MUSTAFA KEMAL KURT", "M.ÖMER DEMİRBAŞ", "HAMZA TOPAL", "EYMEN AYTEN", "RESUL TANYEL", "YAZAN HIŞFE", "UFUK TAHA YILDIZ", "METEHAN KURT", "BERAT DİNİBÜTÜNOĞLU", "ÖMER TAHA CAN", "KAYRA AĞBULAK", "MUSA ÖRGEL", "YİĞİT H. TOKTEMÜR", "CİHAT C. ÖZVATAN", "EYMEN H. YOĞURTCU", "M. BERA BAŞ", "MERVE SERRA GÜNEŞ", "MELEK NUR ÖZTÜRK", "BERİKA EROL", "MERVE HAMMEDE", "BUĞLEM KANBAL", "MERYEM BİLTEKİN", "RÜVEYDA KAFA", "SEMA YILMAZOĞLU", "RÜMEYSA ÇATLI", "ECEM MELEK MEMİŞ", "ÖYKÜ BERRA CİHAN", "İREM YILMAZ", "AYSHA ABDULLAYEVA", "ZEYNEP KURT", "RÜMEYSA ARSLAN", "MERDA GÜLFER", "BUSENUR ZOLAN", "DAMLA NUR KAYA", "ELİSA AŞIK", "SARE HELLI", "AZRA KÜÇÜKOĞLU", "HAVVANUR ÇAKICI", "ELA BEREN YILMAZ", "HİRANUR KAYA", "ECE FATMA YÜCE", "ÜMRAN DEMİR", "MUSTAFA SAİT CEVİZCİ", "ARİF ASLAN", "M. MİRAÇ ÖZTÜRK", "MURAT BALCI", "MUHAMMED YALVAÇ", "MÜCAHİD M.IŞIK", "İSMAİL EFE DELDAK", "FATİH ARICAN", "AHMET BURAK YILMAZ", "M.NOUR AL JOHMANI", "OSMAN MELİH KAYMAK", "POYRAZ EFE KAYAOĞLU", "SELAHADDİN A. ZENGİN", "EMİR EFE AKSEL", "RAMAZAN AYAZ EVREM", "HOCA TEST"
 ];
 
 
@@ -38,8 +38,10 @@ export default function WordQuizPage() {
   const [finalTime, setFinalTime] = useState(0);
 
   const [challengeResult, setChallengeResult] = useState<Challenge | null>(null);
-  const [isSendingChallenge, setIsSendingChallenge] = useState(false);
-  const [sentOpponentName, setSentOpponentName] = useState<string | null>(null);
+  const [isSendingChallenge, setIsSendingChallenge] = useState(false); // Sadece 'Rastgele' butonu için yüklenme
+  
+  // --- DEĞİŞİKLİK 3: YENİ STATE. Düello (arkadaşa VEYA rastgele) gönderildiğinde ismi tutar ---
+  const [challengeSentToName, setChallengeSentToName] = useState<string | null>(null);
   
   const [isSpinningModalOpen, setIsSpinningModalOpen] = useState(false);
   const [spinningName, setSpinningName] = useState("Rakip Aranıyor...");
@@ -71,20 +73,19 @@ export default function WordQuizPage() {
 
   useEffect(() => {
     let spinInterval: NodeJS.Timeout | null = null;
-
-    if (isSendingChallenge && !sentOpponentName) {
+    // --- DEĞİŞİKLİK 4: Animasyon state'i 'isSpinningModalOpen' oldu ---
+    if (isSpinningModalOpen) {
       spinInterval = setInterval(() => {
         const randomIndex = Math.floor(Math.random() * DUMMY_NAMES.length);
         setSpinningName(DUMMY_NAMES[randomIndex]);
       }, 90); 
     }
-
     return () => {
       if (spinInterval) {
         clearInterval(spinInterval);
       }
     };
-  }, [isSendingChallenge, sentOpponentName]);
+  }, [isSpinningModalOpen]); // Sadece modalın açık olup olmamasına bağlandı
 
 
   const sendRandomChallenge = async (score: number, time: number) => {
@@ -95,7 +96,6 @@ export default function WordQuizPage() {
     
     setIsSendingChallenge(true);    
     setIsSpinningModalOpen(true); 
-    setSentOpponentName(null);   
     setSpinningName("Rakip Aranıyor...");
 
     try {
@@ -111,9 +111,9 @@ export default function WordQuizPage() {
       
       await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1500)); 
 
-      setIsSendingChallenge(false); // Animasyonu durdur
       setSpinningName(opponent_name); 
-      setSentOpponentName(opponent_name); 
+      // --- DEĞİŞİKLİK 5: 'challengeSentToName' burada set ediliyor ---
+      setChallengeSentToName(opponent_name); 
       toast.info(`Rakip bulundu: ${opponent_name}! Düello gönderiliyor...`);
       
       const { error: insertError } = await supabase.from('challenges').insert({
@@ -132,11 +132,12 @@ export default function WordQuizPage() {
       toast.success(`${opponent_name} adlı rakibe düello gönderildi! 🚀`);
 
     } catch (error: any) {
-      setIsSendingChallenge(false); 
       setIsSpinningModalOpen(false);
       toast.error("Düello gönderilemedi.", { description: error.message });
-      setSentOpponentName(null); 
-    } 
+      setChallengeSentToName(null); 
+    } finally {
+      setIsSendingChallenge(false); 
+    }
   };
 
 
@@ -243,53 +244,67 @@ export default function WordQuizPage() {
                         <div><p className="font-bold text-lg">{finalTime} sn</p><p className="text-sm text-muted-foreground">Süre</p></div>
                       </div>
                       
-                      {!challengeId && (
+                      {/* --- DEĞİŞİKLİK 6: Butonların Görüntülenme Mantığı --- */}
+                      {/* Eğer düello cevabı değilse VE henüz bir düello gönderilmediyse butonları göster */}
+                      {!challengeId && !challengeSentToName && (
                         <div className="grid grid-cols-2 gap-3">
                           <Button 
                             onClick={() => setShowChallengeDialog(true)} 
                             variant="outline"
-                            disabled={isSendingChallenge || !!sentOpponentName} 
+                            disabled={isSendingChallenge} // Sadece rastgele gönderim sırasında kilitlenir
                           >
                             <Swords className="h-4 w-4 mr-2" />Arkadaşına Gönder
                           </Button>
                           
                           <Button 
                             onClick={() => sendRandomChallenge(correctCount, finalTime)}
-                            disabled={isSendingChallenge || !!sentOpponentName}
-                            variant={sentOpponentName ? "success" : "default"}
+                            disabled={isSendingChallenge} // Gönderim sırasında kilitlenir
                           >
                             {isSendingChallenge ? (
                               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            ) : sentOpponentName ? (
-                              <CheckCircle className="h-4 w-4 mr-2" />
                             ) : (
                               <Shuffle className="h-4 w-4 mr-2" />
                             )}
-                            
-                            {sentOpponentName 
-                                ? `${sentOpponentName}'a Gönderildi` 
-                                : 'Rastgele Rakip'}
+                            {isSendingChallenge ? "Aranıyor..." : 'Rastgele Rakip'}
                           </Button>
                         </div>
                       )}
                       
                       <Button onClick={() => navigate('/practice')} className="w-full">Geri Dön</Button>
+
+                      {/* --- DEĞİŞİKLİK 7: "Geri Dön" butonunun ALTINA onay mesajı eklendi --- */}
+                      {challengeSentToName && (
+                        <div className="text-center p-3 bg-success/10 border border-success/20 rounded-lg">
+                          <p className="font-medium text-success flex items-center justify-center gap-2">
+                            <CheckCircle className="h-4 w-4" />
+                            {challengeSentToName}'a meydan okuma gönderildi! ⚔️
+                          </p>
+                        </div>
+                      )}
                       
                   </CardContent>
               </Card>
           </div>
           
-          <ChallengeDialog open={showChallengeDialog} onOpenChange={setShowChallengeDialog} unitId={parseInt(unitId || '1')} score={score} time={finalTime} />
+          {/* --- DEĞİŞİKLİK 8: Dialog'a yeni prop'lar eklendi --- */}
+          <ChallengeDialog 
+            open={showChallengeDialog} 
+            onClose={() => setShowChallengeDialog(false)}
+            onChallengeSent={(name) => {
+              setChallengeSentToName(name);
+              setShowChallengeDialog(false);
+            }}
+            unitId={parseInt(unitId || '1')} 
+            score={score} 
+            time={finalTime} 
+          />
 
-          {/* --- DEĞİŞİKLİK 8: YENİ ANİMASYON MODALI --- */}
+          {/* Animasyon Modalı (X butonunu gizlemek için CSS'e bağlı) */}
           <Dialog open={isSpinningModalOpen}>
             <DialogContent 
               className="max-w-xs" 
               onInteractOutside={(e) => e.preventDefault()}
-              // --- HATA DÜZELTMESİ: Hatalı prop kaldırıldı ---
-              // showCloseButton={false} <-- BU SATIR HATALIYDI, KALDIRILDI
-              // (X butonunu gizlemek için index.css'e kural ekleyeceğiz)
-              id="spinning-modal-content" // CSS ile hedeflemek için ID eklendi
+              id="spinning-modal-content" // CSS ile hedeflemek için ID (index.css'e kural eklenmeli)
             >
               <div className="flex flex-col items-center justify-center p-6 space-y-4 min-h-[150px]">
                 <Shuffle className="h-12 w-12 text-primary animate-spin" />
@@ -297,7 +312,7 @@ export default function WordQuizPage() {
                 
                 <div className={cn(
                     "text-2xl font-bold text-center h-8 transition-all duration-100",
-                    sentOpponentName && "text-success" 
+                    isSendingChallenge === false && "text-success" // Gönderme bitince (isim bulununca) yeşil yap
                 )}>
                   {spinningName}
                 </div>
