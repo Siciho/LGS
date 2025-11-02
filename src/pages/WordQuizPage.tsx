@@ -38,9 +38,7 @@ export default function WordQuizPage() {
   const [finalTime, setFinalTime] = useState(0);
 
   const [challengeResult, setChallengeResult] = useState<Challenge | null>(null);
-  const [isSendingChallenge, setIsSendingChallenge] = useState(false); // Sadece 'Rastgele' butonu için yüklenme
-  
-  // --- DEĞİŞİKLİK 3: YENİ STATE. Düello (arkadaşa VEYA rastgele) gönderildiğinde ismi tutar ---
+  const [isSendingChallenge, setIsSendingChallenge] = useState(false); 
   const [challengeSentToName, setChallengeSentToName] = useState<string | null>(null);
   
   const [isSpinningModalOpen, setIsSpinningModalOpen] = useState(false);
@@ -73,7 +71,7 @@ export default function WordQuizPage() {
 
   useEffect(() => {
     let spinInterval: NodeJS.Timeout | null = null;
-    // --- DEĞİŞİKLİK 4: Animasyon state'i 'isSpinningModalOpen' oldu ---
+
     if (isSpinningModalOpen) {
       spinInterval = setInterval(() => {
         const randomIndex = Math.floor(Math.random() * DUMMY_NAMES.length);
@@ -85,7 +83,7 @@ export default function WordQuizPage() {
         clearInterval(spinInterval);
       }
     };
-  }, [isSpinningModalOpen]); // Sadece modalın açık olup olmamasına bağlandı
+  }, [isSpinningModalOpen]); 
 
 
   const sendRandomChallenge = async (score: number, time: number) => {
@@ -111,10 +109,9 @@ export default function WordQuizPage() {
       
       await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1500)); 
 
+      setIsSendingChallenge(false); 
       setSpinningName(opponent_name); 
-      // --- DEĞİŞİKLİK 5: 'challengeSentToName' burada set ediliyor ---
       setChallengeSentToName(opponent_name); 
-      toast.info(`Rakip bulundu: ${opponent_name}! Düello gönderiliyor...`);
       
       const { error: insertError } = await supabase.from('challenges').insert({
         challenger_id: userId,
@@ -129,15 +126,13 @@ export default function WordQuizPage() {
 
       await new Promise(resolve => setTimeout(resolve, 1500));
       setIsSpinningModalOpen(false); 
-      toast.success(`${opponent_name} adlı rakibe düello gönderildi! 🚀`);
 
     } catch (error: any) {
+      setIsSendingChallenge(false); 
       setIsSpinningModalOpen(false);
       toast.error("Düello gönderilemedi.", { description: error.message });
       setChallengeSentToName(null); 
-    } finally {
-      setIsSendingChallenge(false); 
-    }
+    } 
   };
 
 
@@ -172,7 +167,8 @@ export default function WordQuizPage() {
 
           if (error) { toast.error("Meydan okuma sonucu kaydedilemedi."); } 
           else if (data) {
-            toast.success("Meydan okuma tamamlandı! Sonuçlar gösteriliyor.");
+            // --- DEĞİŞİKLİK BURADA: 'toast.success' kaldırıldı ---
+            // toast.success("Meydan okuma tamamlandı! Sonuçlar gösteriliyor.");
             setChallengeResult({
                 ...data,
                 challenger_name: data.challenger.ad_soyad,
@@ -244,21 +240,19 @@ export default function WordQuizPage() {
                         <div><p className="font-bold text-lg">{finalTime} sn</p><p className="text-sm text-muted-foreground">Süre</p></div>
                       </div>
                       
-                      {/* --- DEĞİŞİKLİK 6: Butonların Görüntülenme Mantığı --- */}
-                      {/* Eğer düello cevabı değilse VE henüz bir düello gönderilmediyse butonları göster */}
                       {!challengeId && !challengeSentToName && (
                         <div className="grid grid-cols-2 gap-3">
                           <Button 
                             onClick={() => setShowChallengeDialog(true)} 
                             variant="outline"
-                            disabled={isSendingChallenge} // Sadece rastgele gönderim sırasında kilitlenir
+                            disabled={isSendingChallenge} 
                           >
                             <Swords className="h-4 w-4 mr-2" />Arkadaşına Gönder
                           </Button>
                           
                           <Button 
                             onClick={() => sendRandomChallenge(correctCount, finalTime)}
-                            disabled={isSendingChallenge} // Gönderim sırasında kilitlenir
+                            disabled={isSendingChallenge}
                           >
                             {isSendingChallenge ? (
                               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -272,7 +266,6 @@ export default function WordQuizPage() {
                       
                       <Button onClick={() => navigate('/practice')} className="w-full">Geri Dön</Button>
 
-                      {/* --- DEĞİŞİKLİK 7: "Geri Dön" butonunun ALTINA onay mesajı eklendi --- */}
                       {challengeSentToName && (
                         <div className="text-center p-3 bg-success/10 border border-success/20 rounded-lg">
                           <p className="font-medium text-success flex items-center justify-center gap-2">
@@ -286,7 +279,6 @@ export default function WordQuizPage() {
               </Card>
           </div>
           
-          {/* --- DEĞİŞİKLİK 8: Dialog'a yeni prop'lar eklendi --- */}
           <ChallengeDialog 
             open={showChallengeDialog} 
             onClose={() => setShowChallengeDialog(false)}
@@ -299,12 +291,11 @@ export default function WordQuizPage() {
             time={finalTime} 
           />
 
-          {/* Animasyon Modalı (X butonunu gizlemek için CSS'e bağlı) */}
           <Dialog open={isSpinningModalOpen}>
             <DialogContent 
               className="max-w-xs" 
               onInteractOutside={(e) => e.preventDefault()}
-              id="spinning-modal-content" // CSS ile hedeflemek için ID (index.css'e kural eklenmeli)
+              id="spinning-modal-content"
             >
               <div className="flex flex-col items-center justify-center p-6 space-y-4 min-h-[150px]">
                 <Shuffle className="h-12 w-12 text-primary animate-spin" />
@@ -312,7 +303,7 @@ export default function WordQuizPage() {
                 
                 <div className={cn(
                     "text-2xl font-bold text-center h-8 transition-all duration-100",
-                    isSendingChallenge === false && "text-success" // Gönderme bitince (isim bulununca) yeşil yap
+                    !isSendingChallenge && "text-success" 
                 )}>
                   {spinningName}
                 </div>

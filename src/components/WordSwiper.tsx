@@ -165,28 +165,32 @@ const WordSwiper: React.FC = () => {
         )}
       </div>
       
-      {/* --- DEĞİŞİKLİK 1: Buton bu bloğun içine taşındı --- */}
-      <div className="flex flex-col items-center text-gray-500 dark:text-gray-400 gap-2">
-        <div className="flex items-center">
-            <ThumbsUp className="w-5 h-5 mr-2 text-green-500"/>
-            <span></span>
+      {/* --- DEĞİŞİKLİK 1: Ana kapsayıcı dikey (col) ve aralıklı (gap-4) --- */}
+      <div className="flex flex-col items-center text-gray-500 dark:text-gray-400 gap-4">
+        
+        {/* --- DEĞİŞİKLİK 2: ThumbsUp ve ThumbsDown için yatay (row) kapsayıcı --- */}
+        <div className="flex flex-row items-center gap-8">
+          <div className="flex items-center">
+              <ThumbsUp className="w-5 h-5 mr-2 text-green-500"/>
+              <span></span>
+          </div>
+          <div className="flex items-center">
+              <ThumbsDown className="w-5 h-5 mr-2 text-red-500"/>
+              <span></span>
+          </div>
         </div>
-
-        {/* --- DEĞİŞİKLİK 2: Buton buraya eklendi ve kenar boşluğu (mt-4 -> my-2) ayarlandı --- */}
+        
+        {/* --- DEĞİŞİKLİK 3: Buton artık bu kapsayıcının içinde ve altta --- */}
         <Button 
           onClick={() => setIsFlipped(prev => !prev)} 
-          className="my-2 px-4 py-2 text-sm font-semibold rounded-lg" // 'mt-4' yerine 'my-2'
+          className="px-4 py-2 text-sm font-semibold rounded-lg" // 'my-2' kaldırıldı, 'gap-4' zaten boşluk veriyor
           variant="outline"
           disabled={!currentWord} 
         >
           {isFlipped ? "Kelimeyi Gizle" : "Anlamı Gör"}
         </Button>
-        <div className="flex items-center">
-            <ThumbsDown className="w-5 h-5 mr-2 text-red-500"/>
-            <span></span>
-        </div>
       </div>
-   
+      
     </Card>
   );
 };

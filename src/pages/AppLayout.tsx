@@ -202,13 +202,8 @@ export default function AppLayout() {
 
   return (
     <>
-      {/* --- DEĞİŞİKLİK BURADA: ---
-        Masaüstü için olan 'md:pb-4' kaldırıldı.
-        Mobil için 'pb-32' (8rem) olan boşluk, 'pb-24' (6rem) olarak ayarlandı.
-        Bu 6rem'lik boşluk (96px) hem mobil hem de masaüstünde, 
-        BottomNav'ın (64px) rahatça sığması için yeterli olacaktır.
-      */}
-      <div className="max-w-7xl mx-auto p-2 sm:p-4 pb-24">
+      {/* --- DEĞİŞİKLİK 1: Ana kapsayıcı artık 'pb-32' (alt boşluk) içermiyor. --- */}
+      <div className="max-w-7xl mx-auto p-2 sm:p-4 min-h-screen flex flex-col">
         <Header
           userName={userName}
           totalQuestions={totalQuestions}
@@ -223,20 +218,17 @@ export default function AppLayout() {
           isHomePage={isHomePage}
           userRole={userRole}
         />
-        <main>
+        {/* --- DEĞİŞİKLİK 2: 'main' etiketi 'flex-1' (kalan alanı doldur) VE 'pb-32' (alt boşluk) özelliklerini aldı --- */}
+        <main className="flex-1 pb-32">
           {scheduler.notificationSettings.challengeReminder && (
             <ChallengeNotification challenges={pendingChallenges} onDismiss={dismissChallenge} />
           )}
-          <div className="animate-slide-up">
+          {/* Bu div'de 'animate-slide-up' olmaması doğru */}
+          <div>
             <Outlet context={contextValue} />
           </div>
         </main>
       </div>
-      
-      {/* --- NOT: BottomNav.tsx DEĞİŞMEDİ ---
-        'md:hidden' eklemeye gerek YOK. 
-        Hem mobilde hem masaüstünde görünür kalacak.
-      */}
       <BottomNav isMuted={isMuted} userRole={userRole} />
     </>
   );
