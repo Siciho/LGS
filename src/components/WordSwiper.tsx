@@ -165,30 +165,28 @@ const WordSwiper: React.FC = () => {
         )}
       </div>
       
+      {/* --- DEĞİŞİKLİK 1: Buton bu bloğun içine taşındı --- */}
       <div className="flex flex-col items-center text-gray-500 dark:text-gray-400 gap-2">
         <div className="flex items-center">
             <ThumbsUp className="w-5 h-5 mr-2 text-green-500"/>
-            <span>Biliyorum</span>
+            <span></span>
         </div>
-        <div className="w-px h-4 bg-border"></div>
+
+        {/* --- DEĞİŞİKLİK 2: Buton buraya eklendi ve kenar boşluğu (mt-4 -> my-2) ayarlandı --- */}
+        <Button 
+          onClick={() => setIsFlipped(prev => !prev)} 
+          className="my-2 px-4 py-2 text-sm font-semibold rounded-lg" // 'mt-4' yerine 'my-2'
+          variant="outline"
+          disabled={!currentWord} 
+        >
+          {isFlipped ? "Kelimeyi Gizle" : "Anlamı Gör"}
+        </Button>
         <div className="flex items-center">
             <ThumbsDown className="w-5 h-5 mr-2 text-red-500"/>
-            <span>Bilmiyorum</span>
+            <span></span>
         </div>
       </div>
-      
-      {/* --- DEĞİŞİKLİK BURADA: Buton artık 'currentWord'e bağlı değil --- */}
-      <Button 
-        onClick={() => setIsFlipped(prev => !prev)} 
-        className="mt-4 px-4 py-2 text-sm font-semibold rounded-lg"
-        variant="outline"
-        // Butonu her zaman render et, ama kelime yoksa (veya deste bittiyse) devre dışı bırak
-        disabled={!currentWord} 
-      >
-        {isFlipped ? "Kelimeyi Gizle" : "Anlamı Gör"}
-      </Button>
-      {/* --- DEĞİŞİKLİK SONU --- */}
-
+   
     </Card>
   );
 };

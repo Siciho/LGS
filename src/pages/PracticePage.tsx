@@ -1,6 +1,6 @@
 // src/pages/PracticePage.tsx
 
-import { useState, useMemo } from "react";
+import { useState, useMemo } from "react"; 
 import { Question, SolvedStat, Subject } from "@/types";
 import { questions as allQuestions } from "@/data/questions";
 import { useAppContext } from "./AppLayout";
@@ -8,13 +8,11 @@ import QuestionSolver from "@/components/QuestionSolver";
 import DailyQuestions from "@/components/DailyQuestions";
 import MotivationalQuote from "@/components/MotivationalQuote";
 import WordSwiper from "@/components/WordSwiper";
-// --- DEĞİŞİKLİK 1: Stopwatch import'u kaldırıldı ---
-// import { Stopwatch } from "@/components/Stopwatch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Swords, Trophy, Lock, History } from "lucide-react";
+import { Swords, Trophy, Lock, History, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { dailyWords } from "@/data/dailywords";
 import { cn } from "@/lib/utils";
@@ -38,6 +36,9 @@ export default function PracticePage() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { handleQuizCompletion, subjects: allSubjectsFromContext, dailySolvedSubjects, challengeWins } = useAppContext();
+
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false); 
+
 
   const handleSelectSubject = (subjectId: string) => {
     const subject = allSubjectsFromContext.find(s => s.id === subjectId);
@@ -110,14 +111,10 @@ export default function PracticePage() {
 
   return (
     <div className="space-y-6 animate-slide-up">
-      {/* --- DEĞİŞİKLİK 2: Varsayılan sekme 'vocab-world' oldu --- */}
       <Tabs defaultValue="vocab-world" className="w-full">
-        {/* --- DEĞİŞİKLİK 3: grid-cols-3 -> grid-cols-2 oldu --- */}
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="gunluk-gorev">Günlük Görev</TabsTrigger>
           <TabsTrigger value="vocab-world">Vocab World</TabsTrigger>
-          {/* --- DEĞİŞİKLİK 4: "Araçlar" sekmesi kaldırıldı --- */}
-          {/* <TabsTrigger value="araclar">Araçlar</TabsTrigger> */}
         </TabsList>
 
         <div className="mt-6">
@@ -201,29 +198,36 @@ export default function PracticePage() {
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <History className="h-5 w-5 text-primary" />
-                Son Düellolar
-              </CardTitle>
-              <CardDescription>Tamamlanan meydan okumalarının sonuçları.</CardDescription>
+            <CardHeader 
+              className="flex-row items-center justify-between cursor-pointer" 
+              onClick={() => setIsHistoryOpen(!isHistoryOpen)} 
+            >
+              <div> 
+                <CardTitle className="flex items-center gap-2">
+                  <History className="h-5 w-5 text-primary" />
+                  Son Düellolar
+                </CardTitle>
+                <CardDescription>Tamamlanan meydan okumalarının sonuçları.</CardDescription>
+              </div>
+              <ChevronDown 
+                className={cn(
+                  'h-5 w-5 text-muted-foreground transition-transform duration-300',
+                  isHistoryOpen && 'rotate-180' 
+                )} 
+              />
             </CardHeader>
-            <CardContent>
-              <ChallengeHistory />
-            </CardContent>
+            
+            {/* --- DEĞİŞİKLİK BURADA: 'animate-slide-up' sınıfı kaldırıldı --- */}
+            {isHistoryOpen && (
+              <CardContent> 
+                <ChallengeHistory />
+              </CardContent>
+            )}
           </Card>
 
           <WordSwiper />
         </TabsContent>
-
-        {/* --- DEĞİŞİKLİK 5: "Araçlar" sekmesinin içeriği kaldırıldı --- */}
-        {/*
-        <TabsContent value="araclar" className="mt-6">
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Stopwatch />
-           </div>
-        </TabsContent>
-        */}
+        
       </Tabs>
     </div>
   );
