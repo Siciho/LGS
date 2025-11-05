@@ -38,11 +38,12 @@ export default function WordQuizPage() {
   const [finalTime, setFinalTime] = useState(0);
 
   const [challengeResult, setChallengeResult] = useState<Challenge | null>(null);
+  
+  // --- DEĞİŞİKLİK 1: 'isSpinningModalOpen' state'i kaldırıldı ---
+  // Artık 'isSendingChallenge' her şeyi yönetecek.
   const [isSendingChallenge, setIsSendingChallenge] = useState(false); 
   const [challengeSentToName, setChallengeSentToName] = useState<string | null>(null);
-  
-  const [isSpinningModalOpen, setIsSpinningModalOpen] = useState(false);
-  const [spinningName, setSpinningName] = useState("Rakip Aranıyor...");
+  const [spinningName, setSpinningName] = useState(""); // Başlangıçta boş
 
 
   useEffect(() => {
@@ -69,21 +70,26 @@ export default function WordQuizPage() {
     setStartTime(Date.now());
   }, [unitId, navigate]);
 
+  // --- DEĞİŞİKLİK 2: useEffect artık 'isSendingChallenge' state'ini dinliyor ---
   useEffect(() => {
     let spinInterval: NodeJS.Timeout | null = null;
 
-    if (isSpinningModalOpen) {
+    if (isSendingChallenge) { // Modal açıldığında (yani gönderme başladığında)
+      setSpinningName("Rakip Aranıyor..."); // Dönen ismi başlat
       spinInterval = setInterval(() => {
         const randomIndex = Math.floor(Math.random() * DUMMY_NAMES.length);
         setSpinningName(DUMMY_NAMES[randomIndex]);
       }, 90); 
     }
+    
+    // isSendingChallenge 'false' olduğunda (modal kapandığında) 
+    // cleanup fonksiyonu otomatik olarak interval'ı durdurur.
     return () => {
       if (spinInterval) {
         clearInterval(spinInterval);
       }
     };
-  }, [isSpinningModalOpen]); 
+  }, [isSendingChallenge]); // Sadece bu state'e bağlı
 
 
   const sendRandomChallenge = async (score: number, time: number) => {
@@ -92,9 +98,9 @@ export default function WordQuizPage() {
         return;
     }
     
+    // --- DEĞİŞİKLİK 3: Sadece 'isSendingChallenge' state'i 'true' yapıldı ---
     setIsSendingChallenge(true);    
-    setIsSpinningModalOpen(true); 
-    setSpinningName("Rakip Aranıyor...");
+    setChallengeSentToName(null);   
 
     try {
       const { data, error: rpcError } = await supabase.rpc('get_random_opponent', {
@@ -109,7 +115,8 @@ export default function WordQuizPage() {
       
       await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1500)); 
 
-      setIsSendingChallenge(false); 
+      // --- DEĞİŞİKLİK 4: Animasyonu durdurmak için 'setIsSendingChallenge(false)' DEMİYORUZ ---
+      // Sadece ismin durmasını sağlıyoruz
       setSpinningName(opponent_name); 
       setChallengeSentToName(opponent_name); 
       
@@ -125,11 +132,12 @@ export default function WordQuizPage() {
       if (insertError) throw insertError;
 
       await new Promise(resolve => setTimeout(resolve, 1500));
-      setIsSpinningModalOpen(false); 
+      // --- DEĞİŞİKLİK 5: Animasyon ve gönderme bitti, modalı kapat ---
+      setIsSendingChallenge(false); 
 
     } catch (error: any) {
+      // Hata olursa modalı hemen kapat
       setIsSendingChallenge(false); 
-      setIsSpinningModalOpen(false);
       toast.error("Düello gönderilemedi.", { description: error.message });
       setChallengeSentToName(null); 
     } 
@@ -167,8 +175,6 @@ export default function WordQuizPage() {
 
           if (error) { toast.error("Meydan okuma sonucu kaydedilemedi."); } 
           else if (data) {
-            // --- DEĞİŞİKLİK BURADA: 'toast.success' kaldırıldı ---
-            // toast.success("Meydan okuma tamamlandı! Sonuçlar gösteriliyor.");
             setChallengeResult({
                 ...data,
                 challenger_name: data.challenger.ad_soyad,
@@ -254,12 +260,8 @@ export default function WordQuizPage() {
                             onClick={() => sendRandomChallenge(correctCount, finalTime)}
                             disabled={isSendingChallenge}
                           >
-                            {isSendingChallenge ? (
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                              <Shuffle className="h-4 w-4 mr-2" />
-                            )}
-                            {isSendingChallenge ? "Aranıyor..." : 'Rastgele Rakip'}
+                            <Shuffle className="h-4 w-4 mr-2" />
+                            Rastgele Rakip
                           </Button>
                         </div>
                       )}
@@ -291,19 +293,28 @@ export default function WordQuizPage() {
             time={finalTime} 
           />
 
-          <Dialog open={isSpinningModalOpen}>
+          {/* --- DEĞİŞİKLİK 6: Modal artık 'isSendingChallenge' state'ine bağlı --- */}
+          <Dialog open={isSendingChallenge}>
             <DialogContent 
               className="max-w-xs" 
               onInteractOutside={(e) => e.preventDefault()}
               id="spinning-modal-content"
             >
               <div className="flex flex-col items-center justify-center p-6 space-y-4 min-h-[150px]">
-                <Shuffle className="h-12 w-12 text-primary animate-spin" />
-                <p className="text-sm text-muted-foreground">Rakip Aranıyor...</p>
+                {/* --- DEĞİŞİKLİK 7: Yüklenme bitince ikon değişir --- */}
+                {challengeSentToName ? (
+                  <CheckCircle className="h-12 w-12 text-success" />
+                ) : (
+                  <Shuffle className="h-12 w-12 text-primary animate-spin" />
+                )}
+                
+                <p className="text-sm text-muted-foreground">
+                  {challengeSentToName ? "Rakip Bulundu!" : "Rakip Aranıyor..."}
+                </p>
                 
                 <div className={cn(
                     "text-2xl font-bold text-center h-8 transition-all duration-100",
-                    !isSendingChallenge && "text-success" 
+                    challengeSentToName && "text-success" 
                 )}>
                   {spinningName}
                 </div>
