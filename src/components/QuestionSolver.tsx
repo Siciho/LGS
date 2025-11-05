@@ -83,7 +83,15 @@ export default function QuestionSolver({ questions, subjects, onFinish, onClose 
             <Button variant="ghost" size="icon" onClick={onClose}><X /></Button>
           </div>
           <Progress value={progress} />
-          <CardTitle className="pt-6 text-center text-lg md:text-xl">{currentQuestion.question}</CardTitle>
+          
+          {/* --- DEĞİŞİKLİK 1: Soru metnine anti-translate eklendi --- */}
+          <CardTitle 
+            className="pt-6 text-center text-lg md:text-xl notranslate" 
+            translate="no"
+          >
+            {currentQuestion.question}
+          </CardTitle>
+
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -114,7 +122,15 @@ export default function QuestionSolver({ questions, subjects, onFinish, onClose 
                 >
                   <div className="flex items-center gap-3 w-full">
                     <span className="font-bold text-lg min-w-[32px] h-8 rounded-full bg-muted flex items-center justify-center">{String.fromCharCode(65 + index)}</span>
-                    <span className="flex-1 text-base text-wrap break-words">{option}</span>
+                    
+                    {/* --- DEĞİŞİKLİK 2: Seçenek metnine anti-translate eklendi --- */}
+                    <span 
+                      className="flex-1 text-base text-wrap break-words notranslate" 
+                      translate="no"
+                    >
+                      {option}
+                    </span>
+
                     {showResult && isCorrectAnswer && (<CheckCircle className="h-5 w-5 text-success-foreground" />)}
                     {showResult && isSelected && !isCorrectAnswer && (<XCircle className="h-5 w-5 text-destructive-foreground" />)}
                   </div>
@@ -128,9 +144,15 @@ export default function QuestionSolver({ questions, subjects, onFinish, onClose 
         <DialogContent className="max-w-md animate-slide-up-fade">
           <DialogHeader>
             <DialogTitle className={`text-xl ${isCorrect ? 'text-success' : 'text-destructive'}`}>{isCorrect ? 'Doğru!' : 'Yanlış!'}</DialogTitle>
-            <DialogDescription> 
+            
+            {/* --- DEĞİŞİKLİK 3: Açıklama metnine anti-translate eklendi --- */}
+            <DialogDescription 
+              className="notranslate" 
+              translate="no"
+            > 
               {currentQuestion.explanation || (isCorrect ? 'Tebrikler!' : 'Bir dahaki sefere!')}
             </DialogDescription>
+
           </DialogHeader>
           <Button onClick={handleNext} className="mt-4 w-full">{currentQuestionIndex < questions.length - 1 ? 'İleri' : 'Bitir'}</Button>
         </DialogContent>
