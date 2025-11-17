@@ -1,12 +1,11 @@
 // src/pages/LeaderboardPage.tsx
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/supabaseClient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-// --- DEĞİŞİKLİK 1: 'Swords' ikonu eklendi ---
 import { Crown, Star, Target, Flame, X, Swords } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { avatars } from '@/data/avatars';
@@ -14,14 +13,15 @@ import { UserAvatars } from '@/types';
 import { Button } from '@/components/ui/button';
 
 interface LeaderboardEntry {
-  rank: number;
+  rank: number; // Bu artık SADECE 'Tümü' filtresi için kullanılacak
   user_id: string;
   user_name: string;
   user_avatar: UserAvatars | null;
+  user_class: string;
   total_score: number;
   total_questions: number;
   seri: number;
-  challenge_wins: number; // <-- DEĞİŞİKLİK 2: Düello galibiyeti alanı eklendi
+  challenge_wins: number;
 }
 
 const defaultAvatar = avatars.find(a => a.id === 'default')?.image || '';
@@ -40,16 +40,19 @@ const getRankText = (rank: number) => {
 };
 
 export default function LeaderboardPage() {
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [timeFilter, setTimeFilter] = useState<'all' | 'month' | 'week'>('all');
+  const [timeFilter, setTimeFilter] = useState<'all' | 'month' | 'last_week'>('all');
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]); 
   const [loading, setLoading] = useState(true);
   
   const [selectedStudent, setSelectedStudent] = useState<LeaderboardEntry | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [selectedClass, setSelectedClass] = useState("Tümü");
+
   useEffect(() => {
     const fetchLeaderboard = async () => {
       setLoading(true);
+      setSelectedClass("Tümü");
       
       let rpcName = 'get_all_time_leaderboard';
       let rpcParams = {};
@@ -60,8 +63,8 @@ export default function LeaderboardPage() {
       } else if (timeFilter === 'month') {
         rpcName = 'get_monthly_leaderboard';
         rpcParams = {};
-      } else if (timeFilter === 'week') {
-        rpcName = 'get_weekly_leaderboard_for_date'; 
+      } else if (timeFilter === 'last_week') {
+        rpcName = 'get_last_week_leaderboard'; 
         rpcParams = {};
       }
 
@@ -73,6 +76,7 @@ export default function LeaderboardPage() {
           description: `Fonksiyon (${rpcName}) bulunamadı veya bir hata oluştu.`,
         });
       } else {
+        // SQL'den gelen 'rank' verisini SAKLIYORUZ (Tümü filtresi için)
         setLeaderboard(data || []);
       }
       setLoading(false);
@@ -81,6 +85,22 @@ export default function LeaderboardPage() {
     fetchLeaderboard();
   }, [timeFilter]);
 
+  const availableClasses = useMemo(() => {
+    if (leaderboard.length === 0) return [];
+    const classSet = new Set(leaderboard.map(s => s.user_class).filter(Boolean));
+    return ["Tümü", ...Array.from(classSet).sort()];
+  }, [leaderboard]);
+
+  const filteredLeaderboard = useMemo(() => {
+    if (selectedClass === 'Tümü') {
+      // 'Tümü' seçiliyse, SQL'den gelen orijinal listeyi (ve rank'i) kullan
+      return leaderboard; 
+    }
+    // Sınıf filtresi varsa, listeyi filtrele
+    return leaderboard.filter(student => student.user_class === selectedClass);
+  }, [leaderboard, selectedClass]);
+
+  // --- DEĞİŞİKLİK 1: getRankClass fonksiyonu artık 'index + 1'e göre çalışacak ---
   const getRankClass = (rank: number) => {
     if (rank === 1) return 'border-yellow-400 bg-yellow-400/10 hover:bg-yellow-400/20';
     if (rank === 2) return 'border-gray-400 bg-gray-400/10 hover:bg-gray-400/20';
@@ -105,52 +125,84 @@ export default function LeaderboardPage() {
             <CardDescription>Skorlara göz at ve rekabete katıl! (Bir öğrencinin detayını görmek için tıkla)</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs value={timeFilter} onValueChange={(v) => setTimeFilter(v as 'all' | 'month' | 'week')}>
+            <Tabs value={timeFilter} onValueChange={(v) => setTimeFilter(v as 'all' | 'month' | 'last_week')}>
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="all">Tüm Zamanlar</TabsTrigger>
-                <TabsTrigger value="month">Aylık</TabsTrigger>
-                <TabsTrigger value="week">Haftalık</TabsTrigger>
+                <TabsTrigger value="month">Bu Ay</TabsTrigger>
+                <TabsTrigger value="last_week">Geçen Hafta</TabsTrigger>
               </TabsList>
+              
+              <div className="flex gap-2 overflow-x-auto pb-2 pt-4 mb-2">
+                {availableClasses.length > 1 && availableClasses.map(className => (
+                  <Button
+                    key={className}
+                    variant={selectedClass === className ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedClass(className)}
+                    className="flex-shrink-0"
+                  >
+                    {className}
+                  </Button>
+                ))}
+              </div>
+
               <TabsContent value={timeFilter}>
                 {loading ? (
                   <div className="text-center p-10">Yükleniyor...</div>
                 ) : (
                   <div className="mt-4 space-y-2">
-                    {leaderboard.length === 0 ? (
-                      <div className="text-center p-10 text-muted-foreground">Bu zaman aralığı için veri bulunamadı.</div>
+                    {filteredLeaderboard.length === 0 ? (
+                      <div className="text-center p-10 text-muted-foreground">
+                        {leaderboard.length === 0 ? 
+                          "Bu zaman aralığı için veri bulunamadı." : 
+                          "Bu sınıfta öğrenci bulunamadı."}
+                      </div>
                     ) : (
-                      leaderboard.map((entry) => (
-                        <Button
-                          key={entry.user_id}
-                          variant="ghost" 
-                          className={cn(
-                            'p-4 h-auto w-full justify-start text-left', 
-                            'border rounded-lg transition-all',
-                            getRankClass(entry.rank)
-                          )}
-                          onClick={() => handleStudentClick(entry)}
-                        >
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-3">
-                              <span className="text-lg font-bold w-6 text-center">{entry.rank}</span>
-                              <img
-                                src={getAvatarImage(entry.user_avatar)}
-                                alt={entry.user_name}
-                                className="w-12 h-12 rounded-full border-2 border-border"
-                              />
-                              <div>
-                                <p className="font-semibold text-foreground">{entry.user_name}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {getRankText(entry.rank)}
-                                </p>
+                      // --- DEĞİŞİKLİK 2: '.map((entry)' -> '.map((entry, index)' ---
+                      filteredLeaderboard.map((entry, index) => {
+                        
+                        // --- DEĞİŞİKLİK 3: YENİ RANK HESAPLAMASI ---
+                        // Eğer filtre 'Tümü' ise SQL'den gelen rank'i kullan (entry.rank)
+                        // Eğer filtre 'Tümü' DEĞİLSE, o anki index'i kullan (index + 1)
+                        const currentRank = selectedClass === 'Tümü' ? entry.rank : index + 1;
+                        
+                        return (
+                          <Button
+                            key={entry.user_id}
+                            variant="ghost" 
+                            className={cn(
+                              'p-4 h-auto w-full justify-start text-left', 
+                              'border rounded-lg transition-all',
+                              // --- DEĞİŞİKLİK 4: getRankClass yeni rank'i kullanıyor ---
+                              getRankClass(currentRank) 
+                            )}
+                            onClick={() => handleStudentClick(entry)}
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center gap-3">
+                                {/* --- DEĞİŞİKLİK 5: 'entry.rank' yerine 'currentRank' gösteriliyor --- */}
+                                <span className="text-lg font-bold w-6 text-center">{currentRank}</span>
+                                <img
+                                  src={getAvatarImage(entry.user_avatar)}
+                                  alt={entry.user_name}
+                                  className="w-12 h-12 rounded-full border-2 border-border"
+                                />
+                                <div>
+                                  <p className="font-semibold text-foreground">{entry.user_name}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {/* --- DEĞİŞİKLİK 6: 'getRankText' yeni rank'i kullanıyor --- */}
+                                    {entry.user_class} Sınıfı - {getRankText(currentRank)}
+                                  </p>
+                                </div>
                               </div>
+                              {/* --- DEĞİŞİKLİK 7: Rozetler de yeni rank'e göre gösteriliyor --- */}
+                              {currentRank === 1 && <Crown className="h-5 w-5 text-yellow-400" />}
+                              {currentRank === 2 && <Crown className="h-5 w-5 text-gray-400" />}
+                              {currentRank === 3 && <Crown className="h-5 w-5 text-yellow-600" />}
                             </div>
-                            {entry.rank === 1 && <Crown className="h-5 w-5 text-yellow-400" />}
-                            {entry.rank === 2 && <Crown className="h-5 w-5 text-gray-400" />}
-                            {entry.rank === 3 && <Crown className="h-5 w-5 text-yellow-600" />}
-                          </div>
-                        </Button>
-                      ))
+                          </Button>
+                        )
+                      })
                     )}
                   </div>
                 )}
@@ -172,16 +224,18 @@ export default function LeaderboardPage() {
                 />
                 <DialogTitle className="text-2xl mt-4">{selectedStudent.user_name}</DialogTitle>
                 <DialogDescription>
+                  {selectedStudent.user_class} Sınıfı
+                  {' - '}
                   {timeFilter === 'all' && 'Tüm Zamanlar'}
                   {timeFilter === 'month' && 'Bu Ay'}
-                  {timeFilter === 'week' && 'Bu Hafta'}
+                  {timeFilter === 'last_week' && 'Geçen Hafta'}
                   {' İstatistikleri'}
                 </DialogDescription>
               </div>
             )}
           </DialogHeader>
+          {/* Modal (Açılır pencere) içeriği değişmedi, çünkü burada rank göstermiyoruz */}
           {selectedStudent && (
-            // --- DEĞİŞİKLİK 3: Düzen 2x2 olması için grid-cols-2 yapıldı ---
             <div className="grid grid-cols-2 gap-3 text-center py-4">
               <div className="flex flex-col items-center p-2 bg-muted/50 rounded-lg">
                 <Star className="h-6 w-6 text-yellow-500 mb-1" />
@@ -198,8 +252,6 @@ export default function LeaderboardPage() {
                 <p className="text-xl font-bold">{selectedStudent.seri || 0}</p>
                 <p className="text-xs text-muted-foreground">Seri</p>
               </div>
-              
-              {/* --- DEĞİŞİKLİK 4: Yeni düello galibiyeti kartı eklendi --- */}
               <div className="flex flex-col items-center p-2 bg-muted/50 rounded-lg">
                 <Swords className="h-6 w-6 text-primary mb-1" />
                 <p className="text-xl font-bold">{selectedStudent.challenge_wins || 0}</p>

@@ -19,9 +19,7 @@ export default function ChallengeNotification({ challenges, onDismiss }: Challen
   }
 
   const handleAccept = (challenge: Challenge) => {
-    // Bildirimi hemen kapat
     onDismiss(challenge.id);
-    // İlgili teste yönlendir ve challengeId'yi state olarak gönder
     navigate(`/word-quiz/${challenge.unit_id}`, { state: { challengeId: challenge.id } });
   };
 
@@ -46,17 +44,16 @@ export default function ChallengeNotification({ challenges, onDismiss }: Challen
           <CardHeader className="p-4">
             <div className="flex items-start justify-between">
               <div>
-                {/* --- DEĞİŞİKLİK BURADA BAŞLIYOR --- */}
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
                   <Swords className="h-4 w-4 text-primary" />
-                  {/* Başlığa meydan okuyanın adı eklendi */}
                   {challenge.challenger_name} Sana Meydan Okudu!
                 </CardTitle>
+                
+                {/* --- DEĞİŞİKLİK BURADA: Açıklama güncellendi --- */}
                 <CardDescription className="text-xs mt-1">
-                  {/* Açıklama sadeleştirildi */}
-                  Seni Ünite {challenge.unit_id} testine davet ediyor.
+                  Seni Ünite {challenge.unit_id} testinde yenmeye çalışıyor.
                 </CardDescription>
-                {/* --- DEĞİŞİKLİK BURADA BİTİYOR --- */}
+                
               </div>
               <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onDismiss(challenge.id)}>
                 <X className="h-4 w-4" />
@@ -64,9 +61,13 @@ export default function ChallengeNotification({ challenges, onDismiss }: Challen
             </div>
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <p className="text-xs text-muted-foreground mb-2">
+            
+            {/* --- DEĞİŞİKLİK BURADA: "Onun Skoru" bölümü kaldırıldı --- */}
+            {/* <p className="text-xs text-muted-foreground mb-2">
               Onun Skoru: <strong>{challenge.challenger_score} doğru / {challenge.challenger_time_seconds} sn</strong>
-            </p>
+            </p> 
+            */}
+            
             <div className="flex gap-2">
               <Button className="flex-1" size="sm" onClick={() => handleAccept(challenge)}>Kabul Et</Button>
               <Button className="flex-1" size="sm" variant="outline" onClick={() => handleDecline(challenge.id)}>Reddet</Button>

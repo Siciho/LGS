@@ -53,10 +53,20 @@ export default function AppLayout() {
   }, [userRole, navigate, location.pathname]);
 
   const coreData = useCoreData(userId, userName, userRole, isInitialized, isMuted);
+
+  // --- DEĞİŞİKLİK 7: Puan kazanma callback'i güncellendi ---
   const studyData = useStudyData(userId, isInitialized, isMuted, (result, newDailySolvedCount) => {
     if (userRole?.toLowerCase() === 'koç' || userRole?.toLowerCase() === 'admin') return;
-    if (coreData.setTotalPoints && coreData.setStreak) {
-        coreData.setTotalPoints(prev => prev + (result.correct * 10));
+    
+    // Hem 'setTotalPoints' (Cüzdan) hem de 'setLifetimePoints' (Sıralama) fonksiyonlarının varlığını kontrol et
+    if (coreData.setTotalPoints && coreData.setLifetimePoints && coreData.setStreak) {
+        const earnedPoints = result.correct * 10;
+        
+        // 1. Cüzdanı (harcanabilir puan) artır
+        coreData.setTotalPoints(prev => prev + earnedPoints);
+        // 2. Toplam kazanılan puanı (sıralama puanı) artır
+        coreData.setLifetimePoints(prev => prev + earnedPoints);
+
         if (newDailySolvedCount === 3) {
             coreData.setStreak(prev => prev + 1);
             toast.success("Günlük seri arttı! 🔥");
@@ -65,6 +75,8 @@ export default function AppLayout() {
         }
     }
   });
+  // --- DEĞİŞİKLİK 7 SONU ---
+
   const scheduler = useScheduler(userId, isInitialized);
 
   useEffect(() => {
@@ -202,14 +214,13 @@ export default function AppLayout() {
 
   return (
     <>
-      {/* --- DEĞİŞİKLİK 1: Ana kapsayıcı artık 'pb-32' (alt boşluk) içermiyor. --- */}
-      <div className="max-w-7xl mx-auto p-2 sm:p-4 min-h-screen flex flex-col">
+      <div className="max-w-7xl mx-auto p-2 sm:p-4 pb-32 min-h-screen flex flex-col">
         <Header
           userName={userName}
           totalQuestions={totalQuestions}
           streak={coreData.streak}
           unlockedAchievements={unlockedAchievements}
-          totalPoints={coreData.totalPoints}
+          totalPoints={coreData.totalPoints} // Header hâlâ CÜZDAN'ı (harcanabilir puanı) gösterir
           theme={theme}
           toggleTheme={toggleTheme}
           currentAvatarId={coreData.userAvatars?.current || 'default'}
@@ -218,12 +229,10 @@ export default function AppLayout() {
           isHomePage={isHomePage}
           userRole={userRole}
         />
-        {/* --- DEĞİŞİKLİK 2: 'main' etiketi 'flex-1' (kalan alanı doldur) VE 'pb-32' (alt boşluk) özelliklerini aldı --- */}
         <main className="flex-1 pb-32">
           {scheduler.notificationSettings.challengeReminder && (
             <ChallengeNotification challenges={pendingChallenges} onDismiss={dismissChallenge} />
           )}
-          {/* Bu div'de 'animate-slide-up' olmaması doğru */}
           <div>
             <Outlet context={contextValue} />
           </div>

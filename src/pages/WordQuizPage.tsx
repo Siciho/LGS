@@ -9,9 +9,11 @@ import { supabase } from '@/supabaseClient';
 import { toast } from 'sonner';
 import { ChallengeDialog } from '@/components/ChallengeDialog';
 import { Swords, Trophy, Shield, User, Clock, Loader2, Shuffle, CheckCircle } from 'lucide-react';
-import { Dialog, DialogContent } from "@/components/ui/dialog"; 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDescriptionComponent } from "@/components/ui/dialog"; 
 import { Challenge } from '@/types';
 import { cn } from '@/lib/utils';
+// --- DEĞİŞİKLİK 1: Gerekli ses fonksiyonları import edildi ---
+import { playSwipeSound, playSuccessSound } from '@/utils/sounds';
 
 // Listenizi (onkayit_ogrenciler_rows.csv) buraya yapıştırın
 const DUMMY_NAMES = [
@@ -23,7 +25,8 @@ export default function WordQuizPage() {
   const { unitId } = useParams<{ unitId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { dismissChallenge, userId } = useAppContext();
+  // --- DEĞİŞİKLİK 2: 'isMuted' context'ten alındı ---
+  const { dismissChallenge, userId, isMuted } = useAppContext();
 
   const challengeId = location.state?.challengeId;
 
@@ -38,12 +41,9 @@ export default function WordQuizPage() {
   const [finalTime, setFinalTime] = useState(0);
 
   const [challengeResult, setChallengeResult] = useState<Challenge | null>(null);
-  
-  // --- DEĞİŞİKLİK 1: 'isSpinningModalOpen' state'i kaldırıldı ---
-  // Artık 'isSendingChallenge' her şeyi yönetecek.
   const [isSendingChallenge, setIsSendingChallenge] = useState(false); 
   const [challengeSentToName, setChallengeSentToName] = useState<string | null>(null);
-  const [spinningName, setSpinningName] = useState(""); // Başlangıçta boş
+  const [spinningName, setSpinningName] = useState(""); 
 
 
   useEffect(() => {
@@ -70,26 +70,26 @@ export default function WordQuizPage() {
     setStartTime(Date.now());
   }, [unitId, navigate]);
 
-  // --- DEĞİŞİKLİK 2: useEffect artık 'isSendingChallenge' state'ini dinliyor ---
+  // --- DEĞİŞİKLİK 3: Ses çalma mantığı animasyon döngüsüne eklendi ---
   useEffect(() => {
     let spinInterval: NodeJS.Timeout | null = null;
 
-    if (isSendingChallenge) { // Modal açıldığında (yani gönderme başladığında)
-      setSpinningName("Rakip Aranıyor..."); // Dönen ismi başlat
+    if (isSendingChallenge) {
+      setSpinningName("Rakip Aranıyor..."); 
       spinInterval = setInterval(() => {
         const randomIndex = Math.floor(Math.random() * DUMMY_NAMES.length);
         setSpinningName(DUMMY_NAMES[randomIndex]);
+        playSwipeSound(isMuted); // Her isim değişiminde ses çal
       }, 90); 
     }
     
-    // isSendingChallenge 'false' olduğunda (modal kapandığında) 
-    // cleanup fonksiyonu otomatik olarak interval'ı durdurur.
     return () => {
       if (spinInterval) {
         clearInterval(spinInterval);
       }
     };
-  }, [isSendingChallenge]); // Sadece bu state'e bağlı
+  }, [isSendingChallenge, isMuted]); // 'isMuted' bağımlılıklara eklendi
+  // --- DEĞİŞİKLİK 3 SONU ---
 
 
   const sendRandomChallenge = async (score: number, time: number) => {
@@ -98,7 +98,6 @@ export default function WordQuizPage() {
         return;
     }
     
-    // --- DEĞİŞİKLİK 3: Sadece 'isSendingChallenge' state'i 'true' yapıldı ---
     setIsSendingChallenge(true);    
     setChallengeSentToName(null);   
 
@@ -115,10 +114,10 @@ export default function WordQuizPage() {
       
       await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1500)); 
 
-      // --- DEĞİŞİKLİK 4: Animasyonu durdurmak için 'setIsSendingChallenge(false)' DEMİYORUZ ---
-      // Sadece ismin durmasını sağlıyoruz
+      setIsSendingChallenge(false); // Bu, useEffect'teki interval'ı durdurur
       setSpinningName(opponent_name); 
       setChallengeSentToName(opponent_name); 
+      playSuccessSound(isMuted); // Rakip bulunduğunda başarı sesi çal
       
       const { error: insertError } = await supabase.from('challenges').insert({
         challenger_id: userId,
@@ -132,11 +131,8 @@ export default function WordQuizPage() {
       if (insertError) throw insertError;
 
       await new Promise(resolve => setTimeout(resolve, 1500));
-      // --- DEĞİŞİKLİK 5: Animasyon ve gönderme bitti, modalı kapat ---
-      setIsSendingChallenge(false); 
 
     } catch (error: any) {
-      // Hata olursa modalı hemen kapat
       setIsSendingChallenge(false); 
       toast.error("Düello gönderilemedi.", { description: error.message });
       setChallengeSentToName(null); 
@@ -293,15 +289,20 @@ export default function WordQuizPage() {
             time={finalTime} 
           />
 
-          {/* --- DEĞİŞİKLİK 6: Modal artık 'isSendingChallenge' state'ine bağlı --- */}
           <Dialog open={isSendingChallenge}>
             <DialogContent 
               className="max-w-xs" 
               onInteractOutside={(e) => e.preventDefault()}
               id="spinning-modal-content"
             >
+              <DialogHeader className="sr-only">
+                <DialogTitle>Rakip Aranıyor</DialogTitle>
+                <DialogDescriptionComponent>
+                  Sizin için rastgele bir rakip aranıyor, lütfen bekleyin.
+                </DialogDescriptionComponent>
+              </DialogHeader>
+
               <div className="flex flex-col items-center justify-center p-6 space-y-4 min-h-[150px]">
-                {/* --- DEĞİŞİKLİK 7: Yüklenme bitince ikon değişir --- */}
                 {challengeSentToName ? (
                   <CheckCircle className="h-12 w-12 text-success" />
                 ) : (

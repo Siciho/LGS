@@ -16,7 +16,10 @@ export const useCoreData = (
   isInitialized: boolean,
   isMuted: boolean
 ) => {
-  const [totalPoints, setTotalPoints] = useState(0);
+  const [totalPoints, setTotalPoints] = useState(0); // Bu artık "CÜZDAN"
+  // --- DEĞİŞİKLİK 1: Yeni state eklendi ---
+  const [lifetimePoints, setLifetimePoints] = useState(0); // Bu "TOPLAM KAZANILAN PUAN" (Sıralama için)
+
   const [streak, setStreak] = useState(0);
   const [streakFreezes, setStreakFreezes] = useState(0);
   const [achievements, setAchievements] = useState<Achievement[]>(initialAchievementsData);
@@ -40,6 +43,7 @@ export const useCoreData = (
     if (!userId) {
       setIsCloudDataLoaded(true);
       setTotalPoints(0);
+      setLifetimePoints(0); // Sıfırla
       setStreak(0);
       setStreakFreezes(0);
       setChallengeWins(0);
@@ -53,7 +57,8 @@ export const useCoreData = (
     const fetchCoreData = async () => {
       try {
         const [cloudDataRes, winsDataRes] = await Promise.all([
-          supabase.from('kullanicilar').select('puan, seri, seri_dondurma, avatar, kazanilan_basarimlar, is_test_account').eq('id', userId).maybeSingle(),
+          // --- DEĞİŞİKLİK 2: 'toplam_kazanilan_puan' sütunu da çekiliyor ---
+          supabase.from('kullanicilar').select('puan, toplam_kazanilan_puan, seri, seri_dondurma, avatar, kazanilan_basarimlar, is_test_account').eq('id', userId).maybeSingle(),
           supabase.rpc('get_challenge_win_count', { p_user_id: userId })
         ]);
 
@@ -65,30 +70,25 @@ export const useCoreData = (
             const isTestAccount = cloudData.is_test_account === true;
             
             if (isPrivilegedUser || isTestAccount) {
+                // ... (Ayrıcalıklı kullanıcı yüklemesi aynı kalır) ...
                 let savedAvatarCurrent = 'default';
                 if (cloudData.avatar) {
-                    try {
-                        const parsed = typeof cloudData.avatar === 'string' ? JSON.parse(cloudData.avatar) : cloudData.avatar;
-                        if (parsed && parsed.current) {
-                            savedAvatarCurrent = parsed.current;
-                        }
-                    } catch (e) { /* Hata olursa varsayılanı kullan */ }
+                    try { const parsed = typeof cloudData.avatar === 'string' ? JSON.parse(cloudData.avatar) : cloudData.avatar; if (parsed && parsed.current) { savedAvatarCurrent = parsed.current; } } catch (e) { /* Hata olursa varsayılanı kullan */ }
                 }
-
                 const allAvatarIds = allAvatars.map(avatar => avatar.id);
-                const finalPrivilegedAvatars: UserAvatars = {
-                    current: savedAvatarCurrent,
-                    unlocked: allAvatarIds
-                };
+                const finalPrivilegedAvatars: UserAvatars = { current: savedAvatarCurrent, unlocked: allAvatarIds };
                 setUserAvatars(finalPrivilegedAvatars);
                 storage.saveUserAvatars(userId, finalPrivilegedAvatars);
-
                 setTotalPoints(9999);
+                setLifetimePoints(9999); // Test hesabı için bu da güncellendi
                 setStreak(99);
                 setAchievements(initialAchievementsData.map(a => ({ ...a, unlocked: true, unlockedAt: new Date() })));
                 setChallengeWins(999);
             } else {
-                setTotalPoints(cloudData.puan ?? 0);
+                // --- DEĞİŞİKLİK 3: Her iki puan da set ediliyor ---
+                setTotalPoints(cloudData.puan ?? 0); // Cüzdan
+                setLifetimePoints(cloudData.toplam_kazanilan_puan ?? cloudData.puan ?? 0); // Sıralama Puanı (Eğer yeni sütun boşsa eskisini kullanır)
+
                 setStreak(cloudData.seri ?? 0);
                 setStreakFreezes(cloudData.seri_dondurma ?? 0);
 
@@ -110,7 +110,9 @@ export const useCoreData = (
                 setAchievements(syncedAchievements);
             }
         } else {
+            // ... (Lokal depolama yüklemesi aynı kalır, ancak lifetimePoints eklenir) ...
             setTotalPoints(storage.loadPoints(userId));
+            setLifetimePoints(storage.loadPoints(userId)); // Lokal depolamada ayrım olmadığı için ikisine de aynısını yüklüyoruz
             setStreak(storage.loadStreak(userId));
             setStreakFreezes(storage.loadStreakFreezes(userId));
             setUserAvatars(storage.loadUserAvatars(userId));
@@ -126,26 +128,30 @@ export const useCoreData = (
 
   }, [userId, userRole, userName, isPrivilegedUser]);
 
+  // --- DEĞİŞİKLİK 4: Bu useEffect artık HER İKİ PUANI da güncelliyor ---
   useEffect(() => {
     if (!isInitialized || !userId || isPrivilegedUser) return;
     
-    // NOT: Bu zamanlayıcı, puan kazanma (quiz sonrası) veya seri artışı gibi
-    // anlık olmayan durumlar için DEVAM ETMELİDİR.
-    // Ancak 'harcama' işlemleri (handleBuyAvatar) GECİKMEZ.
+    // NOT: Bu zamanlayıcı puan kazanma (quiz sonrası) veya seri artışı içindir.
+    // 'harcama' işlemleri (handleBuyAvatar) GECİKMEZ.
     const debounceTimer = setTimeout(() => {
-        storage.savePoints(userId, totalPoints);
+        // Lokal depolama (storage) sadece cüzdanı tutar (harcanabilir)
+        storage.savePoints(userId, totalPoints); 
         storage.saveStreak(userId, streak);
         storage.saveStreakFreezes(userId, streakFreezes);
         
+        // Supabase'e her iki puanı da gönder
         updateUserCloudData({
-            puan: totalPoints,
+            puan: totalPoints, // Cüzdan
+            toplam_kazanilan_puan: lifetimePoints, // Sıralama Puanı
             seri: streak,
             seri_dondurma: streakFreezes,
         });
     }, 1500);
 
     return () => clearTimeout(debounceTimer);
-  }, [totalPoints, streak, streakFreezes, isInitialized, userId, isPrivilegedUser]);
+  // 'lifetimePoints' bağımlılıklara eklendi
+  }, [totalPoints, lifetimePoints, streak, streakFreezes, isInitialized, userId, isPrivilegedUser]);
 
   useEffect(() => {
     if (isInitialized && userId && achievements.length > 0 && !isPrivilegedUser) {
@@ -170,7 +176,7 @@ export const useCoreData = (
     }
   };
 
-  // --- HATA DÜZELTMESİ BURADA (AVATAR SATIN ALMA) ---
+  // --- DEĞİŞİKLİK 5: Avatar Satın Alma ---
   const handleBuyAvatar = (avatarId: string) => {
     if (!userId || isPrivilegedUser) return;
     const avatar = allAvatars.find(a => a.id === avatarId);
@@ -179,21 +185,19 @@ export const useCoreData = (
     
     if (totalPoints >= price && !(userAvatars?.unlocked || []).includes(avatarId)) {
       
-      // 1. Yeni puanı ve avatar listesini hesapla
-      const newTotalPoints = totalPoints - price;
+      const newTotalPoints = totalPoints - price; // Cüzdan azalır
       const newAvatarsState: UserAvatars = {
         current: userAvatars?.current || 'default',
         unlocked: [...(userAvatars?.unlocked || []), avatarId]
       };
 
-      // 2. Lokal React state'ini hemen güncelle
+      // Lokal state'i GÜNCELLE (Cüzdan azalır, sıralama puanı (lifetimePoints) AYNI KALIR)
       setTotalPoints(newTotalPoints);
       setUserAvatars(newAvatarsState);
 
-      // 3. Lokal depolamayı hemen güncelle (özellikle avatar için)
       storage.saveUserAvatars(userId, newAvatarsState);
 
-      // 4. Buluta (Supabase) HEM YENİ AVATARLARI HEM DE YENİ PUANI AYNI ANDA, GECİKMESİZ GÖNDER
+      // Buluta gönder (Sadece 'puan' (Cüzdan) güncellenir, 'toplam_kazanilan_puan' DEĞİŞMEZ)
       updateUserCloudData({ 
         avatar: newAvatarsState,
         puan: newTotalPoints 
@@ -206,22 +210,21 @@ export const useCoreData = (
     }
   };
   
-  // --- HATA DÜZELTMESİ BURADA (SERİ DONDURMA SATIN ALMA) ---
+  // --- DEĞİŞİKLİK 6: Seri Dondurma Satın Alma ---
   const handleBuyStreakFreeze = () => {
     if (!userId || isPrivilegedUser) return;
-    const price = 200; // Fiyatı buradan yönetebilirsiniz
+    const price = 200; 
     
     if (totalPoints >= price) {
       
-      // 1. Yeni değerleri hesapla
-      const newTotalPoints = totalPoints - price;
+      const newTotalPoints = totalPoints - price; // Cüzdan azalır
       const newStreakFreezes = streakFreezes + 1;
 
-      // 2. Lokal React state'ini hemen güncelle
+      // Lokal state'i GÜNCELLE (Cüzdan azalır, sıralama puanı (lifetimePoints) AYNI KALIR)
       setTotalPoints(newTotalPoints);
       setStreakFreezes(newStreakFreezes);
 
-      // 3. Buluta (Supabase) HEM YENİ PUANI HEM DE YENİ DONDURMA SAYISINI GECİKMESİZ GÖNDER
+      // Buluta gönder (Sadece 'puan' (Cüzdan) güncellenir, 'toplam_kazanilan_puan' DEĞİŞMEZ)
       updateUserCloudData({
         puan: newTotalPoints,
         seri_dondurma: newStreakFreezes
@@ -285,7 +288,8 @@ export const useCoreData = (
   };
 
   return {
-    totalPoints, setTotalPoints,
+    totalPoints, setTotalPoints, // Cüzdan
+    lifetimePoints, setLifetimePoints, // Sıralama Puanı (Yeni eklendi)
     streak, setStreak,
     streakFreezes, setStreakFreezes,
     achievements,
