@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Trophy, Flame, Target, Star, Volume2, VolumeX, ShoppingCart, Settings } from "lucide-react";
+import { Moon, Sun, Trophy, Flame, Target, Star, Volume2, VolumeX, ShoppingCart, Settings, Snowflake } from "lucide-react"; // Snowflake ikonu eklendi
 import { Link } from "react-router-dom";
 import { avatars } from "@/data/avatars";
 import { cn } from "@/lib/utils";
@@ -8,6 +8,7 @@ interface HeaderProps {
   userName: string | null;
   totalQuestions: number;
   streak: number;
+  streakFreezes: number; // --- DEĞİŞİKLİK 1: Yeni prop eklendi ---
   unlockedAchievements: number;
   totalPoints: number;
   theme: 'light' | 'dark';
@@ -23,6 +24,7 @@ export default function Header({
   userName,
   totalQuestions,
   streak,
+  streakFreezes, // --- DEĞİŞİKLİK 2: Destructure edildi ---
   unlockedAchievements,
   totalPoints,
   theme,
@@ -40,7 +42,7 @@ export default function Header({
   const renderHeaderContent = () => (
     <div className={cn(
       "flex items-center justify-between p-3 md:p-4 rounded-xl",
-      "bg-card backdrop-blur-sm border border-border" // GLASS EFEKTİ EKLENDİ
+      "bg-card backdrop-blur-sm border border-border" 
     )}>
       <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
         <Link to="/profile">
@@ -54,7 +56,7 @@ export default function Header({
           <h1 className="text-xl md:text-2xl font-bold text-foreground truncate">Hey, {firstName}!</h1>
           {isHomePage && userRole !== 'koç' && (
             <p className="text-xs md:text-sm text-muted-foreground">
-             
+              Bugünkü hedeflerine ulaşmaya hazır mısın?
             </p>
           )}
         </div>
@@ -72,7 +74,6 @@ export default function Header({
         <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 md:h-9 md:w-9" onClick={toggleMute} title={isMuted ? "Sesi Aç" : "Sesi Kapat"}>
           {isMuted ? <VolumeX className="h-4 w-4 md:h-5 md:w-5" /> : <Volume2 className="h-4 w-4 md:h-5 md:w-5" />}
         </Button>
-        {/* Tema butonu artık işlevsiz olduğu için kaldırılabilir veya gizlenebilir */}
         <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 md:h-9 md:w-9" onClick={toggleTheme} title="Temayı Değiştir">
           {theme === 'light' ? <Moon className="h-4 w-4 md:h-5 md:w-5" /> : <Sun className="h-4 w-4 md:h-5 md:w-5" />}
         </Button> 
@@ -81,8 +82,8 @@ export default function Header({
   );
 
   const renderStatsCards = () => (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-      {/* İstatistik kartlarına da glass efekti eklendi */}
+    // --- DEĞİŞİKLİK 3: Grid yapısı güncellendi (4 -> 5 sütun) ---
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 md:gap-4">
       <div className="bg-card backdrop-blur-sm p-3 md:p-4 rounded-lg border border-border transition-all duration-300">
         <div className="flex items-center gap-2 md:gap-3">
           <div className="bg-primary/10 p-1.5 md:p-2 rounded-lg"><Target className="h-4 w-4 md:h-5 md:w-5 text-primary" /></div>
@@ -110,6 +111,19 @@ export default function Header({
           </div>
         </div>
       </div>
+      
+      {/* --- DEĞİŞİKLİK 4: Yeni 'Seri Dondurma' kartı eklendi --- */}
+      <div className="bg-card backdrop-blur-sm p-3 md:p-4 rounded-lg border border-border transition-all duration-300">
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className="bg-blue-400/10 p-1.5 md:p-2 rounded-lg"><Snowflake className="h-4 w-4 md:h-5 md:w-5 text-blue-400" /></div>
+          <div>
+            <p className="text-lg md:text-2xl font-bold text-foreground">{streakFreezes}</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Dondurma</p>
+          </div>
+        </div>
+      </div>
+      {/* --- DEĞİŞİKLİK 4 SONU --- */}
+
       <div className="bg-card backdrop-blur-sm p-3 md:p-4 rounded-lg border border-border transition-all duration-300">
         <div className="flex items-center gap-2 md:gap-3">
           <div className="bg-emerald-500/10 p-1.5 md:p-2 rounded-lg"><Trophy className="h-4 w-4 md:h-5 md:w-5 text-emerald-500" /></div>

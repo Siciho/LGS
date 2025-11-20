@@ -53,18 +53,11 @@ export default function AppLayout() {
   }, [userRole, navigate, location.pathname]);
 
   const coreData = useCoreData(userId, userName, userRole, isInitialized, isMuted);
-
-  // --- DEĞİŞİKLİK 7: Puan kazanma callback'i güncellendi ---
   const studyData = useStudyData(userId, isInitialized, isMuted, (result, newDailySolvedCount) => {
     if (userRole?.toLowerCase() === 'koç' || userRole?.toLowerCase() === 'admin') return;
-    
-    // Hem 'setTotalPoints' (Cüzdan) hem de 'setLifetimePoints' (Sıralama) fonksiyonlarının varlığını kontrol et
     if (coreData.setTotalPoints && coreData.setLifetimePoints && coreData.setStreak) {
         const earnedPoints = result.correct * 10;
-        
-        // 1. Cüzdanı (harcanabilir puan) artır
         coreData.setTotalPoints(prev => prev + earnedPoints);
-        // 2. Toplam kazanılan puanı (sıralama puanı) artır
         coreData.setLifetimePoints(prev => prev + earnedPoints);
 
         if (newDailySolvedCount === 3) {
@@ -75,8 +68,6 @@ export default function AppLayout() {
         }
     }
   });
-  // --- DEĞİŞİKLİK 7 SONU ---
-
   const scheduler = useScheduler(userId, isInitialized);
 
   useEffect(() => {
@@ -125,7 +116,7 @@ export default function AppLayout() {
   }, [navigate]);
 
   useEffect(() => {
-    if (userId && userRole !== 'koç' && userRole !== 'admin' && studyData.lastActiveDate && coreData.setStreak) {
+    if (userId && userRole !== 'koç' && userRole !== 'admin' && !studyData.isLoading && studyData.lastActiveDate && coreData.setStreak) {
       const { lastActiveDate, setLastActiveDate } = studyData;
       const { streak, streakFreezes, setStreak, setStreakFreezes } = coreData;
       const today = new Date();
@@ -133,7 +124,6 @@ export default function AppLayout() {
       
       if (lastActiveDate !== todayStr) {
         const lastDate = new Date(lastActiveDate);
-        
         const yesterday = new Date();
         yesterday.setDate(today.getDate() - 1);
         const yesterdayStart = new Date(yesterday.setHours(0, 0, 0, 0));
@@ -153,7 +143,7 @@ export default function AppLayout() {
         }
       }
     }
-  }, [userId, userRole, studyData, coreData, isMuted]);
+  }, [userId, userRole, studyData.isLoading, studyData.lastActiveDate, coreData.streak, isMuted]);
 
   useEffect(() => {
     const requestPermissions = async () => {
@@ -214,13 +204,14 @@ export default function AppLayout() {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto p-2 sm:p-4 pb-32 min-h-screen flex flex-col">
+      <div className="max-w-7xl mx-auto p-2 sm:p-4 min-h-screen flex flex-col">
         <Header
           userName={userName}
           totalQuestions={totalQuestions}
           streak={coreData.streak}
+          streakFreezes={coreData.streakFreezes} // --- DEĞİŞİKLİK: Prop olarak geçirildi ---
           unlockedAchievements={unlockedAchievements}
-          totalPoints={coreData.totalPoints} // Header hâlâ CÜZDAN'ı (harcanabilir puanı) gösterir
+          totalPoints={coreData.totalPoints}
           theme={theme}
           toggleTheme={toggleTheme}
           currentAvatarId={coreData.userAvatars?.current || 'default'}

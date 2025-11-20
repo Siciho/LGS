@@ -26,13 +26,31 @@ export const useStudyData = (
   const [dailySolvedSubjects, setDailySolvedSubjects] = useState<string[]>([]);
   const [lastActiveDate, setLastActiveDate] = useState<string | null>(null);
   
+  // --- DEĞİŞİKLİK 1: Yüklenme durumu eklendi ---
+  const [isLoading, setIsLoading] = useState(true);
+  
   useEffect(() => {
     if (userId) {
       const fetchDailyData = async () => {
-        const todayStr = getTodayDateString();
+        // Yükleme başladı
+        setIsLoading(true);
         
-        const storedLastActiveDate = storage.loadLastActiveDate(userId);
-        if (storedLastActiveDate && storedLastActiveDate !== todayStr) {
+        const todayStr = getTodayDateString();
+        let currentLastActiveDate = storage.loadLastActiveDate(userId);
+
+        // Supabase'den son tarihi çek
+        const { data: userData, error: userError } = await supabase
+            .from('kullanicilar')
+            .select('son_aktif_tarih')
+            .eq('id', userId)
+            .single();
+
+        if (!userError && userData?.son_aktif_tarih) {
+            currentLastActiveDate = userData.son_aktif_tarih;
+            storage.saveLastActiveDate(userId, currentLastActiveDate);
+        }
+        
+        if (currentLastActiveDate && currentLastActiveDate !== todayStr) {
           storage.clearDailySolvedSubjects(userId);
         }
         
@@ -51,7 +69,10 @@ export const useStudyData = (
           storage.saveDailySolvedSubjects(userId, solved);
         }
         
-        setLastActiveDate(storedLastActiveDate);
+        setLastActiveDate(currentLastActiveDate);
+        
+        // --- DEĞİŞİKLİK 2: Yükleme bitti ---
+        setIsLoading(false);
       };
       fetchDailyData();
     } else {
@@ -59,6 +80,7 @@ export const useStudyData = (
         setSessions([]);
         setDailySolvedSubjects([]);
         setLastActiveDate(null);
+        setIsLoading(false);
     }
   }, [userId]);
 
@@ -108,9 +130,7 @@ export const useStudyData = (
 
   useEffect(() => { if (isInitialized && userId) storage.saveSubjects(userId, subjects); }, [subjects, isInitialized, userId]);
   useEffect(() => { if (isInitialized && userId) storage.saveSessions(userId, sessions); }, [sessions, isInitialized, userId]);
-  useEffect(() => { if (isInitialized && userId && lastActiveDate) storage.saveLastActiveDate(userId, lastActiveDate); }, [lastActiveDate, isInitialized, userId]);
-
-
+  
   const handleAddQuestions = async (subjectId: string, counts: { correct: number, incorrect: number }, topic: string) => {
     if (!userId) return;
     const { correct, incorrect } = counts;
@@ -126,14 +146,10 @@ export const useStudyData = (
     await supabase.from('cozulen_sorular').insert({ kullanici_id: userId, ders_id: subjectId, dogru_sayisi: correct, yanlis_sayisi: incorrect, konu: topic });
   };
 
-  // --- DEĞİŞİKLİK BURADA BAŞLIYOR ---
-  // Fonksiyon imzası (solvedStats: SolvedStat[]) iken (subjectId: string, solvedStats: SolvedStat[] | null) olarak değiştirildi.
-  // solvedStats 'null' gelirse, bu görevin terk edildiği (forfeit) anlamına gelir.
   const handleQuizCompletion = async (subjectId: string, solvedStats: SolvedStat[] | null) => {
     if (!userId) return;
     const todayStr = getTodayDateString();
     
-    // Bu ders zaten o gün çözülmüşse (veya terk edilmişse) tekrar işlem yapma
     if (dailySolvedSubjects.includes(subjectId)) return;
     
     const newDailySolved = [...dailySolvedSubjects, subjectId];
@@ -143,12 +159,10 @@ export const useStudyData = (
     let incorrectCount: number;
 
     if (solvedStats === null) {
-      // Görev terk edildi (Forfeit durumu)
       correctCount = 0;
       incorrectCount = 6;
     } else {
-      // Görev normal tamamlandı
-      correctCount = solvedStats.filter(s => s.correct).length;
+      correctCount = solvedStats.filter(s => s.correct).length ; 0;
       incorrectCount = 6 - correctCount;
     }
 
@@ -158,18 +172,18 @@ export const useStudyData = (
       topic: "Günlük Test", date: new Date(), duration: 0,
     };
     setSessions(prev => [...prev, newSession]);
-    setLastActiveDate(todayStr);
     
-    // 'onQuizCompleted' prop'u normal tamamlanma ve terk etme durumlarında çağrılır.
+    setLastActiveDate(todayStr);
+    storage.saveLastActiveDate(userId, todayStr); 
+    await supabase.from('kullanicilar').update({ son_aktif_tarih: todayStr }).eq('id', userId);
+    
     onQuizCompleted({ correct: correctCount, incorrect: incorrectCount }, newDailySolved.length);
     
-    // Supabase'e hem çözülen soruları (0'a 6 olsa bile) hem de görevin tamamlandığını kaydet
     await supabase.from('cozulen_sorular').insert({ kullanici_id: userId, ders_id: subjectId, dogru_sayisi: correctCount, yanlis_sayisi: incorrectCount, konu: "Günlük Test" });
     await supabase.from('tamamlanan_gunluk_gorevler').insert({ kullanici_id: userId, ders_id: subjectId, tamamlanma_tarihi: todayStr });
     
     storage.saveDailySolvedSubjects(userId, newDailySolved);
   };
-  // --- DEĞİŞİKLİK BURADA BİTİYOR ---
 
   return {
     subjects,
@@ -178,6 +192,7 @@ export const useStudyData = (
     lastActiveDate,
     setLastActiveDate,
     handleAddQuestions,
-    handleQuizCompletion
+    handleQuizCompletion,
+    isLoading // --- DEĞİŞİKLİK 3: isLoading dışarı aktarıldı ---
   };
 };
