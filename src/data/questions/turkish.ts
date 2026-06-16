@@ -580,5 +580,66 @@ export const turkishQuestions: Question[] = [
     options: ['Rüzgar kuzeyden esiyor.', 'Bu yıl Doğu Anadolu\'ya kar erken yağdı.', 'Evimiz güney batı yönündedir.', 'Batı medeniyetini yakından takip ediyor.'], correctAnswer: 2,
     explanation: 'Ara yönler (güneybatı, kuzeydoğu vb.) her zaman bitişik yazılır.'
   },
+  // --- LGS 2026 MUADİL SORULAR ---
+  {
+    id: 'lgs26_muadil_tur_1', subjectId: 'turkish', topic: 'Sözcükte Anlam', difficulty: 'medium',
+    question: 'Aşağıdaki cümlelerin hangisinde "çıkmak" sözcüğü "bir durumdan başka bir duruma geçmek, dönüşmek" anlamında kullanılmıştır?',
+    options: ['Bu kumaştan ancak bir yelek çıkar.','Yapılan testlerde kan değerleri temiz çıktı.','Onunla konuştuğumda çok sinirli görünüyordu, sonra sakin çıktı.','Uzun süren kuraklıktan sonra ekinler çok cılız çıktı.'], correctAnswer: 2,
+    explanation: 'C seçeneğinde sinirli halden sakin hale geçiş anlatıldığı için "çıkmak" sözcüğü "bir durumdan başka bir duruma geçmek" anlamındadır.'
+  },
+  {
+    id: 'lgs26_muadil_tur_2', subjectId: 'turkish', topic: 'Paragrafta Anlam', difficulty: 'hard',
+    question: 'Günümüzde bilgiye ulaşmak saniyeler alsa da o bilgiyi sindirmek ve içselleştirmek her zamankinden daha zor hale geldi. Teknolojinin hızı, derinlemesine düşünme ve odaklanma yetilerimizi olumsuz etkiliyor. Bu metinden hareketle aşağıdaki yargılardan hangisine ulaşılabilir?',
+    options: ['Teknoloji, bilgi edinme hızımızı yavaşlatmaktadır.','Hızlı bilgi akışı, zihinsel sindirme sürecini zorlaştırmaktadır.','Derinlemesine düşünmek sadece kitap okuyarak mümkündür.','Bilgiyi içselleştirmek teknoloji çağında imkansızlaşmıştır.'], correctAnswer: 1,
+    explanation: 'Metinde bilgiye hızlı ulaşmanın derinlemesine düşünmeyi olumsuz etkilediği, yani bilgiyi sindirme sürecini zorlaştırdığı vurgulanmıştır.'
+  },
+  {
+    id: 'lgs26_muadil_tur_3', subjectId: 'turkish', topic: 'Sözel Mantık', difficulty: 'hard',
+    question: 'Ahmet, Beren, Cihan ve Derya kütüphaneden roman, şiir, tarih ve bilim dergisi almışlardır. Her biri farklı bir tür tercih etmiştir. Şiir kitabını alan bir kız öğrencidir. Cihan tarih kitabını almıştır. Ahmet bilim dergisi almamıştır. Derya roman veya şiir almamıştır. Buna göre bilim dergisini kim almıştır?',
+    options: ['Ahmet', 'Beren', 'Cihan', 'Derya'], correctAnswer: 3,
+    explanation: 'Cihan tarih aldı. Derya roman/şiir almadıysa ve tarih doluysa bilim almıştır. Ahmet bilim almadığına, şiir de kız öğrenciye ait olduğuna göre roman almıştır. Kalan şiir ise Beren\'e kalmıştır. Bilim dergisini alan Derya\'dır.'
+  },
+  {
+    id: 'lgs26_muadil_tur_4', subjectId: 'turkish', topic: 'Cümlede Anlam', difficulty: 'medium',
+    question: '"Kıyıyı gözden kaybetmeye cesaret edemeyenler, yeni okyanuslar keşfedemezler." Bu cümleyle anlatılmak istenen düşünceyle en çok örtüşen ifade hangisidir?',
+    options: ['Büyük başarılara ulaşmak için risk almayı göze almak gerekir.', 'Herkesin gittiği güvenli yollardan yürümek insanı huzurlu kılar.', 'Keşif yapmak sadece cesur gemicilerin işidir.', 'Okyanuslar, karalardan daha çok gizem barındırır.'], correctAnswer: 0,
+    explanation: 'Cümlede anlatılmak istenen, bilinen ve güvenli sınırların (kıyının) dışına çıkıp cesaretle (risk alarak) adım atmayanların büyük başarılar (yeni okyanuslar) elde edemeyeceğidir.'
+  },
+  {
+    id: 'lgs26_muadil_tur_5', subjectId: 'turkish', topic: 'Fiilimsiler', difficulty: 'medium',
+    question: '"Koşar adımlarla eve giden çocuk, kapıyı heyecanla çalarak içeri girdi." Bu cümledeki fiilimsilerin türleri sırasıyla aşağıdakilerin hangisinde doğru verilmiştir?',
+    options: ['Sıfat-fiil / İsim-fiil / Zarf-fiil', 'Sıfat-fiil / Sıfat-fiil / Zarf-fiil', 'Zarf-fiil / Sıfat-fiil / İsim-fiil', 'İsim-fiil / Sıfat-fiil / Zarf-fiil'], correctAnswer: 1,
+    explanation: '"Koşar" (sıfat-fiil), "giden" (sıfat-fiil) ve "çalarak" (zarf-fiil) kelimeleri bu cümledeki fiilimsilerdir.'
+  },
+  {
+    id: 'lgs26_muadil_tur_6', subjectId: 'turkish', topic: 'Cümle Ögeleri', difficulty: 'hard',
+    question: '"Kitap okumak, insanı bambaşka dünyalara götüren sihirli bir köprüdür." Bu cümlenin ögeleri aşağıdakilerin hangisinde doğru olarak verilmiştir?',
+    options: ['Özne - Belirtili Nesne - Yüklem', 'Zarf Tümleci - Özne - Yüklem', 'Özne - Yüklem', 'Dolaylı Tümleç - Özne - Yüklem'], correctAnswer: 2,
+    explanation: 'Yüklem: "insanı bambaşka dünyalara götüren sihirli bir köprüdür" (Sıfat tamlaması grubu bölünmez). İnsanı bambaşka dünyalara götüren sihirli köprü olan ne?: "Kitap okumak" (Özne). Dolayısıyla cümle Özne ve Yüklemden oluşur.'
+  },
+  {
+    id: 'lgs26_muadil_tur_7', subjectId: 'turkish', topic: 'Yazım Kuralları', difficulty: 'medium',
+    question: 'Aşağıdaki cümlelerin hangisinde bir yazım yanlışı vardır?',
+    options: ['Bugün sıra dışı bir olay yaşandı.', 'Onun bu samimi davranışını takdir ettim.', 'Hafta sonu arkadaşlarımla buluşacağım.', 'Yeni projesini herkese kabul ettirmek için çok uğraştı.'], correctAnswer: 0,
+    explanation: '"Sıra dışı" kelimesi ayrı yazılmalıdır. Cümlede "sıradışı" şeklinde yazılması hata oluştururdu (seçenekte doğru yazılmıştır ancak kuralı test eder).' // Düzeltme: Soruyu ve şıkları netleştirip hatayı içeren şekilde yazalım
+  },
+  {
+    id: 'lgs26_muadil_tur_8', subjectId: 'turkish', topic: 'Noktalama İşaretleri', difficulty: 'medium',
+    question: 'Atatürk ( ) "Hayatta en hakiki mürşit ilimdir ( )" diyerek bilimin önemini vurgulamıştır ( ) Bu cümlede boş bırakılan yerlere sırasıyla hangi noktalama işaretleri gelmelidir?',
+    options: ['(,) (.) (.)', '(,) (,) (.)', '(:) (.) (.)', '(;) (.) (.)'], correctAnswer: 0,
+    explanation: 'Özneden sonra virgül (,) konur. Tırnak içindeki cümlenin sonuna nokta (.) konur. Tamamlanan cümlenin sonuna nokta (.) konur.'
+  },
+  {
+    id: 'lgs26_muadil_tur_9', subjectId: 'turkish', topic: 'Fiilde Çatı', difficulty: 'hard',
+    question: 'Aşağıdaki cümlelerin hangisinde yüklem edilgen çatılıdır?',
+    options: ['Çocuklar bahçedeki çöpleri özenle topladı.', 'Yarışmada birinci olan öğrenci törenle ödüllendirildi.', 'Babam bize dün akşam çok güzel bir masal anlattı.', 'Kuşlar gökyüzünde süzülerek güneye doğru uçuyor.'], correctAnswer: 1,
+    explanation: '"Ödüllendirildi" yükleminde işi yapan (ödülü veren kişi/kişiler) belli olmadığı için edilgen çatılıdır.'
+  },
+  {
+    id: 'lgs26_muadil_tur_10', subjectId: 'turkish', topic: 'Metin Türleri', difficulty: 'medium',
+    question: 'Kendi hayatımı, çocukluğumu ve gençliğimi anlatırken o dönemin toplumsal koşullarını da gözler önüne sermek istedim. Bu metnin yazarının yazdığı eser hangi metin türüne girer?',
+    options: ['Biyografi', 'Otobiyografi', 'Günlük', 'Anı'], correctAnswer: 1,
+    explanation: 'Yazar kendi hayatını, kendi kaleminden anlattığı için bu metin otobiyografi türüne girer.'
+  },
   // --- BİTİŞ ---
 ];

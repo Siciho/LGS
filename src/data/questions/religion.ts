@@ -500,5 +500,66 @@ export const religionQuestions: Question[] = [
     options: ['Son ilahi kitap olması', 'Sadece Araplara gönderilmiş olması', 'Kıyamete kadar geçerli olması', 'Allah kelamı olması'], correctAnswer: 1,
     explanation: 'İslam inancına göre Kur\'an, sadece Araplara değil, tüm insanlığa gönderilmiş evrensel bir ilahi kitaptır.'
   },
+  // --- LGS 2026 MUADİL SORULAR ---
+  {
+    id: 'lgs26_muadil_rel_1', subjectId: 'religion', topic: 'KADER İNANCI', difficulty: 'medium',
+    question: 'Allah\'ın evrene koyduğu fiziksel yasalar; madde ve enerjinin yapısı, hareketi ve değişimi ile ilgilidir. Bu yasalar deney ve gözlemle anlaşılabilir, evrenseldir. Buna göre aşağıdaki olay veya durumlardan hangisi fiziksel yasalara örnek gösterilemez?',
+    options: ['Suyun 100 derecede kaynaması', 'Gezegenlerin belirli yörüngelerde hareket etmesi', 'Canlıların solunum ve sindirim sistemlerinin yapısı', 'Yer çekimi kuvveti nedeniyle bırakılan cisimlerin düşmesi'], correctAnswer: 2,
+    explanation: 'Canlıların yapısı, gelişimi ve üremesi ile ilgili olan yasalar biyolojik yasalardır. Fiziksel yasalar ise madde ve enerji ile ilgilidir.'
+  },
+  {
+    id: 'lgs26_muadil_rel_2', subjectId: 'religion', topic: 'KADER İNANCI', difficulty: 'medium',
+    question: 'İslam inancına göre insan, akıl ve cüz\'i irade sahibi bir varlıktır. Yaptığı eylemlerde özgürdür ve bu özgürlüğü nedeniyle yaptıklarından sorumludur. Buna göre aşağıdaki durumlardan hangisi insanın kendi sorumluluğu kapsamına girmez?',
+    options: ['Hangi mesleği seçeceği', 'Dürüst veya yalancı bir insan olmayı tercih etmesi', 'Ne zaman ve hangi ailede dünyaya geleceği', 'Zor durumda kalan bir arkadaşına yardım edip etmeyeceği'], correctAnswer: 2,
+    explanation: 'İnsanın doğum yeri, doğum tarihi, anne-babası, ırkı, göz rengi gibi durumlar külli iradenin (Allah\'ın sonsuz iradesinin) alanına girer ve insan bunlardan sorumlu tutulmaz. İnsan sadece cüz\'i iradesiyle seçebileceği eylemlerden sorumludur.'
+  },
+  {
+    id: 'lgs26_muadil_rel_3', subjectId: 'religion', topic: 'KADER İNANCI', difficulty: 'hard',
+    question: 'Çiftçilik yapan Mehmet Bey, tarlasını güzelce sürmüş, tohumunu ekmiş, gübrelemesini ve sulamasını zamanında yapmıştır. Ürün alabilmek için gerekli tüm çalışmaları tamamladıktan sonra "Ben elimden geleni yaptım, artık gerisi Allah\'a kalmış." diyerek dua etmiştir. Mehmet Bey\'in bu davranışı aşağıdaki kavramlardan hangisinin doğru anlaşıldığını gösterir?',
+    options: ['Kaza', 'Rızık', 'Tevekkül', 'Ecel'], correctAnswer: 2,
+    explanation: 'Tevekkül, bir iş için gerekli tüm maddi ve fiili tedbirleri aldıktan (çaba gösterdikten) sonra işin sonucunu Allah\'a bırakmak ve O\'na güvenmektir. Mehmet Bey\'in yaptığı tam olarak budur.'
+  },
+  {
+    id: 'lgs26_muadil_rel_4', subjectId: 'religion', topic: 'ZEKÂT VE SADAKA', difficulty: 'hard',
+    question: 'İslam dininde tarım ürünlerinden alınan zekata "öşür" adı verilir. Toprak ürünlerinin zekat oranı belirlenirken tarlanın sulanma yöntemi dikkate alınır. Eğer tarla yağmur suyuyla doğal olarak sulanıyorsa zekat oranı onda bir (1/10), baraj veya kuyu suyu gibi emek ve masraf harcanarak sulanıyorsa yirmide bir (1/20) olur. Buna göre İslam\'ın zekat oranlarında bu tarz bir farklılık yapması neye dayanır?',
+    options: ['Tarımsal üretimi sınırlandırmaya', 'Hakkaniyet ve adalet prensibine (emek ve masrafın düşülmesine)', 'Zekat verilecek kişileri seçmeye', 'Toprak türlerini sınıflandırmaya'], correctAnswer: 1,
+    explanation: 'Emek ve masraf harcanarak yapılan üretimde kazançtan bu masrafların düşülmesi hakkı tanınmış, zekat yükümlülüğü yarıya indirilmiştir (1/20). Bu durum İslam\'ın adalet ve hakkaniyet ilkelerine uygunluğunu gösterir.'
+  },
+  {
+    id: 'lgs26_muadil_rel_5', subjectId: 'religion', topic: 'ZEKÂT VE SADAKA', difficulty: 'hard',
+    question: 'Maun Suresi\'nde; ibadetlerini gösteriş için yapanlar, yetimlere kötü davranıp onları itip kakanlar ve yoksula yardım etmeyi teşvik etmeyenler eleştirilmektedir. Buna göre Maun Suresi\'nden hareketle aşağıdaki yargılardan hangisine ulaşılamaz?',
+    options: ['İbadetlerde samimiyet ve ihlas önemlidir, gösterişten uzak durulmalıdır.', 'İslam dini yetim ve yoksulların haklarının korunmasını ister.', 'Yardımlaşma ve paylaşma toplumsal barış için gereklidir.', 'Zekat sadece belirli zengin kabilelerin görevidir.'], correctAnswer: 3,
+    explanation: 'Maun Suresi zekat ve yardımlaşmanın bireysel ve toplumsal önemine vurgu yapar. Ancak zekatın belirli kabilelerin görevi olduğuna dair herhangi bir ifade surede yer almaz.'
+  },
+  {
+    id: 'lgs26_muadil_rel_6', subjectId: 'religion', topic: 'ZEKÂT VE SADAKA', difficulty: 'medium',
+    question: 'Peygamberimiz bir hadisinde şöyle buyurmuştur: "İnsan öldüğü zaman amel defteri kapanır. Ancak üç şey hariç: Sadaka-i cariye (kalıcı hayır işleri), faydalanılan ilim ve kendisine dua eden hayırlı evlat." Buna göre aşağıdaki yardımlardan hangisi "sadaka-i cariye" kapsamında değerlendirilemez?',
+    options: ['Bir okula kütüphane yaptırmak', 'Mahalledeki bir yoksula bir kereye mahsus gıda paketi vermek', 'İnsanların su içmesi için yol kenarına çeşme yaptırmak', 'Köyün çocuklarının okuması için okul binası inşa ettirmek'], correctAnswer: 1,
+    explanation: 'Sadaka-i cariye, etkisi ve faydası kalıcı olan, uzun yıllar devam eden hayır işleridir (kütüphane, çeşme, okul vb.). Bir kişiye tek seferlik gıda yardımı yapmak normal sadakadır ancak kalıcı olmadığından sadaka-i cariye değildir.'
+  },
+  {
+    id: 'lgs26_muadil_rel_7', subjectId: 'religion', topic: 'DİN VE HAYAT', difficulty: 'medium',
+    question: 'İslam dininde "canın korunması" temel haklardan biridir ve kutsaldır. İslam, bir insanın haksız yere öldürülmesini tüm insanlığın öldürülmesi gibi görmüş, intiharı ve cana zarar verecek her türlü davranışı yasaklamıştır. Buna göre aşağıdaki uygulamalardan hangisi dinin canın korunması ilkesiyle doğrudan ilgilidir?',
+    options: ['Hırsızlığın yasaklanması', 'İş yerlerinde iş güvenliği ve sağlığı tedbirlerinin alınması zorunluluğu', 'Evlilik kurumunun teşvik edilmesi', 'Hileli ticaretin yasaklanması'], correctAnswer: 1,
+    explanation: 'İş güvenliği ve sağlığı tedbirleri doğrudan çalışanların hayatını (canını) korumaya yönelik uygulamalardır. Hırsızlık ve hileli ticaret malın korunmasıyla, evlilik ise neslin korunmasıyla ilgilidir.'
+  },
+  {
+    id: 'lgs26_muadil_rel_8', subjectId: 'religion', topic: 'DİN VE HAYAT', difficulty: 'hard',
+    question: 'Asr Suresi\'nde Allah zamana (asr) yemin ederek insanların hüsranda (zararda) olduğunu belirtir. Ancak surenin sonunda bazı özelliklere sahip olanların bu zarardan kurtulacağını bildirir. Aşağıdakilerden hangisi Asr Suresi\'ne göre kurtuluşa erenlerden biri değildir?',
+    options: ['İman edenler', 'Salih (güzel, faydalı) ameller işleyenler', 'Sadece kendi çıkarlarını düşünenler', 'Birbirlerine hakkı ve sabrı tavsiye edenler'], correctAnswer: 2,
+    explanation: 'Asr Suresi\'ne göre kurtuluşa erenler: İman edenler, salih amel işleyenler, birbirlerine hakkı tavsiye edenler ve sabrı tavsiye edenlerdir. Bencil ve çıkarcı kimseler hüsrandadır.'
+  },
+  {
+    id: 'lgs26_muadil_rel_9', subjectId: 'religion', topic: 'HZ. MUHAMMED VE ÖRNEKLİĞİ', difficulty: 'medium',
+    question: 'Hz. Muhammed, Mekkeli müşriklerin tüm baskılarına, tehditlerine ve cazip tekliflerine rağmen "Güneş\'i sağ elime, Ay\'ı sol elime verseler de ben bu davadan vazgeçmem." diyerek İslam tebliğine devam etmiştir. Bu tarihi olay onun hangi kişisel özelliğini ön plana çıkarır?',
+    options: ['Merhameti ve affediciliği', 'Cesareti, kararlılığı ve davasına olan bağlılığı', 'İstişareye (danışmaya) verdiği önemi', 'Kolaylaştırıcı yönünü'], correctAnswer: 1,
+    explanation: 'Tüm engellemelere ve büyük vaatlere rağmen davasından vazgeçmeyeceğini belirtmesi, onun eşsiz kararlılığını, cesaretini ve inancını gösterir.'
+  },
+  {
+    id: 'lgs26_muadil_rel_10', subjectId: 'religion', topic: 'HZ. MUHAMMED VE ÖRNEKLİĞİ', difficulty: 'medium',
+    question: 'Hz. Muhammed, Uhud Savaşı öncesinde ordunun nasıl bir savunma yapacağı konusunda arkadaşlarıyla görüş alışverişinde bulunmuş ve kendisi Medine içinde kalıp savunma yapmayı tercih etmesine rağmen, çoğunluğun (özellikle gençlerin) isteği üzerine Medine dışına çıkıp Uhud Dağı eteklerinde meydan savaşı yapılmasına karar vermiştir. Bu olay onun hangi özelliğini gösterir?',
+    options: ['Kendi kararlarını dayattığını', 'İstişareye (danışmaya) ve ortak karara önem verdiğini', 'Askeri olarak deneyimsiz olduğunu', 'Savaşmaktan çekindiğini'], correctAnswer: 1,
+    explanation: 'Kendi görüşü farklı olmasına rağmen arkadaşlarına danışması (istişare etmesi) ve çoğunluğun kararına uyarak hareket etmesi, Hz. Muhammed\'in ortak akla ve istişareye verdiği büyük önemin en açık kanıtıdır.'
+  },
   // --- BİTİŞ ---
 ];

@@ -674,7 +674,66 @@ export const scienceQuestions: Question[] = [
     options: ['Akımı artırmak', 'Gerilimi düşürmek', 'Devreyi aşırı akıma karşı korumak', 'Elektrik enerjisi depolamak'], correctAnswer: 2,
     explanation: 'Sigorta, devreden belirlenen değerden daha yüksek bir akım geçtiğinde eriyerek veya atarak devreyi keser ve bağlı olan cihazların zarar görmesini engeller.'
   },
+  // --- LGS 2026 MUADİL SORULAR ---
+  {
+    id: 'lgs26_muadil_sci_1', subjectId: 'science', topic: 'Mevsimler ve İklim', difficulty: 'medium',
+    question: 'Kuzey Yarım Küre\'de yaşayan bir öğrenci, bahçesindeki bir direğin öğle vaktindeki gölge boyunu yıl boyunca belirli aralıklarla ölçüyor. Öğrenci yaptığı ölçümlerde gölge boyunun en kısa ve en uzun olduğu tarihleri sırasıyla aşağıdakilerin hangisinde doğru gözlemlemiştir?',
+    options: ['21 Haziran / 21 Aralık', '21 Aralık / 21 Haziran', '21 Mart / 23 Eylül', '23 Eylül / 21 Mart'], correctAnswer: 0,
+    explanation: 'Kuzey Yarım Küre\'de 21 Haziran\'da Güneş ışınları en dik açıyla gelir, bu nedenle gölge boyu en kısadır. 21 Aralık\'ta ise en eğik açıyla geldiğinden gölge boyu en uzundur.'
+  },
+  {
+    id: 'lgs26_muadil_sci_2', subjectId: 'science', topic: 'Mevsimler ve İklim', difficulty: 'medium',
+    question: 'Rüzgarlar yüksek basınç alanlarından alçak basınç alanlarına doğru olan yatay yönlü hava hareketleridir. Sıcaklığı yüksek olan bölgelerde yükselici hava hareketi görüldüğü için alçak basınç, sıcaklığı düşük olan yerlerde ise alçaltıcı hava hareketi görüldüğü için yüksek basınç alanı oluşur. Buna göre rüzgarın yönü ile ilgili aşağıdakilerden hangisi doğrudur?',
+    options: ['Sıcak bölgeden soğuk bölgeye doğrudur.', 'Soğuk bölgeden sıcak bölgeye doğrudur.', 'Gündüzleri denizden karaya doğru esen rüzgarda kara soğuktur.', 'Alçak basınçtan yüksek basınca doğrudur.'], correctAnswer: 1,
+    explanation: 'Rüzgar yüksek basınçtan (soğuk bölge) alçak basınca (sıcak bölge) doğru eser. Gündüzleri karalar hızlı ısındığı için alçak basınç, denizler ise daha soğuk olduğundan yüksek basınçtır. Bu sebeple denizden karaya doğru esinti gerçekleşir.'
+  },
+  {
+    id: 'lgs26_muadil_sci_3', subjectId: 'science', topic: 'DNA ve Genetik Kod', difficulty: 'hard',
+    question: 'Bezelyelerde mor çiçek rengi geni beyaz çiçek rengi genine baskındır. Çiçek rengi bilinmeyen mor çiçekli bir bezelye ile beyaz çiçekli bir bezelye çaprazlandığında oluşan yeni bezelyelerin bir kısmının beyaz çiçekli olduğu gözleniyor. Buna göre çaprazlanan mor çiçekli bezelyenin genotipi nedir ve Mor çiçekli bezelyelerin kendi aralarında çaprazlanması durumunda beyaz bezelye çıkma ihtimali nedir?',
+    options: ['Homozigot mor / %0', 'Heterozigot mor / %25', 'Homozigot mor / %25', 'Heterozigot mor / %50'], correctAnswer: 1,
+    explanation: 'Beyaz bezelye (aa) oluşabilmesi için her iki atadan da çekinik "a" geninin gelmesi gerekir. Beyaz ata zaten "aa"dır. Mor ata ise "a" geni taşımalıdır, yani heterozigot "Aa" olmak zorundadır. İki heterozigot mor bezelye (Aa x Aa) çaprazlandığında beyaz çiçekli (aa) yavru bezelye oluşma olasılığı %25 olur.'
+  },
+  {
+    id: 'lgs26_muadil_sci_4', subjectId: 'science', topic: 'DNA ve Genetik Kod', difficulty: 'hard',
+    question: 'DNA eşlenmesi sırasında hücre çekirdeğinde yeni zincirlerin karşısına uygun nükleotidler yerleşir. Bu süreçte bazen hatalar oluşabilir. DNA molekülünde meydana gelen; I. Karşılıklı iki zincirin de boş kalması, II. Bir zincirde nükleotidin karşısının boş kalması, III. Yanlış nükleotid eşleşmesi gibi durumlardan hangileri DNA üzerindeki enzimler tarafından onarılamaz?',
+    options: ['Yalnız I', 'Yalnız II', 'I ve II', 'II ve III'], correctAnswer: 0,
+    explanation: 'DNA molekülünde tek bir zincirde eksik nükleotid (II) varsa veya yanlış bir eşleşme (III) yapılmışsa, enzimler karşı zincire bakarak bunu düzeltebilir. Ancak karşılıklı iki zincir de boş ise (I) hangi bilginin geleceği bilinemediğinden onarım gerçekleştirilemez.'
+  },
+  {
+    id: 'lgs26_muadil_sci_5', subjectId: 'science', topic: 'DNA ve Genetik Kod', difficulty: 'medium',
+    question: 'Arı larvalarının arı sütü ile beslendiğinde kraliçe arı, bal özü ile beslendiğinde işçi arı olması modifikasyona; kutup ayılarının soğuktan korunmak için kalın yağ tabakasına ve beyaz kürke sahip olması adaptasyona örnektir. Buna göre aşağıdakilerden hangisi doğrudur?',
+    options: ['Modifikasyonlar kalıtsaldır, adaptasyonlar kalıtsal değildir.', 'Her iki durum da sadece çevre etkisiyle oluşur ve genlerin yapısı değişir.', 'Modifikasyonda genlerin işleyişi, adaptasyonda ise genlerin yapısı ve dizilimi değişir (kalıtsaldır).', 'Kutup ayısının kürk rengi sıcak havalarda kahverengiye dönebilir.'], correctAnswer: 2,
+    explanation: 'Modifikasyonda çevre etkisiyle sadece genlerin işleyişi değişir ve kalıtsal değildir. Adaptasyonda ise canlı hayatta kalmak için kalıtsal özellikler kazanmıştır, gen yapısına işlenmiştir ve nesillere aktarılır.'
+  },
+  {
+    id: 'lgs26_muadil_sci_6', subjectId: 'science', topic: 'Basınç', difficulty: 'medium',
+    question: 'Özdeş tuğlalar kullanılarak oluşturulan düzeneklerde tuğlaların yatay zemine uyguladıkları katı basınçları inceleniyor. Tuğlaların ağırlıkları eşit olmasına rağmen, dikey konumda konulan tuğlanın kum zemine, yatay konumda konulan tuğlaya göre daha fazla battığı gözleniyor. Bu deneyin bağımsız değişkeni aşağıdakilerden hangisidir?',
+    options: ['Tuğlanın ağırlığı', 'Kum zeminin cinsi', 'Tuğlanın zemine temas eden yüzey alanı', 'Tuğlanın zemine uyguladığı katı basıncı'], correctAnswer: 2,
+    explanation: 'Deneyde ağırlık ve zemin sabit tutulmuş (kontrol edilen değişkenler), sadece yüzey alanı değiştirilmiştir (bağımsız değişken). Buna bağlı olarak kumda batma miktarı/basınç değişmiştir (bağımlı değişken).'
+  },
+  {
+    id: 'lgs26_muadil_sci_7', subjectId: 'science', topic: 'Basınç', difficulty: 'hard',
+    question: 'Sıvı basıncı sıvının derinliğine ve yoğunluğuna bağlıdır. İçinde eşit derinlikte sırasıyla su, zeytinyağı ve tuzlu su bulunan özdeş kapların tabanlarındaki sıvı basınçları ölçülüyor. (Yoğunluklar: Tuzlu su > Su > Zeytinyağı). Bu kapların tabanındaki sıvı basınçlarının büyükten küçüke doğru sıralanışı aşağıdakilerin hangisinde verilmiştir?',
+    options: ['Tuzlu su > Su > Zeytinyağı', 'Zeytinyağı > Su > Tuzlu su', 'Su > Tuzlu su > Zeytinyağı', 'Hepsinin derinliği eşit olduğu için basınçları da eşittir.'], correctAnswer: 0,
+    explanation: 'Sıvı basıncı formülü P = h * d * g şeklindedir (h: derinlik, d: yoğunluk). Derinlikler eşit olduğuna göre yoğunluğu en fazla olan tuzlu suyun taban basıncı en yüksek, yoğunluğu en az olan zeytinyağının taban basıncı en küçüktür.'
+  },
+  {
+    id: 'lgs26_muadil_sci_8', subjectId: 'science', topic: 'Madde ve Endüstri', difficulty: 'hard',
+    question: 'Kimyasal tepkimelerde atomların türü ve sayısı korunduğu için kütle de korunur. Kapalı bir kapta gerçekleşen kimyasal bir tepkimede X ve Y maddeleri azalarak Z maddesini oluşturmaktadır. Tepkime başlangıcında kapta 30 gram X ve 20 gram Y bulunmaktadır. Tepkime sonunda X maddesinden 5 gram arttığı, Y maddesinin ise tamamen tükendiği gözlendiğine göre oluşan Z maddesi kaç gramdır?',
+    options: ['45 gram', '50 gram', '25 gram', '15 gram'], correctAnswer: 0,
+    explanation: 'Tepkimeye giren maddelerin kütleleri toplamı, oluşan ürünlerin kütlesine eşittir. Giren X miktarı: 30 - 5 = 25 gram. Giren Y miktarı: 20 gram. Toplam giren kütlesi: 25 + 20 = 45 gramdır. Kütlenin korunumu kanununa göre oluşan Z miktarı da 45 gram olmalıdır.'
+  },
+  {
+    id: 'lgs26_muadil_sci_9', subjectId: 'science', topic: 'Madde ve Endüstri', difficulty: 'medium',
+    question: 'Asitlerin metallere ve mermer yüzeylere aşındırıcı etkisi vardır. Bazlar ise cam ve porselen eşyaları matlaştırır. Bu bilgilere göre günlük hayattaki hangi kullanım veya olay bu durumla doğrudan açıklanamaz?',
+    options: ['Limon kesilen mermer tezgahın üzerinde leke kalması', 'Metal kaplarda asitli içecek saklanmaması', 'Bulaşık makinesinde yıkanan cam bardakların zamanla çizilip matlaşması', 'Turşu yapımında plastik veya cam kavanoz tercih edilmesi'], correctAnswer: 3,
+    explanation: 'Plastik veya cam kavanozların tercih edilmesi asidin buraları aşındırmamasından kaynaklanır, ancak bu durum asidin aşındırıcı zararlı etkisiyle doğrudan açıklanmak yerine koruyucu önlem niteliğindedir.' // Düzeltme: Şıkların bilimsel doğruluğunu artırdık
+  },
+  {
+    id: 'lgs26_muadil_sci_10', subjectId: 'science', topic: 'Basit Makineler', difficulty: 'medium',
+    question: 'Bir inşaat işçisi, ağır bir yükü sabit ve hareketli makaralardan oluşan bir palanga düzeneği kullanarak yukarı taşımaktadır. Bu düzenek işçiye hangi kolaylığı veya kazancı kesinlikle sağlamaz?',
+    options: ['Kuvvetin yönünü değiştirmek', 'İş kolaylığı sağlamak', 'Yapılan işten veya enerjiden kazanç sağlamak', 'Kuvvetten kazanç sağlamak'], correctAnswer: 2,
+    explanation: 'Hiçbir basit makine yapılan işten veya enerjiden kazanç sağlamaz. İş kolaylığı sağlar, kuvvetten kazandırabilir ama yoldan aynı oranda kaybettirir.'
+  },
   // --- BİTİŞ ---
-  // --- BİTİŞ ---
-  
 ];

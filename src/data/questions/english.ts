@@ -487,7 +487,68 @@ export const englishQuestions: Question[] = [
     id: 'eng_yeni_30', subjectId: 'english', topic: 'Natural Forces', difficulty: 'medium',
     question: 'After the flood disaster, rescue teams searched for ____.',
     options: ['precautions', 'survivors', 'droughts', 'volcanoes'], correctAnswer: 1,
-    explanation: '"Survivors" are people who have managed to stay alive in a situation where others have died.'
+    explanation: 'Survivors (hayatta kalanlar) is the correct word here since the sentence mentions rescue teams searching for them after a disaster.'
+  },
+  // --- LGS 2026 MUADİL SORULAR ---
+  {
+    id: 'lgs26_muadil_eng_1', subjectId: 'english', topic: 'Friendship', difficulty: 'easy',
+    question: 'Amy: "We are organizing a class picnic this Sunday. Would you like to join us?" \n\nKate: "____. I must stay at home and take care of my baby brother."',
+    options: ['That sounds awesome, but I can\'t', 'Sure, why not', 'That\'s a great idea', 'I\'d love to, count me in'], correctAnswer: 0,
+    explanation: 'Since Kate states she must stay at home, she is refusing the invitation. "That sounds awesome, but I can\'t" is a polite way to refuse.'
+  },
+  {
+    id: 'lgs26_muadil_eng_2', subjectId: 'english', topic: 'Friendship', difficulty: 'medium',
+    question: 'A true friend is someone who always supports you when you are in trouble. He or she never lies to you, and you can always trust them. \n\nAccording to the information above, a good friend should be ____.',
+    options: ['stubborn and self-centered', 'helpful and honest', 'laid-back and sneaky', 'aggressive and jealous'], correctAnswer: 1,
+    explanation: 'Supporting someone in trouble means being "helpful". Never lying and being trustworthy means being "honest".'
+  },
+  {
+    id: 'lgs26_muadil_eng_3', subjectId: 'english', topic: 'Teen Life', difficulty: 'medium',
+    question: 'Arthur: "What kind of books do you prefer reading?" \n\nBree: "I prefer biographical books ____ fantasy books. I think learning about real people\'s lives is more interesting."',
+    options: ['to', 'than', 'prefer', 'for'], correctAnswer: 0,
+    explanation: 'In English, we use "prefer something TO something else" to state our preference.'
+  },
+  {
+    id: 'lgs26_muadil_eng_4', subjectId: 'english', topic: 'In the Kitchen', difficulty: 'easy',
+    question: 'First, peel and slice the potatoes. Second, mix them with olive oil and spices. Next, place them on a baking tray. Finally, ____ them in a hot oven for 20 minutes.',
+    options: ['boil', 'grate', 'bake', 'fry'], correctAnswer: 2,
+    explanation: 'Cooking potatoes on a baking tray inside an oven is called "baking" (bake).'
+  },
+  {
+    id: 'lgs26_muadil_eng_5', subjectId: 'english', topic: 'On the Phone', difficulty: 'medium',
+    question: 'Secretary: "Good afternoon, Apple Corp. How can I help you?" \n\nCustomer: "Hello, could you please ____ me through to the sales department?" \n\nSecretary: "Hold on a moment, please."',
+    options: ['hang', 'put', 'call', 'leave'], correctAnswer: 1,
+    explanation: '"Put someone through" is a phrasal verb that means to connect someone on the phone.'
+  },
+  {
+    id: 'lgs26_muadil_eng_6', subjectId: 'english', topic: 'The Internet', difficulty: 'medium',
+    question: 'If you want to read other people\'s comments and share your opinions, you must first register and ____ your account.',
+    options: ['log in to', 'download', 'shut down', 'offline'], correctAnswer: 0,
+    explanation: 'To access a website or service where you have registered, you must "log in to" your account.'
+  },
+  {
+    id: 'lgs26_muadil_eng_7', subjectId: 'english', topic: 'Adventures', difficulty: 'medium',
+    question: 'Sally: "I would love to try skydiving." \n\nDave: "Really? Why do you prefer extreme sports?" \n\nSally: "Because they are ____! I love the adrenaline rush."',
+    options: ['boring and depressing', 'disappointing and ordinary', 'exciting and challenging', 'tasty and easy'], correctAnswer: 2,
+    explanation: 'People who love adrenaline rushes think extreme sports are "exciting and challenging".'
+  },
+  {
+    id: 'lgs26_muadil_eng_8', subjectId: 'english', topic: 'Tourism', difficulty: 'easy',
+    question: 'Ephesus is a very famous ____ city. Thousands of tourists visit its ancient ruins and historic library every year.',
+    options: ['modern', 'historic', 'urban', 'rural'], correctAnswer: 1,
+    explanation: 'A city with ancient ruins is described as "historic" or "ancient".'
+  },
+  {
+    id: 'lgs26_muadil_eng_9', subjectId: 'english', topic: 'Chores', difficulty: 'easy',
+    question: 'My father usually cooks dinner, and I help him by ____. I place the plates, knives, and forks carefully.',
+    options: ['doing the laundry', 'vacuuming the floor', 'setting the table', 'taking out the trash'], correctAnswer: 2,
+    explanation: 'Placing plates, knives, and forks on a table before a meal is called "setting the table".'
+  },
+  {
+    id: 'lgs26_muadil_eng_10', subjectId: 'english', topic: 'Science', difficulty: 'medium',
+    question: 'Many scientists are currently doing research in their labs to ____ new medicines for dangerous diseases.',
+    options: ['invent', 'explore', 'discover', 'register'], correctAnswer: 2,
+    explanation: 'Finding something that already exists in nature (like a cure or a property of a disease) is "discovering" (discover).'
   },
   // --- BİTİŞ ---
 ];

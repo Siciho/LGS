@@ -448,6 +448,66 @@ export const revolutionQuestions: Question[] = [
     options: ['Milli egemenlik', 'Akılcılık ve bilimsellik', 'Tam bağımsızlık', 'Milli birlik'], correctAnswer: 1,
     explanation: 'Bu söz, hayatta yol gösterici olarak dogma ve hurafeler yerine aklı, bilimi ve teknolojiyi kabul etmenin önemini vurgular.'
   },
-  // --- BİTİŞ ---
+  // --- LGS 2026 MUADİL SORULAR ---
+  {
+    id: 'lgs26_muadil_rev_1', subjectId: 'revolution', topic: 'Bir Kahraman Doğuyor', difficulty: 'medium',
+    question: 'Mustafa Kemal\'in doğup büyüdüğü Selanik; limanı, demiryolu bağlantısı, çok uluslu yapısı ve zengin basın yayın hayatıyla Osmanlı Devleti\'nin Batı\'ya açılan penceresi konumundaydı. Bu durumun Mustafa Kemal\'in fikir hayatına sağladığı en önemli katkı nedir?',
+    options: ['Saltanat sistemini savunmasına yol açması', 'Askerlik mesleğine olan ilgisini azaltması', 'Farklı kültürleri tanımasına ve hoşgörülü, yenilikçi bir bakış açısı kazanmasına yardımcı olması', 'Dini eğitim almasını zorunlu kılması'], correctAnswer: 2,
+    explanation: 'Çok uluslu ve zengin kültürel yapı, Mustafa Kemal\'in farklı kültürleri ve fikir akımlarını yakından tanımasını sağlamış, demokratik ve yenilikçi bir dünya görüşü edinmesinde etkili olmuştur.'
+  },
+  {
+    id: 'lgs26_muadil_rev_2', subjectId: 'revolution', topic: 'Bir Kahraman Doğuyor', difficulty: 'medium',
+    question: 'Mustafa Kemal, ilk görev yeri olan Şam\'da güvendiği arkadaşlarıyla birlikte "Vatan ve Hürriyet Cemiyeti"ni kurmuştur. Bu gelişme onun aşağıdaki kişisel özelliklerinden hangisini doğrudan kanıtlar?',
+    options: ['Teşkilatçılık (Örgütleyicilik) ve Liderlik', 'İleri görüşlülük ve barışçılık', 'Edebi yönünün güçlü olması', 'Eğitime ve bilme verdiği değer'], correctAnswer: 0,
+    explanation: 'Bir amaç doğrultusunda insanları bir araya getirip gizlice bir cemiyet kurabilmek, onun güçlü bir teşkilatçılık (örgütleyicilik) yeteneğine ve liderlik vasfına sahip olduğunu gösterir.'
+  },
+  {
+    id: 'lgs26_muadil_rev_3', subjectId: 'revolution', topic: 'Milli Uyanış: Bağımsızlık Yolunda Atılan Adımlar', difficulty: 'medium',
+    question: 'Mondros Ateşkes Antlaşması sonrasında başlayan işgallere karşı Osmanlı Hükümeti\'nin tepkisiz ve aciz kalması üzerine Türk halkı kendi imkanlarıyla silahlı direniş grupları kurmuş ve haklarını savunmak için bölgesel dernekler açmıştır. Halkın kurduğu bu silahlı direniş gruplarına ne ad verilir?',
+    options: ['Temsil Heyeti', 'Düzenli Ordu', 'Kuvay-ı Milliye', 'Felah-ı Vatan'], correctAnswer: 2,
+    explanation: 'İşgallere karşı halkın kendi bölgesini korumak amacıyla kurduğu düzensiz, gönüllü silahlı direniş güçlerine Kuvay-ı Milliye (Milli Kuvvetler) adı verilir.'
+  },
+  {
+    id: 'lgs26_muadil_rev_4', subjectId: 'revolution', topic: 'Milli Uyanış: Bağımsızlık Yolunda Atılan Adımlar', difficulty: 'hard',
+    question: 'Amasya Genelgesi\'nde yer alan "Vatanın bütünlüğü, milletin bağımsızlığı tehlikededir. İstanbul Hükümeti üzerine aldığı sorumluluğu yerine getirememektedir. Milletin bağımsızlığını, yine milletin azim ve kararı kurtaracaktır." kararı ile ilgili aşağıdakilerden hangisi söylenemez?',
+    options: ['Milli Mücadele\'nin gerekçesi belirtilmiştir.', 'Milli Mücadele\'nin yöntemi açıklanmıştır.', 'Gelecekte milli egemenliğe dayalı yeni bir rejim kurulacağının ilk ipucu verilmiştir.', 'Manda ve himaye fikri kesin olarak kabul edilmiştir.'], correctAnswer: 3,
+    explanation: 'Genelgenin bu maddesinde Kurtuluş Savaşı\'nın gerekçesi (vatanın tehlikede olması) ve yöntemi (milletin azim ve kararı) açıklanmıştır. Milletin kararı ifadesi milli egemenliğe geçileceğinin göstergesidir. Manda ve himaye reddedilmiştir, kabulü söz konusu olamaz.'
+  },
+  {
+    id: 'lgs26_muadil_rev_5', subjectId: 'revolution', topic: 'Milli Uyanış: Bağımsızlık Yolunda Atılan Adımlar', difficulty: 'hard',
+    question: 'Misak-ı Milli kararlarında yer alan "Siyasi, adli ve mali gelişmemizi engelleyen kapitülasyonlar kesinlikle kabul edilemez." kararı ile doğrudan hangisi amaçlanmıştır?',
+    options: ['Tam bağımsız bir ekonomi ve devlet düzeni kurmak', 'Dış borçları tamamen ödemeyi reddetmek', 'Komşu devletlerin iç işlerine müdahale etmek', 'Saltanatı güçlendirmek'], correctAnswer: 0,
+    explanation: 'Kapitülasyonlar (yabancı devletlere verilen ayrıcalıklar) devletin ekonomik, siyasi ve hukuki bağımsızlığını baltalıyordu. Bunların tamamen reddedilmesi, tam bağımsızlığın hedeflendiğini gösterir.'
+  },
+  {
+    id: 'lgs26_muadil_rev_6', subjectId: 'revolution', topic: 'Milli Bir Destan; Ya İstiklal Ya Ölüm', difficulty: 'medium',
+    question: 'Kurtuluş Savaşı Güney Cephesi\'nde Fransızlara karşı düzenli bir ordu bulunmuyordu. Bölgeyi, işgaller karşısında canını dişine takarak savunan yerel halk kahramanları (Sütçü İmam, Şahin Bey, Ali Saip Bey vb.) öncülüğündeki direnişçiler kurtarmıştır. Bu durum aşağıdakilerden hangisinin göstergesidir?',
+    options: ['Güney cephesinde Yunanlılarla savaşıldığının', 'Temsil Heyeti\'nin güneyde etkisiz kaldığının', 'Halkın vatan savunmasında gösterdiği eşsiz fedakarlık ve bağımsızlık inancının', 'Milli Mücadele\'nin güney cephesinde başarısız olduğunun'], correctAnswer: 2,
+    explanation: 'Güney Cephesi\'nde düzenli ordu olmadan kazanılan zaferler, tamamen halkın vatan sevgisi ve bağımsızlık aşkıyla gösterdiği bölgesel fedakarlıkların bir sonucudur.'
+  },
+  {
+    id: 'lgs26_muadil_rev_7', subjectId: 'revolution', topic: 'Milli Bir Destan; Ya İstiklal Ya Ölüm', difficulty: 'hard',
+    question: 'Kurtuluş Savaşı\'nın en kritik dönemlerinden biri olan Kütahya-Eskişehir Savaşları devam ederken, Mustafa Kemal Paşa\'nın talimatıyla Ankara\'da "Maarif (Eğitim) Kongresi" toplanmıştır. Bu gelişme Mustafa Kemal\'in aşağıdakilerden hangisine verdiği önemi gösterir?',
+    options: ['Askeri stratejileri geliştirmeye', 'Eğitime, kültüre ve ülkenin gelecekteki kalkınmasına', 'Milletvekili seçimlerini yenilemeye', 'İthalat ve ihracat dengesini korumaya'], correctAnswer: 1,
+    explanation: 'Savaşın en zor günlerinde bile öğretmenlerin katılımıyla eğitim kurultayı düzenlenmesi, eğitimin ve cehaletle mücadelenin en az düşmanla savaşmak kadar önemli görüldüğünün kanıtıdır.'
+  },
+  {
+    id: 'lgs26_muadil_rev_8', subjectId: 'revolution', topic: 'Milli Bir Destan; Ya İstiklal Ya Ölüm', difficulty: 'medium',
+    question: 'Sakarya Meydan Muharebesi sırasında Başkomutan Mustafa Kemal Paşa ordusuna "Hattı müdafaa yoktur, sathı müdafaa vardır. O satıh, bütün vatandır. Vatanın her karış toprağı vatandaşın kanıyla ıslanmadıkça terk olunamaz." emrini vermiştir. Bu emir doğrultusunda uygulanan taktik hangisidir?',
+    options: ['Sadece belirli bir cephe hattını korumak', 'Topyekûn (tüm vatan yüzeyini kapsayan) savunma savaşı yapmak', 'Ordunun savaşa girmeden geri çekilmesi', 'Yabancı devletlerden askeri yardım beklemek'], correctAnswer: 1,
+    explanation: 'Bu emir, savunmanın sadece bir çizgi üzerinde değil, tüm vatan sathında (yüzeyinde) yapılacağını belirtir. Bir birlik geri çekilse bile diğer birliğin direnmeye devam etmesi esasına dayanan topyekûn mücadeledir.'
+  },
+  {
+    id: 'lgs26_muadil_rev_9', subjectId: 'revolution', topic: 'Atatürkçülük ve Çağdaşlaşan Türkiye', difficulty: 'hard',
+    question: '1926 yılında kabul edilen Türk Medeni Kanunu ile kadınlara; istediği mesleği seçebilme, mahkemelerde şahitlik yapabilme, miras ve boşanma konularında erkeklerle eşit haklara sahip olma imkanı tanınmıştır. Medeni Kanun ile ilgili hangisi söylenemez?',
+    options: ['Toplumsal ve hukuki alanda kadın-erkek eşitliği hedeflenmiştir.', 'Halkçılık ilkesi doğrultusunda bir adımdır.', 'Türk kadınlarına seçme ve seçilme hakkı verilmiştir.', 'Aile yapısı çağdaş ve güvenceli bir hale getirilmiştir.'], correctAnswer: 2,
+    explanation: 'Medeni Kanun sosyal, ekonomik ve hukuki hakları düzenlemiştir, ancak kadınlara milletvekili seçme/seçilme gibi siyasi haklar 1930 ve 1934 yıllarındaki anayasa değişiklikleriyle verilmiştir.'
+  },
+  {
+    id: 'lgs26_muadil_rev_10', subjectId: 'revolution', topic: 'Atatürkçülük ve Çağdaşlaşan Türkiye', difficulty: 'medium',
+    question: '1 Temmuz 1926\'da kabul edilen Kabotaj Kanunu ile Türk karasularında gemi işletme ve deniz ticareti yapma hakkı sadece Türk vatandaşlarına ve Türk bayraklı gemilere verilmiştir. Bu kanunun temel amacı nedir?',
+    options: ['Denizlerdeki ticaret hacmini tamamen durdurmak', 'Yabancı sermayeyi ülkeye çekmek', 'Denizlerde tam bağımsızlığı (millileşmeyi) ve ekonomik egemenliği sağlamak', 'Balıkçılığı yasaklamak'], correctAnswer: 2,
+    explanation: 'Kabotaj Kanunu, denizlerimizdeki yabancı imtiyazlarını sonlandırarak deniz ticaretini millileştirmiş, böylece milli bağımsızlığı ve ekonomik egemenliği güçlendirmiştir.'
+  },
   // --- BİTİŞ ---
 ];

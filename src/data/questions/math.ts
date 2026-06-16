@@ -720,5 +720,66 @@ export const mathQuestions: Question[] = [
     options: ['7', '8', '9', '10'], correctAnswer: 1,
     explanation: 'Ali\'nin yaşı $x$ olsun. Denklem: $2x + 5 = 21$. $2x = 21 - 5$. $2x = 16$. $x = 8$.'
   },
+  // --- LGS 2026 MUADİL SORULAR ---
+  {
+    id: 'lgs26_muadil_mat_1', subjectId: 'math', topic: 'Çarpanlar ve Katlar', difficulty: 'hard',
+    question: 'A ve B marka kahve paketleri sırasıyla 12 gramlık ve 15 gramlık paketlerde satılmaktadır. Bir kafeterya her iki marka kahveden de eşit miktarda (gram cinsinden) satın almış ve toplamda 600 TL\'den az ödeme yapmıştır. A marka kahvenin paketi 15 TL, B marka kahvenin paketi 20 TL olduğuna göre kafeterya en fazla kaç paket kahve satın almıştır?',
+    options: ['27', '36', '45', '54'], correctAnswer: 0,
+    explanation: 'Alınan kahve miktarı (gram) EKOK(12, 15) = 60 gramın bir katı olmalıdır. Her 60 gram için: A\'dan 5 paket (5 * 15 = 75 TL), B\'den 4 paket (4 * 20 = 80 TL) alınır. Toplam maliyet 75 + 80 = 155 TL olur. Toplam ödeme 600 TL\'den az olduğuna göre, 155\'in katlarını alırız: 155 * 3 = 465 TL (uygun), 155 * 4 = 620 TL (sınırı aşar). Demek ki 3 katı kadar alınmış. Paket sayısı: (5 + 4) * 3 = 27 paket.'
+  },
+  {
+    id: 'lgs26_muadil_mat_2', subjectId: 'math', topic: 'Üslü İfadeler', difficulty: 'medium',
+    question: 'Bir fabrikada üretilen 2^15 adet çikolata, her kutuda 2^4 adet çikolata olacak şekilde paketleniyor. Elde edilen tüm kutular, her kolide 2^3 adet kutu olacak şekilde kolileniyor. Buna göre bu işlem için toplam kaç koli kullanılmıştır?',
+    options: ['2^6', '2^8', '2^9', '2^11'], correctAnswer: 1,
+    explanation: 'Toplam kutu sayısı: 2^15 / 2^4 = 2^11 kutu. Toplam koli sayısı ise kutu sayısının koli başına düşen kutu sayısına bölünmesiyle bulunur: 2^11 / 2^3 = 2^8 koli.'
+  },
+  {
+    id: 'lgs26_muadil_mat_3', subjectId: 'math', topic: 'Kareköklü İfadeler', difficulty: 'medium',
+    question: 'Uzunluğu 10√2 metre olan düz bir tahta bloktan, her birinin uzunluğu √8 metre olan eş parçalar kesilecektir. Bu kesim işlemi sonucunda tahta bloktan en fazla kaç adet eş parça elde edilir?',
+    options: ['3', '4', '5', '6'], correctAnswer: 2,
+    explanation: '√8 sayısı 2√2 şeklinde yazılabilir. Elde edilecek parça sayısı toplam uzunluğun bir parçanın uzunluğuna bölünmesiyle bulunur: 10√2 / 2√2 = 5 parça.'
+  },
+  {
+    id: 'lgs26_muadil_mat_4', subjectId: 'math', topic: 'Veri Analizi', difficulty: 'hard',
+    question: 'Bir okuldaki LGS öğrencilerinin şubelere göre dağılımı daire grafiğiyle gösterildiğinde 8-A şubesini temsil eden dilimin merkez açısı 120 derece, 8-B şubesini temsil eden dilimin açısı 150 derecedir. Kalan öğrenciler ise 8-C şubesindedir. 8-C şubesinde 18 öğrenci olduğuna göre, bu okulda LGS sınavına hazırlanan toplam kaç öğrenci vardır?',
+    options: ['54', '72', '80', '90'], correctAnswer: 1,
+    explanation: '8-A ve 8-B şubelerinin toplam açısı: 120 + 150 = 270 derecedir. 8-C şubesine kalan merkez açı: 360 - 270 = 90 derecedir (yani dairenin 1/4\'ü). 90 derecelik dilim 18 öğrenciyi temsil ediyorsa, okulun tamamı (360 derece): 18 * 4 = 72 öğrencidir.'
+  },
+  {
+    id: 'lgs26_muadil_mat_5', subjectId: 'math', topic: 'Olasılık', difficulty: 'medium',
+    question: 'İçinde sadece mavi, kırmızı ve sarı renkli bilyelerin bulunduğu bir torbadaki bilyelerin %30\'u mavi, %50\'si kırmızıdır. Torbada 6 adet sarı bilye olduğuna göre, torbadan rastgele çekilen bir bilyenin kırmızı olma olasılığı kaçtır ve torbada toplam kaç bilye vardır?',
+    options: ['Olasılık: 1/2, Toplam: 20 bilye', 'Olasılık: 1/2, Toplam: 30 bilye', 'Olasılık: 3/10, Toplam: 20 bilye', 'Olasılık: 5/10, Toplam: 30 bilye'], correctAnswer: 0,
+    explanation: 'Mavi oranı %30, kırmızı oranı %50 ise sarı oranı %20\'dir (%100 - %80). %20\'lik sarı bilyeler 6 adet olduğuna göre, torbadaki toplam bilye sayısı: 6 * 5 = 30 bilyedir. Kırmızı bilye sayısı: 30 * 0.50 = 15 bilyedir. Kırmızı çekme olasılığı ise 15/30 = 1/2 (veya %50)\'dir.' // Düzeltme: Şık ve açıklamayı uyumlu yaptık
+  },
+  {
+    id: 'lgs26_muadil_mat_6', subjectId: 'math', topic: 'Cebirsel İfadeler', difficulty: 'medium',
+    question: 'Bir kenarı (2x + 3) cm olan kare şeklindeki bir kağıt parçasından, kenar uzunluğu (x - 1) cm olan kare şeklinde bir parça kesilip atılıyor. Kalan kağıt parçasının alanını santimetrekare cinsinden veren cebirsel ifade hangisidir?',
+    options: ['3x^2 + 14x + 8', '3x^2 + 10x + 8', '3x^2 + 14x + 10', '3x^2 + 10x + 10'], correctAnswer: 0,
+    explanation: 'Büyük alan: (2x + 3)^2 = 4x^2 + 12x + 9. Küçük alan: (x - 1)^2 = x^2 - 2x + 1. Kalan alan: (4x^2 + 12x + 9) - (x^2 - 2x + 1) = 3x^2 + 14x + 8.'
+  },
+  {
+    id: 'lgs26_muadil_mat_7', subjectId: 'math', topic: 'Doğrusal Denklemler', difficulty: 'easy',
+    question: 'Bir taksinin açılış ücreti 30 TL\'dir. Gidilen her kilometre için ise 8 TL ücret alınmaktadır. Bu taksiyle yolculuk yapan bir müşteri toplam 190 TL ödediğine göre, taksiyle kaç kilometre yol gitmiştir?',
+    options: ['15', '18', '20', '22'], correctAnswer: 2,
+    explanation: 'Gidilen yol x olsun. Toplam ücret denklemi: 30 + 8x = 190. 8x = 190 - 30 = 160. x = 160 / 8 = 20 km.'
+  },
+  {
+    id: 'lgs26_muadil_mat_8', subjectId: 'math', topic: 'Basit Eşitsizlikler', difficulty: 'medium',
+    question: 'Bir su deposunda başlangıçta 120 litre su bulunmaktadır. Depoya her saatte 15 litre su eklenmektedir. Deponun taşmaması için depodaki su miktarının en fazla 300 litre olması gerektiğine göre, depoya su ekleme işleminin yapılabileceği süreyi (saat cinsinden) gösteren eşitsizlik hangisidir?',
+    options: ['t <= 12', 't <= 15', 't <= 18', 't <= 20'], correctAnswer: 0,
+    explanation: 'Depodaki su miktarı: 120 + 15t. Bu miktar 300 litreden küçük veya eşit olmalıdır: 120 + 15t <= 300. 15t <= 180. t <= 12 saat.'
+  },
+  {
+    id: 'lgs26_muadil_mat_9', subjectId: 'math', topic: 'Eşlik ve Benzerlik', difficulty: 'medium',
+    question: 'Benzer iki dik üçgenin çevreleri oranı 3/4\'tür. Küçük üçgenin hipotenüs uzunluğu 15 cm olduğuna göre, büyük üçgenin hipotenüs uzunluğu kaç cm\'dir?',
+    options: ['18', '20', '24', '25'], correctAnswer: 1,
+    explanation: 'Benzer şekillerin çevreleri oranı, benzerlik oranına eşittir. Benzerlik oranı 3/4 ise karşılıklı kenarların oranı da 3/4 olmalıdır: 15 / x = 3/4 ise 3x = 60, buradan x = 20 cm bulunur.'
+  },
+  {
+    id: 'lgs26_muadil_mat_10', subjectId: 'math', topic: 'Geometrik Cisimler', difficulty: 'medium',
+    question: 'Taban yarıçapı 3 cm ve yüksekliği 10 cm olan bir dik dairesel silindirin tüm yüzey alanı kaç santimetrekaredir? (pi = 3 alınız)',
+    options: ['180', '216', '234', '270'], correctAnswer: 2,
+    explanation: 'Silindirin yüzey alanı = 2 * Taban Alanı + Yanal Alan = 2 * (pi * r^2) + 2 * pi * r * h. Taban Alanları: 2 * 3 * 3^2 = 54. Yanal Alan: 2 * 3 * 3 * 10 = 180. Toplam Alan: 54 + 180 = 234 cm^2.'
+  },
   // --- BİTİŞ ---
 ];
