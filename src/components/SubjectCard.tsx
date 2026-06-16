@@ -53,13 +53,23 @@ export default function SubjectCard({ subject, onAddQuestions }: SubjectCardProp
   const handleOpenMebiApp = async () => {
     const appUrl = 'mebi://';
     const androidStoreUrl = 'https://play.google.com/store/apps/details?id=tr.gov.eba.mebi';
-    const iosStoreUrl = 'https://apps.apple.com/tr/app/id1438258386';
+    const iosStoreUrl = 'https://apps.apple.com/tr/app/id6474448766'; // MEBİ app id
     const platform = Capacitor.getPlatform();
 
     if (platform === 'web') {
-      const storeUrl = /iPad|iPhone|iPod/.test(navigator.userAgent) ? iosStoreUrl : androidStoreUrl;
-      toast.info("MEB uygulaması için mağaza sayfası açılıyor...");
-      window.open(storeUrl, '_blank');
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isAndroid = /Android/.test(navigator.userAgent);
+      
+      if (isIOS) {
+        toast.info("MEBİ uygulaması için App Store açılıyor...");
+        window.open(iosStoreUrl, '_blank');
+      } else if (isAndroid) {
+        toast.info("MEBİ uygulaması için Play Store açılıyor...");
+        window.open(androidStoreUrl, '_blank');
+      } else {
+        toast.info("MEBİ Web Platformu açılıyor...");
+        window.open('https://mebi.eba.gov.tr', '_blank');
+      }
       return;
     }
 
@@ -68,10 +78,10 @@ export default function SubjectCard({ subject, onAddQuestions }: SubjectCardProp
       const canOpen = await AppLauncher.canOpenUrl({ url: appUrl });
       if (canOpen.value) {
         await AppLauncher.openUrl({ url: appUrl });
-        toast.info("MEB uygulaması açılıyor...");
+        toast.info("MEBİ uygulaması açılıyor...");
       } else {
         await Browser.open({ url: storeUrl });
-        toast.info("MEB uygulaması bulunamadı, mağaza açılıyor...");
+        toast.info("MEBİ uygulaması bulunamadı, mağaza açılıyor...");
       }
     } catch (e) {
       console.error('Uygulama açılırken hata oluştu, mağaza deneniyor:', e);
