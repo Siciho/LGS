@@ -1,7 +1,7 @@
 // src/pages/PracticePage.tsx
 
-import { useState, useMemo } from "react"; 
-import { Question, SolvedStat, Subject } from "@/types";
+import { useState, useMemo, useEffect } from "react"; 
+import { Question, SolvedStat, Subject, ChallengeOpponent, UserAvatars } from "@/types";
 import { questions as allQuestions } from "@/data/questions";
 import { useAppContext } from "./AppLayout";
 import QuestionSolver from "@/components/QuestionSolver";
@@ -12,13 +12,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Swords, Trophy, Lock, History, ChevronDown } from "lucide-react";
+import { Swords, Trophy, Lock, History, ChevronDown, Search, Shuffle, User, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { dailyWords } from "@/data/dailywords";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { isTopicActive } from "@/curriculum";
 import ChallengeHistory from "@/components/ChallengeHistory";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { avatars } from "@/data/avatars";
+import { supabase } from "@/supabaseClient";
+
+const defaultAvatar = avatars.find(a => a.id === 'default')?.image || '';
 
 const badges = [
   { wins: 0, image: '/assets/default.png', name: 'Başlangıç Ligi' },
@@ -38,6 +45,42 @@ export default function PracticePage() {
   const { handleQuizCompletion, subjects: allSubjectsFromContext, dailySolvedSubjects, challengeWins } = useAppContext();
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false); 
+
+  const [selectedUnitForDialog, setSelectedUnitForDialog] = useState<number | null>(null);
+  const [showOpponentSelection, setShowOpponentSelection] = useState(false);
+  const [opponents, setOpponents] = useState<ChallengeOpponent[]>([]);
+  const [opponentsLoading, setOpponentsLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const { userId } = useAppContext();
+
+  useEffect(() => {
+    if (showOpponentSelection && userId) {
+      const fetchOpponents = async () => {
+        setOpponentsLoading(true);
+        const { data, error } = await supabase.rpc('get_challenge_opponents', { p_user_id: userId });
+        if (error) {
+          console.error("Rakip listesi çekilemedi:", error);
+          toast.error("Rakip listesi yüklenemedi.");
+        } else {
+          setOpponents(data || []);
+        }
+        setOpponentsLoading(false);
+      };
+      fetchOpponents();
+    }
+  }, [showOpponentSelection, userId]);
+
+  const filteredOpponents = useMemo(() => {
+    return opponents.filter(op =>
+      op.user_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [opponents, searchTerm]);
+
+  const getAvatarImage = (avatarData: UserAvatars | null) => {
+    const currentAvatarId = avatarData?.current || 'default';
+    return avatars.find(a => a.id === currentAvatarId)?.image || defaultAvatar;
+  };
 
 
   const handleSelectSubject = (subjectId: string) => {
@@ -185,7 +228,11 @@ export default function PracticePage() {
                 {wordUnits.map(unit => (
                   <Button 
                     key={unit} 
-                    onClick={() => navigate(`/word-quiz/${unit}`)}
+                    onClick={() => {
+                      setSelectedUnitForDialog(unit);
+                      setShowOpponentSelection(false);
+                      setSearchTerm('');
+                    }}
                     variant="default"
                     className="h-16"
                   >
@@ -229,6 +276,112 @@ export default function PracticePage() {
         </TabsContent>
         
       </Tabs>
+
+      {/* Mod ve Rakip Seçim Modalı */}
+      <Dialog open={selectedUnitForDialog !== null} onOpenChange={(open) => { if (!open) setSelectedUnitForDialog(null); }}>
+        <DialogContent className="max-w-md max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Ünite {selectedUnitForDialog} Kelime Testi</DialogTitle>
+            <DialogDescription>
+              {!showOpponentSelection 
+                ? "Bu testi tek başına çözerek puan kazanabilir veya bir arkadaşına meydan okuyabilirsin."
+                : "Meydan okumak istediğin rakibini seç."}
+            </DialogDescription>
+          </DialogHeader>
+
+          {!showOpponentSelection ? (
+            <div className="grid grid-cols-2 gap-4 py-4">
+              <Button 
+                variant="outline" 
+                className="h-24 flex flex-col gap-2 font-semibold text-lg"
+                onClick={() => {
+                  const unit = selectedUnitForDialog;
+                  setSelectedUnitForDialog(null);
+                  navigate(`/word-quiz/${unit}`);
+                }}
+              >
+                <User className="h-6 w-6 text-muted-foreground" />
+                Tek Başına Çöz
+              </Button>
+              <Button 
+                variant="default" 
+                className="h-24 flex flex-col gap-2 font-semibold text-lg"
+                onClick={() => setShowOpponentSelection(true)}
+              >
+                <Swords className="h-6 w-6" />
+                Düello Başlat
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4 flex-1 overflow-hidden mt-2">
+              <Button 
+                variant="secondary" 
+                className="w-full flex items-center justify-center gap-2 py-6 font-semibold"
+                onClick={() => {
+                  const unit = selectedUnitForDialog;
+                  setSelectedUnitForDialog(null);
+                  navigate(`/word-quiz/${unit}`, { state: { duelMode: 'random' } });
+                }}
+              >
+                <Shuffle className="h-5 w-5" />
+                Rastgele Rakip Bul ve Başlat
+              </Button>
+
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Arkadaş ara..."
+                  className="pl-8"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              <ScrollArea className="flex-1 min-h-[200px] max-h-[40vh] pr-2 mt-2">
+                <div className="space-y-2">
+                  {opponentsLoading && <p className="text-center text-muted-foreground py-4">Yükleniyor...</p>}
+                  {!opponentsLoading && filteredOpponents.length === 0 && (
+                    <p className="text-center text-muted-foreground py-4">Rakip bulunamadı.</p>
+                  )}
+                  {filteredOpponents.map(opponent => (
+                    <div key={opponent.user_id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted border border-transparent hover:border-border transition-all">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={getAvatarImage(opponent.user_avatar)}
+                          alt={opponent.user_name}
+                          className="w-10 h-10 rounded-full border border-border"
+                        />
+                        <span className="font-medium text-sm">{opponent.user_name}</span>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        onClick={() => {
+                          const unit = selectedUnitForDialog;
+                          setSelectedUnitForDialog(null);
+                          navigate(`/word-quiz/${unit}`, { 
+                            state: { 
+                              duelMode: 'friend', 
+                              opponentId: opponent.user_id, 
+                              opponentName: opponent.user_name 
+                            } 
+                          });
+                        }}
+                      >
+                        <Send className="h-4 w-4 mr-1.5" />
+                        Seç ve Başlat
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              
+              <Button variant="ghost" onClick={() => setShowOpponentSelection(false)} className="mt-2">
+                Geri Dön
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
