@@ -162,7 +162,7 @@ export const useStudyData = (
       correctCount = 0;
       incorrectCount = 6;
     } else {
-      correctCount = solvedStats.filter(s => s.correct).length ; 0;
+      correctCount = solvedStats.filter(s => s.correct).length;
       incorrectCount = 6 - correctCount;
     }
 

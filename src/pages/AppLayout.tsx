@@ -123,16 +123,14 @@ export default function AppLayout() {
       const todayStr = today.toISOString().split('T')[0]; 
       
       if (lastActiveDate !== todayStr) {
-        const lastDate = new Date(lastActiveDate);
-        const yesterday = new Date();
-        yesterday.setDate(today.getDate() - 1);
-        const yesterdayStart = new Date(yesterday.setHours(0, 0, 0, 0));
+        const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
         
-        if (lastDate.getTime() < yesterdayStart.getTime()) {
+        if (lastActiveDate < yesterdayStr) {
           if (streak > 0) {
             if (streakFreezes > 0) {
               setStreakFreezes(prev => prev - 1);
-              setLastActiveDate(yesterday.toISOString().split('T')[0]);
+              setLastActiveDate(yesterdayStr);
               toast.info("Bir gün ara verdin ama Seri Dondurma serini kurtardı! ❄️");
             } else {
               setStreak(0);

@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Timer } from "lucide-react";
+import { supabase } from '@/supabaseClient';
+
+const DEFAULT_LGS_DATE = '2026-06-07T09:30:00';
+const CACHE_KEY = 'lgs_app_target_lgs_date';
 
 const LgsCountdown = () => {
-  // LGS 2026 sınav tarihi (Haziran ayının ilk Pazarı olarak tahmin edilmiştir)
-  const targetDate = new Date('2026-06-07T09:30:00');
+  const [targetDateStr, setTargetDateStr] = useState<string>(() => {
+    return localStorage.getItem(CACHE_KEY) || DEFAULT_LGS_DATE;
+  });
 
-  const calculateTimeLeft = () => {
+  const calculateTimeLeft = (targetStr: string) => {
+    const targetDate = new Date(targetStr);
     const difference = +targetDate - +new Date();
     let timeLeft = {
       days: 0,
@@ -26,18 +32,38 @@ const LgsCountdown = () => {
     return timeLeft;
   };
 
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft(targetDateStr));
 
-  // DÜZELTME: useEffect artık sadece bileşen ilk yüklendiğinde çalışacak
-  // ve her saniye kendini tekrar render etmeyecek.
   useEffect(() => {
+    const fetchTargetDate = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('sistem_ayarlari')
+          .select('deger')
+          .eq('anahtar', 'lgs_tarihi')
+          .maybeSingle();
+
+        if (!error && data?.deger) {
+          setTargetDateStr(data.deger);
+          localStorage.setItem(CACHE_KEY, data.deger);
+        }
+      } catch (err) {
+        console.error('LGS tarihi Supabase\'den çekilemedi:', err);
+      }
+    };
+
+    fetchTargetDate();
+  }, []);
+
+  useEffect(() => {
+    setTimeLeft(calculateTimeLeft(targetDateStr));
+
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
+      setTimeLeft(calculateTimeLeft(targetDateStr));
     }, 1000);
 
-    // Bileşen ekrandan kaldırıldığında zamanlayıcıyı temizle
     return () => clearInterval(timer);
-  }, []); // Boş dependency array, bu etkinin sadece bir kez çalışmasını sağlar
+  }, [targetDateStr]);
 
   return (
     <Card className="shadow-lg border-primary/20 bg-gradient-to-r from-purple-600 to-indigo-600 text-white">

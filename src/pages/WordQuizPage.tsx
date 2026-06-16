@@ -26,7 +26,7 @@ export default function WordQuizPage() {
   const navigate = useNavigate();
   const location = useLocation();
   // --- DEĞİŞİKLİK 2: 'isMuted' context'ten alındı ---
-  const { dismissChallenge, userId, isMuted } = useAppContext();
+  const { dismissChallenge, userId, isMuted, setTotalPoints, setLifetimePoints } = useAppContext();
 
   const challengeId = location.state?.challengeId;
 
@@ -160,6 +160,13 @@ export default function WordQuizPage() {
         const finalCorrectCount = isCorrectNow ? correctCount + 1 : correctCount;
         
         setFinalTime(timeTaken);
+
+        const earnedPoints = finalCorrectCount * 10;
+        if (setTotalPoints && setLifetimePoints && earnedPoints > 0) {
+          setTotalPoints(prev => prev + earnedPoints);
+          setLifetimePoints(prev => prev + earnedPoints);
+          toast.success(`${earnedPoints} puan kazandın! 🪙`);
+        }
 
         if (challengeId) {
           const { data, error } = await supabase.from('challenges').update({
