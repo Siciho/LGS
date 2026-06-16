@@ -26,6 +26,7 @@ export const useCoreData = (
   const [userAvatars, setUserAvatars] = useState<UserAvatars>({ current: 'default', unlocked: ['default'] });
   const [challengeWins, setChallengeWins] = useState(0);
   const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
+  const [isTestAccount, setIsTestAccount] = useState(false);
 
   const isPrivilegedUser = useMemo(() => {
     const lowerCaseRole = userRole?.toLowerCase();
@@ -49,6 +50,7 @@ export const useCoreData = (
       setChallengeWins(0);
       setUserAvatars({ current: 'default', unlocked: ['default'] });
       setAchievements(initialAchievementsData);
+      setIsTestAccount(false);
       return; 
     }
 
@@ -67,9 +69,10 @@ export const useCoreData = (
         const { data: cloudData, error } = cloudDataRes;
         
         if (!error && cloudData) {
-            const isTestAccount = cloudData.is_test_account === true;
+            const isTest = cloudData.is_test_account === true;
+            setIsTestAccount(isTest);
             
-            if (isPrivilegedUser || isTestAccount) {
+            if (isPrivilegedUser || isTest) {
                 // ... (Ayrıcalıklı kullanıcı yüklemesi aynı kalır) ...
                 let savedAvatarCurrent = 'default';
                 if (cloudData.avatar) {
@@ -81,10 +84,12 @@ export const useCoreData = (
                 storage.saveUserAvatars(userId, finalPrivilegedAvatars);
                 setTotalPoints(9999);
                 setLifetimePoints(9999); // Test hesabı için bu da güncellendi
-                setStreak(99);
+                setStreak(9999);
+                setStreakFreezes(99);
                 setAchievements(initialAchievementsData.map(a => ({ ...a, unlocked: true, unlockedAt: new Date() })));
                 setChallengeWins(999);
             } else {
+                setIsTestAccount(false);
                 // --- DEĞİŞİKLİK 3: Her iki puan da set ediliyor ---
                 setTotalPoints(cloudData.puan ?? 0); // Cüzdan
                 setLifetimePoints(cloudData.toplam_kazanilan_puan ?? cloudData.puan ?? 0); // Sıralama Puanı (Eğer yeni sütun boşsa eskisini kullanır)
@@ -110,6 +115,7 @@ export const useCoreData = (
                 setAchievements(syncedAchievements);
             }
         } else {
+            setIsTestAccount(false);
             // ... (Lokal depolama yüklemesi aynı kalır, ancak lifetimePoints eklenir) ...
             setTotalPoints(storage.loadPoints(userId));
             setLifetimePoints(storage.loadPoints(userId)); // Lokal depolamada ayrım olmadığı için ikisine de aynısını yüklüyoruz
@@ -130,7 +136,7 @@ export const useCoreData = (
 
   // --- DEĞİŞİKLİK 4: Bu useEffect artık HER İKİ PUANI da güncelliyor ---
   useEffect(() => {
-    if (!isInitialized || !userId || isPrivilegedUser) return;
+    if (!isInitialized || !userId || isPrivilegedUser || isTestAccount) return;
     
     // NOT: Bu zamanlayıcı puan kazanma (quiz sonrası) veya seri artışı içindir.
     // 'harcama' işlemleri (handleBuyAvatar) GECİKMEZ.
@@ -151,15 +157,15 @@ export const useCoreData = (
 
     return () => clearTimeout(debounceTimer);
   // 'lifetimePoints' bağımlılıklara eklendi
-  }, [totalPoints, lifetimePoints, streak, streakFreezes, isInitialized, userId, isPrivilegedUser]);
+  }, [totalPoints, lifetimePoints, streak, streakFreezes, isInitialized, userId, isPrivilegedUser, isTestAccount]);
 
   useEffect(() => {
-    if (isInitialized && userId && achievements.length > 0 && !isPrivilegedUser) {
+    if (isInitialized && userId && achievements.length > 0 && !isPrivilegedUser && !isTestAccount) {
       storage.saveAchievements(userId, achievements);
       const unlockedIds = achievements.filter(a => a.unlocked).map(a => a.id);
       updateUserCloudData({ kazanilan_basarimlar: unlockedIds });
     }
-  }, [achievements, isInitialized, userId, isPrivilegedUser]);
+  }, [achievements, isInitialized, userId, isPrivilegedUser, isTestAccount]);
 
   const handleSetAvatar = (avatarId: string) => {
     if (!userId) return;
@@ -170,7 +176,9 @@ export const useCoreData = (
       };
       setUserAvatars(newAvatarsState);
       storage.saveUserAvatars(userId, newAvatarsState);
-      updateUserCloudData({ avatar: newAvatarsState });
+      if (!isPrivilegedUser && !isTestAccount) {
+        updateUserCloudData({ avatar: newAvatarsState });
+      }
       toast.success("Avatarın değiştirildi!");
       playConfirmSound(isMuted);
     }
@@ -178,7 +186,7 @@ export const useCoreData = (
 
   // --- DEĞİŞİKLİK 5: Avatar Satın Alma ---
   const handleBuyAvatar = (avatarId: string) => {
-    if (!userId || isPrivilegedUser) return;
+    if (!userId || isPrivilegedUser || isTestAccount) return;
     const avatar = allAvatars.find(a => a.id === avatarId);
     if (!avatar || avatar.unlockMethod !== 'purchase') return;
     const price = avatar.price || 0;
@@ -212,7 +220,7 @@ export const useCoreData = (
   
   // --- DEĞİŞİKLİK 6: Seri Dondurma Satın Alma ---
   const handleBuyStreakFreeze = () => {
-    if (!userId || isPrivilegedUser) return;
+    if (!userId || isPrivilegedUser || isTestAccount) return;
     const price = 200; 
     
     if (totalPoints >= price) {
@@ -300,5 +308,6 @@ export const useCoreData = (
     handleSetAvatar,
     checkAchievements,
     isCloudDataLoaded,
+    isTestAccount,
   };
 };
