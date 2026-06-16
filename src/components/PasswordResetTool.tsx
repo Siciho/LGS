@@ -29,11 +29,11 @@ export default function PasswordResetTool() {
       const { data, error } = await supabase
         .from('kullanicilar')
         .select('id, ad_soyad')
-        .eq('rol', 'ogrenci')
+        .in('rol', ['ogrenci', 'koç'])
         .order('ad_soyad', { ascending: true });
 
       if (error) {
-        toast.error("Öğrenci listesi yüklenemedi.");
+        toast.error("Kullanıcı listesi yüklenemedi.");
         console.error(error);
       } else {
         setStudents(data || []);
@@ -53,7 +53,7 @@ export default function PasswordResetTool() {
 
   const handleResetPassword = async () => {
     if (!selectedStudent) {
-      toast.error("Lütfen bir öğrenci seçin.");
+      toast.error("Lütfen bir kullanıcı seçin.");
       return;
     }
     if (!newPassword || newPassword.length < 6) {
@@ -74,7 +74,7 @@ export default function PasswordResetTool() {
     if (error) {
       toast.error(`Şifre sıfırlanırken hata oluştu: ${error.message}`);
     } else {
-      toast.success(`${selectedStudent.ad_soyad} adlı öğrencinin şifresi başarıyla güncellendi.`);
+      toast.success(`${selectedStudent.ad_soyad} adlı kullanıcının şifresi başarıyla güncellendi.`);
       setNewPassword("");
       setSelectedStudent(null);
     }
@@ -88,7 +88,7 @@ export default function PasswordResetTool() {
           <KeyRound className="h-5 w-5 text-primary" /> Yönetici Paneli: Şifre Sıfırlama
         </CardTitle>
         <CardDescription>
-          Bir öğrencinin şifresini unuttuğunda buradan onun için yeni bir şifre belirleyebilirsiniz.
+          Bir öğrenci veya koçun şifresini unuttuğunda buradan onun için yeni bir şifre belirleyebilirsiniz.
         </CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -97,7 +97,7 @@ export default function PasswordResetTool() {
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Öğrenci ara..."
+              placeholder="Kullanıcı ara..."
               className="pl-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -105,7 +105,7 @@ export default function PasswordResetTool() {
           </div>
           {loading ? (
             <div className="flex items-center justify-center h-72 rounded-md border p-2">
-              <p>Öğrenciler yükleniyor...</p>
+              <p>Kullanıcılar yükleniyor...</p>
             </div>
           ) : (
             <ScrollArea className="h-72 rounded-md border p-2">
@@ -155,7 +155,7 @@ export default function PasswordResetTool() {
           ) : (
             <div className="text-center text-muted-foreground">
               <KeyRound className="h-10 w-10 mx-auto mb-4 text-gray-400" />
-              <p>Lütfen listeden şifresini sıfırlamak istediğiniz öğrenciyi seçin.</p>
+              <p>Lütfen listeden şifresini sıfırlamak istediğiniz kullanıcıyı seçin.</p>
             </div>
           )}
         </div>
