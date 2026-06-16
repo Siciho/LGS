@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.student.app',
-  appName: 'Öğrenci+',
+  appName: 'LGS Asistanım',
   webDir: 'dist',
   // YENİ EKLENEN BÖLÜM
   plugins: {
