@@ -74,6 +74,71 @@ export const useScheduler = (userId: string | null, isInitialized: boolean) => {
     storage.saveNotificationSettings(notificationSettings);
   }, [notificationSettings]);
 
+  const scheduleBagNotifications = async (
+    settings: NotificationSettings,
+    schedule: ManualSchedule | null
+  ) => {
+    try {
+      // Önce mevcut çanta bildirimlerini temizle (ID'ler: 9001 - 9007)
+      const pending = await LocalNotifications.getPending();
+      const idsToCancel = pending.notifications
+        .map(n => n.id)
+        .filter(id => id >= 9001 && id <= 9007);
+      
+      if (idsToCancel.length > 0) {
+        await LocalNotifications.cancel({ notifications: idsToCancel.map(id => ({ id })) });
+      }
+
+      // Eğer bildirim kapalıysa veya ders programı yoksa çık
+      if (!settings.bagReminder?.enabled || !schedule) {
+        return;
+      }
+
+      const notificationsToSchedule = [];
+
+      for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+        // Yarınki günün indeksini al (Pazartesi günü ders varsa Pazar akşamı hazırlık yapılır)
+        const tomorrowIndex = (dayIndex + 1) % 7;
+        const tomorrowDayName = weekDaysForLookup[tomorrowIndex];
+        const tomorrowLessons = schedule[tomorrowDayName] || [];
+        const tomorrowSubjectsList = [...new Set(tomorrowLessons.map(l => l.subject).filter(Boolean))];
+
+        // Eğer yarın ders varsa, bu akşam (dayIndex) çanta hazırlama bildirimini kuracağız
+        if (tomorrowSubjectsList.length > 0) {
+          const notificationId = 9001 + dayIndex;
+          
+          notificationsToSchedule.push({
+            id: notificationId,
+            title: "Çanta Hazırlama Hatırlatıcısı 🎒",
+            body: `Yarınki derslerin: ${tomorrowSubjectsList.join(', ')}. Kitap ve defterlerini çantana koydun mu?`,
+            schedule: {
+              allowWhileIdle: true,
+              on: {
+                // weekday: Sunday = 1, Monday = 2, ..., Saturday = 7
+                weekday: dayIndex + 1,
+                hour: settings.bagReminder.hour,
+                minute: settings.bagReminder.minute
+              },
+              repeats: true
+            }
+          });
+        }
+      }
+
+      if (notificationsToSchedule.length > 0) {
+        await LocalNotifications.schedule({ notifications: notificationsToSchedule });
+      }
+    } catch (e) {
+      console.error("Çanta hazırlama bildirimleri ayarlanırken hata:", e);
+    }
+  };
+
+  // Çanta hazırlama bildirimlerini güncelle
+  useEffect(() => {
+    if (isInitialized && userId) {
+      scheduleBagNotifications(notificationSettings, manualSchedule);
+    }
+  }, [notificationSettings, manualSchedule, isInitialized, userId]);
 
   const handleUpdateManualSchedule = (newSchedule: ManualSchedule) => {
     setManualSchedule(newSchedule);
