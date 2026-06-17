@@ -4,14 +4,105 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, Pencil, Save, X, BookOpen, Clock } from "lucide-react";
+import { Plus, Trash2, Pencil, Save, X, BookOpen, Clock, User } from "lucide-react";
 import { AddStudyPlanDialog } from "@/components/AddStudyPlanDialog";
 import { StudyPlanEntry, ManualSchedule } from "@/types";
 import { emptySchedule } from '@/data/schedule';
 import { subjects as allSubjectsData } from '@/data/subjects';
+import { cn } from "@/lib/utils";
 
 const weekDays = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma"];
 const allWeekDays = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
+
+const dayShortNames: Record<string, string> = {
+  "Pazartesi": "Pzt",
+  "Salı": "Sal",
+  "Çarşamba": "Çar",
+  "Perşembe": "Per",
+  "Cuma": "Cum"
+};
+
+const getSubjectVisuals = (subjectName: string) => {
+  const name = (subjectName || "").trim().toUpperCase();
+  if (name.includes("MAT") || name.includes("MATE")) {
+    return {
+      icon: "➗",
+      bg: "bg-blue-500/10 dark:bg-blue-500/20",
+      text: "text-blue-600 dark:text-blue-400",
+      border: "border-blue-500/30",
+      sideBorder: "border-l-blue-500",
+      label: "Matematik"
+    };
+  }
+  if (name.includes("FEN") || name.includes("FİZ") || name.includes("KİM") || name.includes("BİY")) {
+    return {
+      icon: "🔬",
+      bg: "bg-emerald-500/10 dark:bg-emerald-500/20",
+      text: "text-emerald-600 dark:text-emerald-400",
+      border: "border-emerald-500/30",
+      sideBorder: "border-l-emerald-500",
+      label: "Fen Bilimleri"
+    };
+  }
+  if (name.includes("TÜR") || name.includes("TUR") || name.includes("EDEB")) {
+    return {
+      icon: "✍️",
+      bg: "bg-amber-500/10 dark:bg-amber-500/20",
+      text: "text-amber-600 dark:text-amber-400",
+      border: "border-amber-500/30",
+      sideBorder: "border-l-amber-500",
+      label: "Türkçe"
+    };
+  }
+  if (name.includes("İNG") || name.includes("ING") || name.includes("ENG")) {
+    return {
+      icon: "🇬🇧",
+      bg: "bg-violet-500/10 dark:bg-violet-500/20",
+      text: "text-violet-600 dark:text-violet-400",
+      border: "border-violet-500/30",
+      sideBorder: "border-l-violet-500",
+      label: "İngilizce"
+    };
+  }
+  if (name.includes("İNK") || name.includes("TAR") || name.includes("TARİH")) {
+    return {
+      icon: "🇹🇷",
+      bg: "bg-rose-500/10 dark:bg-rose-500/20",
+      text: "text-rose-600 dark:text-rose-400",
+      border: "border-rose-500/30",
+      sideBorder: "border-l-rose-500",
+      label: "İnkılap Tarihi"
+    };
+  }
+  if (name.includes("DİN") || name.includes("DKAB") || name.includes("AHL")) {
+    return {
+      icon: "🕌",
+      bg: "bg-teal-500/10 dark:bg-teal-500/20",
+      text: "text-teal-600 dark:text-teal-400",
+      border: "border-teal-500/30",
+      sideBorder: "border-l-teal-500",
+      label: "Din Kültürü"
+    };
+  }
+  if (!name || name === "BOŞ" || name === "BOS" || name === "-") {
+    return {
+      icon: "😴",
+      bg: "bg-slate-500/10 dark:bg-slate-500/20",
+      text: "text-slate-500 dark:text-slate-400",
+      border: "border-slate-500/20",
+      sideBorder: "border-l-slate-400/50",
+      label: "Boş Ders"
+    };
+  }
+  return {
+    icon: "📚",
+    bg: "bg-indigo-500/10 dark:bg-indigo-500/20",
+    text: "text-indigo-600 dark:text-indigo-400",
+    border: "border-indigo-500/30",
+    sideBorder: "border-l-indigo-500",
+    label: subjectName
+  };
+};
 
 export default function ProgramimSayfasi() {
   const { 
@@ -109,54 +200,121 @@ export default function ProgramimSayfasi() {
                 )}
               </div>
             </CardHeader>
-            <CardContent>
-                <div className="bg-muted/30 rounded-md p-1 mb-4">
-                    <div className="flex gap-1 justify-between overflow-x-auto">
+            <CardContent className="p-4 md:p-6">
+                <div className="bg-muted/30 rounded-lg p-1.5 mb-6 border border-border/40 shadow-sm">
+                    <div className="flex gap-1.5 justify-between overflow-x-auto">
                         {weekDays.map(day => (
                         <Button 
                             key={day} 
                             variant={selectedDay === day ? "default" : "ghost"}
                             size="sm"
                             onClick={() => setSelectedDay(day)}
-                            className="flex-1"
+                            className={cn(
+                              "flex-1 font-semibold rounded-md transition-all duration-200 py-2.5 h-auto",
+                              selectedDay === day 
+                                ? "shadow-sm bg-primary text-primary-foreground font-bold" 
+                                : "text-muted-foreground hover:text-foreground"
+                            )}
                         >
-                            {day}
+                            <span className="hidden md:inline">{day}</span>
+                            <span className="md:hidden">{dayShortNames[day] || day}</span>
                         </Button>
                         ))}
                     </div>
                 </div>
-              <div className="space-y-1">
+              <div className="space-y-3">
                 {lessonsForSelectedDay.length > 0 ? (
-                  lessonsForSelectedDay.map((lesson, lessonIndex) => (
-                    // === DEĞİŞİKLİK BURADA BAŞLIYOR ===
-                    <div key={lessonIndex} className="grid grid-cols-[auto_1fr_1fr] gap-3 items-center bg-muted/30 p-2 rounded-md">
-                      <span className="font-mono font-bold text-muted-foreground text-center w-6">{lessonIndex + 1}</span>
-                      {isEditingManual ? (
-                        <>
-                          <Input
-                            value={lesson.subject}
-                            onChange={(e) => handleManualEditChange(selectedDay, lessonIndex, 'subject', e.target.value)}
-                            placeholder="DERS KODU"
-                            className="uppercase h-9"
-                          />
+                  lessonsForSelectedDay.map((lesson, lessonIndex) => {
+                    const visuals = getSubjectVisuals(lesson.subject);
+                    return isEditingManual ? (
+                      <div 
+                        key={lessonIndex} 
+                        className={cn(
+                          "flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl border bg-muted/20 border-l-4 shadow-sm transition-all duration-200",
+                          visuals.sideBorder,
+                          "border-border/60"
+                        )}
+                      >
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className={cn(
+                            "flex items-center justify-center h-8 w-8 rounded-full font-extrabold text-sm shrink-0",
+                            visuals.bg, visuals.text
+                          )}>
+                            {lessonIndex + 1}
+                          </div>
+                          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground sm:hidden">. Ders</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3 flex-1">
+                          <div className="relative">
+                            <Input
+                              value={lesson.subject}
+                              onChange={(e) => handleManualEditChange(selectedDay, lessonIndex, 'subject', e.target.value)}
+                              placeholder="Ders Kodu (Örn: MAT)"
+                              className="uppercase h-10 pr-8 font-semibold tracking-wide"
+                            />
+                            <span className="absolute right-2.5 top-2.5 text-base pointer-events-none" role="img" aria-label="subject icon">
+                              {visuals.icon}
+                            </span>
+                          </div>
                           <Input
                             value={lesson.teacher}
                             onChange={(e) => handleManualEditChange(selectedDay, lessonIndex, 'teacher', e.target.value)}
-                            placeholder="ÖĞRETMEN"
-                            className="uppercase h-9"
+                            placeholder="Öğretmen"
+                            className="uppercase h-10 font-medium"
                           />
-                        </>
-                      ) : (
-                        <>
-                          <p className="font-semibold px-2">{lesson.subject || "Boş Ders"}</p>
-                          <p className="text-sm text-muted-foreground px-2">{lesson.teacher || "-"}</p>
-                        </>
-                      )}
-                    </div>
-                     // === DEĞİŞİKLİK BURADA BİTİYOR ===
-                  ))
+                        </div>
+                      </div>
+                    ) : (
+                      <div 
+                        key={lessonIndex} 
+                        className={cn(
+                          "flex items-center gap-4 p-3.5 rounded-xl border-l-4 shadow-sm bg-card hover:bg-muted/10 transition-all duration-300 border border-border/50 hover:translate-x-1",
+                          visuals.sideBorder
+                        )}
+                      >
+                        {/* Ders Numarası */}
+                        <div className={cn(
+                          "flex items-center justify-center h-9 w-9 rounded-full font-black text-sm shrink-0 shadow-inner",
+                          visuals.bg, visuals.text
+                        )}>
+                          {lessonIndex + 1}
+                        </div>
+
+                        {/* Ders İkonu */}
+                        <div className="text-2xl shrink-0 p-1 bg-muted/40 rounded-lg border border-border/20">
+                          {visuals.icon}
+                        </div>
+
+                        {/* Ders ve Öğretmen Bilgisi */}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-extrabold text-base tracking-tight truncate text-foreground leading-tight">
+                            {lesson.subject ? visuals.label : "Boş Ders"}
+                          </h4>
+                          {lesson.subject && (
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <span className="text-[10px] font-black uppercase tracking-widest bg-muted px-1.5 py-0.5 rounded border border-border/50 text-muted-foreground">
+                                {lesson.subject}
+                              </span>
+                              {lesson.teacher && (
+                                <>
+                                  <span className="text-muted-foreground/30 text-xs">•</span>
+                                  <p className="text-xs text-muted-foreground flex items-center gap-1 font-medium truncate max-w-[150px]">
+                                    <User className="h-3 w-3 inline text-muted-foreground/60" />
+                                    {lesson.teacher}
+                                  </p>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
                 ) : (
-                  <p className="text-center text-muted-foreground py-4">Seçili gün için ders programı boş.</p>
+                  <div className="text-center text-muted-foreground py-10 bg-muted/10 rounded-xl border border-dashed border-border/60">
+                    <p className="font-medium">Seçili gün için ders programı boş.</p>
+                  </div>
                 )}
               </div>
             </CardContent>
