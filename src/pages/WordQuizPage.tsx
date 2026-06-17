@@ -29,9 +29,6 @@ export default function WordQuizPage() {
   const { dismissChallenge, userId, isMuted, setTotalPoints, setLifetimePoints } = useAppContext();
 
   const challengeId = location.state?.challengeId;
-  const duelMode = location.state?.duelMode; // 'random' | 'friend'
-  const opponentId = location.state?.opponentId;
-  const opponentName = location.state?.opponentName;
 
   const [questions, setQuestions] = useState<any[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -143,43 +140,7 @@ export default function WordQuizPage() {
     } 
   };
 
-  const sendFriendChallenge = async (opponentId: string, opponentName: string, score: number, time: number) => {
-    if (!userId) {
-        toast.error("Düello göndermek için giriş yapmalısınız.");
-        return;
-    }
-    
-    setIsSendingChallenge(true);    
-    setChallengeSentToName(null);   
-    setSpinningName(opponentName);
 
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500)); 
-
-      setIsSendingChallenge(false);
-      setChallengeSentToName(opponentName); 
-      playSuccessSound(isMuted);
-      
-      const { error: insertError } = await supabase.from('challenges').insert({
-        challenger_id: userId,
-        opponent_id: opponentId,
-        unit_id: parseInt(unitId || '1'),
-        challenger_score: score,
-        challenger_time_seconds: time,
-        status: 'pending'
-      });
-      
-      if (insertError) throw insertError;
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-    } catch (error) {
-      setIsSendingChallenge(false); 
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      toast.error("Düello gönderilemedi.", { description: errorMsg });
-      setChallengeSentToName(null); 
-    } 
-  };
 
 
   const handleAnswerClick = async (option: string) => {
@@ -231,13 +192,6 @@ export default function WordQuizPage() {
 
         } else {
           setIsFinished(true);
-          
-          // Eğer önceden seçilmiş bir düello modu varsa otomatik olarak gönder
-          if (duelMode === 'random') {
-            sendRandomChallenge(finalCorrectCount, timeTaken);
-          } else if (duelMode === 'friend' && opponentId && opponentName) {
-            sendFriendChallenge(opponentId, opponentName, finalCorrectCount, timeTaken);
-          }
         }
       }
     }, 400);
