@@ -202,24 +202,28 @@ export default function ProgramimSayfasi() {
             </CardHeader>
             <CardContent className="p-4 md:p-6">
                 <div className="bg-muted/30 rounded-lg p-1.5 mb-6 border border-border/40 shadow-sm">
-                    <div className="flex gap-1.5 justify-between overflow-x-auto">
-                        {weekDays.map(day => (
-                        <Button 
-                            key={day} 
-                            variant={selectedDay === day ? "default" : "ghost"}
-                            size="sm"
-                            onClick={() => setSelectedDay(day)}
-                            className={cn(
-                              "flex-1 font-semibold rounded-md transition-all duration-200 py-2.5 h-auto",
-                              selectedDay === day 
-                                ? "shadow-sm bg-primary text-primary-foreground font-bold" 
-                                : "text-muted-foreground hover:text-foreground"
-                            )}
-                        >
-                            <span className="hidden md:inline">{day}</span>
-                            <span className="md:hidden">{dayShortNames[day] || day}</span>
-                        </Button>
-                        ))}
+                    <div className="grid grid-cols-6 md:grid-cols-5 gap-1.5">
+                        {weekDays.map((day, idx) => {
+                          const colSpan = idx < 3 ? "col-span-2 md:col-span-1" : "col-span-3 md:col-span-1";
+                          return (
+                            <Button 
+                                key={day} 
+                                variant={selectedDay === day ? "default" : "ghost"}
+                                size="sm"
+                                onClick={() => setSelectedDay(day)}
+                                className={cn(
+                                  "font-semibold rounded-md transition-all duration-200 py-2.5 h-auto w-full",
+                                  colSpan,
+                                  selectedDay === day 
+                                    ? "shadow-sm bg-primary text-primary-foreground font-bold" 
+                                    : "text-muted-foreground hover:text-foreground"
+                                )}
+                            >
+                                <span className="hidden md:inline">{day}</span>
+                                <span className="md:hidden">{dayShortNames[day] || day}</span>
+                            </Button>
+                          );
+                        })}
                     </div>
                 </div>
               <div className="space-y-3">
