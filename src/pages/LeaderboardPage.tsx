@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils';
 import { avatars } from '@/data/avatars';
 import { UserAvatars } from '@/types';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { useAppContext } from './AppLayout';
 
 interface LeaderboardEntry {
   rank: number; // Bu artık SADECE 'Tümü' filtresi için kullanılacak
@@ -40,6 +42,12 @@ const getRankText = (rank: number) => {
 };
 
 export default function LeaderboardPage() {
+  const { userRole } = useAppContext();
+  const isCoach = useMemo(() => {
+    const lowerRole = userRole?.toLowerCase();
+    return lowerRole === 'koç' || lowerRole === 'admin' || lowerRole === 'hoca';
+  }, [userRole]);
+
   const [timeFilter, setTimeFilter] = useState<'all' | 'month' | 'last_week'>('all');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]); 
   const [loading, setLoading] = useState(true);
@@ -222,7 +230,19 @@ export default function LeaderboardPage() {
                   alt={selectedStudent.user_name}
                   className="w-24 h-24 rounded-full border-4 border-primary/20"
                 />
-                <DialogTitle className="text-2xl mt-4">{selectedStudent.user_name}</DialogTitle>
+                <DialogTitle className="text-2xl mt-4">
+                  {isCoach ? (
+                    <Link 
+                      to={`/student/${selectedStudent.user_id}`} 
+                      className="text-primary hover:underline hover:opacity-90 inline-flex items-center gap-1.5"
+                    >
+                      {selectedStudent.user_name}
+                      <span className="text-[10px] uppercase tracking-wider font-extrabold bg-primary/10 text-primary px-2 py-0.5 rounded-full select-none">Detayları Gör ➔</span>
+                    </Link>
+                  ) : (
+                    selectedStudent.user_name
+                  )}
+                </DialogTitle>
                 <DialogDescription>
                   {selectedStudent.user_class} Sınıfı
                   {' - '}
