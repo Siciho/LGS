@@ -444,4 +444,53 @@ export const avatars: Avatar[] = [
     "unlockMethod": "purchase",
     "price": 100000
   },
+  {
+    "id": "ironman",
+    "name": "Demir Adam",
+    "image": "/avatars/ironman.png",
+    "unlockMethod": "purchase",
+    "price": 300
+  },
+  {
+    "id": "thor",
+    "name": "Thor",
+    "image": "/avatars/thor.png",
+    "unlockMethod": "purchase",
+    "price": 250
+  },
+  {
+    "id": "hulk",
+    "name": "Hulk",
+    "image": "/avatars/hulk.png",
+    "unlockMethod": "purchase",
+    "price": 250
+  },
+  {
+    "id": "jack",
+    "name": "Jack Sparrow",
+    "image": "/avatars/jack.png",
+    "unlockMethod": "purchase",
+    "price": 250
+  },
+  {
+    "id": "barbie",
+    "name": "Barbie",
+    "image": "/avatars/barbie.png",
+    "unlockMethod": "purchase",
+    "price": 300
+  },
+  {
+    "id": "elsa",
+    "name": "Elsa",
+    "image": "/avatars/elsa.png",
+    "unlockMethod": "purchase",
+    "price": 275
+  },
+  {
+    "id": "hermione",
+    "name": "Hermione Granger",
+    "image": "/avatars/hermione.png",
+    "unlockMethod": "purchase",
+    "price": 275
+  },
 ];
