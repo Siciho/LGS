@@ -125,7 +125,7 @@ export default function AppLayout() {
 
   const coreData = useCoreData(userId, userName, userRole, isInitialized, isMuted);
   const studyData = useStudyData(userId, isInitialized, isMuted, (result, newDailySolvedCount) => {
-    if (userRole?.toLowerCase() === 'koç' || userRole?.toLowerCase() === 'admin' || coreData.isTestAccount) return;
+    if (userRole?.toLowerCase() === 'koç' || userRole?.toLowerCase() === 'admin') return;
     if (coreData.setTotalPoints && coreData.setLifetimePoints && coreData.setStreak) {
         const earnedPoints = result.correct * 10;
         coreData.setTotalPoints(prev => prev + earnedPoints);
@@ -187,7 +187,7 @@ export default function AppLayout() {
   }, [navigate]);
 
   useEffect(() => {
-    if (userId && userRole !== 'koç' && userRole !== 'admin' && !coreData.isTestAccount && !studyData.isLoading && studyData.lastActiveDate && coreData.setStreak) {
+    if (userId && userRole !== 'koç' && userRole !== 'admin' && !studyData.isLoading && studyData.lastActiveDate && coreData.setStreak) {
       const { lastActiveDate, setLastActiveDate } = studyData;
       const { streak, streakFreezes, setStreak, setStreakFreezes } = coreData;
       const today = new Date();
@@ -212,7 +212,7 @@ export default function AppLayout() {
         }
       }
     }
-  }, [userId, userRole, studyData.isLoading, studyData.lastActiveDate, coreData.streak, isMuted, coreData.isTestAccount]);
+  }, [userId, userRole, studyData.isLoading, studyData.lastActiveDate, coreData.streak, isMuted]);
 
   useEffect(() => {
     const requestPermissions = async () => {
@@ -224,10 +224,10 @@ export default function AppLayout() {
   }, []);
 
   useEffect(() => {
-    if (coreData.isCloudDataLoaded && userId && studyData.subjects?.length > 0 && userRole !== 'koç' && userRole !== 'admin' && !coreData.isTestAccount) {
+    if (coreData.isCloudDataLoaded && userId && studyData.subjects?.length > 0 && userRole !== 'koç' && userRole !== 'admin') {
       coreData.checkAchievements(studyData.subjects, { type: 'questions' });
     }
-  }, [coreData.isCloudDataLoaded, userId, studyData.subjects, userRole, coreData, coreData.isTestAccount]);
+  }, [coreData.isCloudDataLoaded, userId, studyData.subjects, userRole, coreData]);
 
   useEffect(() => { storage.saveIsMuted(isMuted); }, [isMuted]);
   

@@ -72,7 +72,7 @@ export const useCoreData = (
             const isTest = cloudData.is_test_account === true;
             setIsTestAccount(isTest);
             
-            if (isPrivilegedUser || isTest) {
+            if (isPrivilegedUser) {
                 // ... (Ayrıcalıklı kullanıcı yüklemesi aynı kalır) ...
                 let savedAvatarCurrent = 'default';
                 if (cloudData.avatar) {
@@ -89,7 +89,6 @@ export const useCoreData = (
                 setAchievements(initialAchievementsData.map(a => ({ ...a, unlocked: true, unlockedAt: new Date() })));
                 setChallengeWins(999);
             } else {
-                setIsTestAccount(false);
                 // --- DEĞİŞİKLİK 3: Her iki puan da set ediliyor ---
                 setTotalPoints(cloudData.puan ?? 0); // Cüzdan
                 setLifetimePoints(cloudData.toplam_kazanilan_puan ?? cloudData.puan ?? 0); // Sıralama Puanı (Eğer yeni sütun boşsa eskisini kullanır)
@@ -136,7 +135,7 @@ export const useCoreData = (
 
   // --- DEĞİŞİKLİK 4: Bu useEffect artık HER İKİ PUANI da güncelliyor ---
   useEffect(() => {
-    if (!isInitialized || !userId || isPrivilegedUser || isTestAccount) return;
+    if (!isInitialized || !userId || isPrivilegedUser) return;
     
     // NOT: Bu zamanlayıcı puan kazanma (quiz sonrası) veya seri artışı içindir.
     // 'harcama' işlemleri (handleBuyAvatar) GECİKMEZ.
@@ -160,7 +159,7 @@ export const useCoreData = (
   }, [totalPoints, lifetimePoints, streak, streakFreezes, isInitialized, userId, isPrivilegedUser, isTestAccount]);
 
   useEffect(() => {
-    if (isInitialized && userId && achievements.length > 0 && !isPrivilegedUser && !isTestAccount) {
+    if (isInitialized && userId && achievements.length > 0 && !isPrivilegedUser) {
       storage.saveAchievements(userId, achievements);
       const unlockedIds = achievements.filter(a => a.unlocked).map(a => a.id);
       updateUserCloudData({ kazanilan_basarimlar: unlockedIds });
@@ -176,7 +175,7 @@ export const useCoreData = (
       };
       setUserAvatars(newAvatarsState);
       storage.saveUserAvatars(userId, newAvatarsState);
-      if (!isPrivilegedUser && !isTestAccount) {
+      if (!isPrivilegedUser) {
         updateUserCloudData({ avatar: newAvatarsState });
       }
       toast.success("Avatarın değiştirildi!");
@@ -186,7 +185,7 @@ export const useCoreData = (
 
   // --- DEĞİŞİKLİK 5: Avatar Satın Alma ---
   const handleBuyAvatar = (avatarId: string) => {
-    if (!userId || isPrivilegedUser || isTestAccount) return;
+    if (!userId || isPrivilegedUser) return;
     const avatar = allAvatars.find(a => a.id === avatarId);
     if (!avatar || avatar.unlockMethod !== 'purchase') return;
     const price = avatar.price || 0;
@@ -220,7 +219,7 @@ export const useCoreData = (
   
   // --- DEĞİŞİKLİK 6: Seri Dondurma Satın Alma ---
   const handleBuyStreakFreeze = () => {
-    if (!userId || isPrivilegedUser || isTestAccount) return;
+    if (!userId || isPrivilegedUser) return;
     const price = 200; 
     
     if (totalPoints >= price) {
