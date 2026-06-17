@@ -241,6 +241,12 @@ export default function AppLayout() {
 
   const toggleMute = () => setIsMuted(prev => !prev);
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  const handleClaimGift = async () => {
+    if (coreData.claimGiftPoints) {
+      await coreData.claimGiftPoints();
+      toast.success("Ödül başarıyla hesabınıza eklendi! 🎉");
+    }
+  };
   
   const handleQuizCompletion = async (subjectId: string, solvedStats: SolvedStat[] | null) => {
     if (!studyData.handleQuizCompletion || !coreData.checkAchievements) return;
@@ -350,6 +356,63 @@ export default function AppLayout() {
               Şimdi Güncelle
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* HEDİYE PUAN KUTLAMA MODALI */}
+      <Dialog 
+        open={coreData.pendingGiftPoints > 0} 
+        onOpenChange={(open) => {
+          // Öğrenci modalı dışarı tıklayarak kapatamaz, hediye puanı al butonuna basmalıdır.
+        }}
+      >
+        <DialogContent className="max-w-sm sm:max-w-md rounded-2xl p-6 overflow-hidden border-2 border-yellow-500/30 bg-card/95 backdrop-blur-md">
+          {/* Arka plan süslemesi */}
+          <div className="absolute inset-0 bg-gradient-to-b from-yellow-500/5 to-transparent pointer-events-none" />
+
+          <div className="flex flex-col items-center text-center space-y-4 relative z-10 py-4">
+            <div className="relative">
+              <div className="text-6xl animate-bounce">🏆</div>
+              <div className="absolute -top-2 -left-2 text-2xl animate-ping opacity-75">✨</div>
+              <div className="absolute -bottom-2 -right-2 text-2xl animate-ping opacity-75">🎉</div>
+            </div>
+
+            <DialogTitle className="text-3xl font-black tracking-tight bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 bg-clip-text text-transparent">
+              Tebrikler! 🎉
+            </DialogTitle>
+            
+            <DialogDescription className="text-sm font-bold text-foreground">
+              Koçunuz sana özel bir başarı ödülü tanımladı!
+            </DialogDescription>
+
+            <div className="w-full bg-amber-500/10 border border-amber-500/25 p-4 rounded-2xl my-2">
+              <span className="text-xs font-black uppercase tracking-wider text-amber-500 dark:text-amber-400">Kazanılan Ödül</span>
+              <div className="text-4xl font-black text-amber-600 dark:text-amber-400 mt-1 mb-2 flex items-center justify-center gap-1.5">
+                <span>+{coreData.pendingGiftPoints}</span>
+                <span className="text-2xl">Puan</span>
+              </div>
+              
+              {coreData.pendingGiftReason && (
+                <div className="border-t border-amber-500/20 pt-2.5 mt-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Ödül Sebebi</span>
+                  <p className="text-sm text-foreground/90 font-semibold mt-0.5 leading-relaxed">
+                    "{coreData.pendingGiftReason}"
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-normal">
+              Ödül puanları cüzdanına ve liderlik sıralamana eklenmiştir. Başarılarının devamını dileriz!
+            </p>
+
+            <Button 
+              onClick={handleClaimGift}
+              className="w-full font-black text-lg bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white py-6 rounded-xl shadow-lg shadow-amber-500/20 hover:shadow-xl hover:translate-y-[-1px] transition-all"
+            >
+              Harika! Ödülü Al 🥳
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>

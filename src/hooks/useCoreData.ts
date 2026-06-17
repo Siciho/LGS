@@ -27,6 +27,8 @@ export const useCoreData = (
   const [challengeWins, setChallengeWins] = useState(0);
   const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
   const [isTestAccount, setIsTestAccount] = useState(false);
+  const [pendingGiftPoints, setPendingGiftPoints] = useState<number>(0);
+  const [pendingGiftReason, setPendingGiftReason] = useState<string>("");
 
   const isPrivilegedUser = useMemo(() => {
     const lowerCaseRole = userRole?.toLowerCase();
@@ -60,7 +62,7 @@ export const useCoreData = (
       try {
         const [cloudDataRes, winsDataRes] = await Promise.all([
           // --- DEĞİŞİKLİK 2: 'toplam_kazanilan_puan' sütunu da çekiliyor ---
-          supabase.from('kullanicilar').select('puan, toplam_kazanilan_puan, seri, seri_dondurma, avatar, kazanilan_basarimlar, is_test_account').eq('id', userId).maybeSingle(),
+          supabase.from('kullanicilar').select('puan, toplam_kazanilan_puan, seri, seri_dondurma, avatar, kazanilan_basarimlar, is_test_account, pending_gift_points, pending_gift_reason').eq('id', userId).maybeSingle(),
           supabase.rpc('get_challenge_win_count', { p_user_id: userId })
         ]);
 
@@ -92,6 +94,8 @@ export const useCoreData = (
                 // --- DEĞİŞİKLİK 3: Her iki puan da set ediliyor ---
                 setTotalPoints(cloudData.puan ?? 0); // Cüzdan
                 setLifetimePoints(cloudData.toplam_kazanilan_puan ?? cloudData.puan ?? 0); // Sıralama Puanı (Eğer yeni sütun boşsa eskisini kullanır)
+                setPendingGiftPoints(cloudData.pending_gift_points ?? 0);
+                setPendingGiftReason(cloudData.pending_gift_reason ?? "");
 
                 setStreak(cloudData.seri ?? 0);
                 setStreakFreezes(cloudData.seri_dondurma ?? 0);
@@ -243,6 +247,35 @@ export const useCoreData = (
     }
   };
 
+  const claimGiftPoints = async () => {
+    if (!userId || pendingGiftPoints <= 0) return;
+    
+    const pointsToAdd = pendingGiftPoints;
+    const newTotalPoints = totalPoints + pointsToAdd;
+    const newLifetimePoints = lifetimePoints + pointsToAdd;
+
+    setTotalPoints(newTotalPoints);
+    setLifetimePoints(newLifetimePoints);
+    setPendingGiftPoints(0);
+    setPendingGiftReason("");
+
+    storage.savePoints(userId, newTotalPoints);
+
+    const { error } = await supabase
+      .from('kullanicilar')
+      .update({
+        puan: newTotalPoints,
+        toplam_kazanilan_puan: newLifetimePoints,
+        pending_gift_points: 0,
+        pending_gift_reason: null
+      })
+      .eq('id', userId);
+
+    if (error) {
+      console.error("Hediye puan talep edilirken hata oluştu:", error);
+    }
+  };
+
   const checkAchievements = (subjects: Subject[], trigger: { type: 'quiz' | 'questions' | 'english_unit', data?: any }) => {
     if (!userId || isPrivilegedUser) return;
     
@@ -308,5 +341,8 @@ export const useCoreData = (
     checkAchievements,
     isCloudDataLoaded,
     isTestAccount,
+    pendingGiftPoints,
+    pendingGiftReason,
+    claimGiftPoints,
   };
 };

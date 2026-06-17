@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/supabaseClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowLeft, CheckCircle, XCircle, ChevronDown, TrendingUp, TrendingDown, AlertTriangle, BookCopy } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, ChevronDown, TrendingUp, TrendingDown, AlertTriangle, BookCopy, Award } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -10,6 +10,9 @@ import { subjects as allSubjectsData } from '@/data/subjects';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 // Arayüz için tipler
 interface DenemeSonucuDetay {
@@ -65,6 +68,66 @@ const filterOptions = [
 export default function StudentDetailPage() {
   const { studentId } = useParams<{ studentId: string }>();
   const navigate = useNavigate();
+  
+  const { userRole } = useAuthContext();
+  const isCoach = useMemo(() => {
+    const lowerRole = userRole?.toLowerCase();
+    return lowerRole === 'koç' || lowerRole === 'admin' || lowerRole === 'hoca';
+  }, [userRole]);
+
+  const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
+  const [giftPoints, setGiftPoints] = useState<number>(100);
+  const [giftReason, setGiftReason] = useState<string>('Deneme Sınavı Birinciliği');
+  const [customReason, setCustomReason] = useState<string>('');
+  const [isSendingGift, setIsSendingGift] = useState(false);
+
+  const handleSendGift = async () => {
+    if (!studentId) return;
+    setIsSendingGift(true);
+    const reasonText = giftReason === 'Diğer' ? customReason : giftReason;
+    if (!reasonText.trim()) {
+      toast.error("Lütfen bir ödül sebebi belirtin.");
+      setIsSendingGift(false);
+      return;
+    }
+
+    try {
+      const { data: studentData, error: fetchError } = await supabase
+        .from('kullanicilar')
+        .select('pending_gift_points, pending_gift_reason')
+        .eq('id', studentId)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      const currentPendingPoints = studentData?.pending_gift_points || 0;
+      const currentPendingReason = studentData?.pending_gift_reason || '';
+
+      const newPendingPoints = currentPendingPoints + giftPoints;
+      const newPendingReason = currentPendingReason
+        ? `${currentPendingReason} + ${reasonText}`
+        : reasonText;
+
+      const { error: updateError } = await supabase
+        .from('kullanicilar')
+        .update({
+          pending_gift_points: newPendingPoints,
+          pending_gift_reason: newPendingReason
+        })
+        .eq('id', studentId);
+
+      if (updateError) throw updateError;
+
+      toast.success(`${studentName} isimli öğrenciye ${giftPoints} hediye puan başarıyla tanımlandı!`);
+      setIsGiftDialogOpen(false);
+      setCustomReason('');
+    } catch (e: any) {
+      console.error("Ödül puanı gönderilirken hata:", e);
+      toast.error("Ödül puanı gönderilemedi.");
+    } finally {
+      setIsSendingGift(false);
+    }
+  };
   
   const [report, setReport] = useState<ReportData | null>(null);
   const [denemeler, setDenemeler] = useState<DenemeKaydi[]>([]);
@@ -216,7 +279,23 @@ export default function StudentDetailPage() {
         <ArrowLeft className="h-4 w-4" />
         Koç Paneline Geri Dön
       </Link>
-      <Card><CardHeader><CardTitle className="text-2xl">{studentName}</CardTitle><CardDescription>Öğrencinin genel ve deneme performans analizi.</CardDescription></CardHeader></Card>
+      <Card className="shadow-card border border-border/50 bg-card/90 backdrop-blur-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-6 flex-wrap gap-4">
+          <div>
+            <CardTitle className="text-2xl font-bold tracking-tight">{studentName}</CardTitle>
+            <CardDescription className="mt-1">Öğrencinin genel ve deneme performans analizi.</CardDescription>
+          </div>
+          {isCoach && (
+            <Button 
+              onClick={() => setIsGiftDialogOpen(true)} 
+              className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-extrabold shadow-md hover:shadow-lg transition-all"
+            >
+              <Award className="h-5 w-5 mr-2 animate-pulse" />
+              Ödül Puanı Ver
+            </Button>
+          )}
+        </CardHeader>
+      </Card>
       
       {/* Deneme Sınavları Raporu */}
       <Card>
@@ -354,6 +433,91 @@ export default function StudentDetailPage() {
                 </Card>
           </div>
       )}
+      {/* ÖDÜL PUANI GÖNDERME DIALOGU */}
+      <Dialog open={isGiftDialogOpen} onOpenChange={setIsGiftDialogOpen}>
+        <DialogContent className="max-w-md rounded-2xl p-6">
+          <DialogHeader className="flex flex-col items-center text-center space-y-2">
+            <div className="h-12 w-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-2xl text-amber-500 animate-pulse">
+              🏆
+            </div>
+            <DialogTitle className="text-xl font-bold tracking-tight text-center">Öğrenciyi Ödüllendir</DialogTitle>
+            <DialogDescription className="text-sm text-center">
+              {studentName} isimli öğrenciye hediye puan ve tebrik mesajı gönderin.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 my-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Puan Miktarı</label>
+              <div className="grid grid-cols-4 gap-2">
+                {[100, 250, 500].map(points => (
+                  <Button
+                    key={points}
+                    type="button"
+                    variant={giftPoints === points ? "default" : "outline"}
+                    onClick={() => setGiftPoints(points)}
+                    className="font-bold"
+                  >
+                    {points}
+                  </Button>
+                ))}
+                <Input
+                  type="number"
+                  placeholder="Diğer"
+                  value={giftPoints || ""}
+                  onChange={(e) => setGiftPoints(Number(e.target.value))}
+                  className="font-bold text-center h-10"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Ödül Sebebi</label>
+              <Select value={giftReason} onValueChange={setGiftReason}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Bir sebep seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Deneme Sınavı Birinciliği">Deneme Sınavı Birinciliği 🏆</SelectItem>
+                  <SelectItem value="Haftalık Soru Çözme Rekoru">Haftalık Soru Çözme Rekoru 🔥</SelectItem>
+                  <SelectItem value="Gayretli ve Başarılı Çalışma">Gayretli ve Başarılı Çalışma ⭐</SelectItem>
+                  <SelectItem value="Kitap Bitirme Ödülü">Kitap Bitirme Ödülü 📚</SelectItem>
+                  <SelectItem value="Diğer">Diğer (Kendi Sebebinizi Yazın)...</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {giftReason === 'Diğer' && (
+              <div className="space-y-1.5 animate-slide-up">
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Özel Sebep</label>
+                <Input
+                  placeholder="Örn: Sınıf içi sınavda 1. oldu"
+                  value={customReason}
+                  onChange={(e) => setCustomReason(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
+            <Button
+              variant="outline"
+              disabled={isSendingGift}
+              onClick={() => setIsGiftDialogOpen(false)}
+              className="w-full sm:w-auto font-semibold"
+            >
+              İptal
+            </Button>
+            <Button
+              disabled={isSendingGift || giftPoints <= 0}
+              onClick={handleSendGift}
+              className="w-full sm:w-auto font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-md"
+            >
+              {isSendingGift ? "Gönderiliyor..." : "Ödülü Tanımla"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
