@@ -254,7 +254,7 @@ export default function ProgramimSayfasi() {
                             <Input
                               value={lesson.subject}
                               onChange={(e) => handleManualEditChange(selectedDay, lessonIndex, 'subject', e.target.value)}
-                              placeholder="Ders Kodu (Örn: MAT)"
+                              placeholder="Ders Adı (Örn: MAT)"
                               className="uppercase h-10 pr-8 font-semibold tracking-wide"
                             />
                             <span className="absolute right-2.5 top-2.5 text-base pointer-events-none" role="img" aria-label="subject icon">
