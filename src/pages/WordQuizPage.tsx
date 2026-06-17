@@ -341,7 +341,11 @@ export default function WordQuizPage() {
   const currentQuestion = questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
   return (
-    <div className="p-4 animate-slide-up">
+    <div 
+      className="p-4 animate-slide-up notranslate select-none" 
+      translate="no"
+      onContextMenu={(e) => e.preventDefault()}
+    >
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
             <Progress value={progress} className="h-2 mb-4" />
