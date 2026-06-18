@@ -2,15 +2,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CheckCircle, Lock, Trophy, UserRound } from "lucide-react";
 import { useAppContext } from "@/pages/AppLayout";
 import { avatars as allAvatars } from "@/data/avatars";
-import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Achievement } from "@/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function ProfilePage() {
   const { userAvatars, handleSetAvatar, achievements } = useAppContext();
-  const [showAvatars, setShowAvatars] = useState(true);
-  const [showAchievements, setShowAchievements] = useState(false);
 
   const sortedAvatars = useMemo(() => {
     const unlockedAvatars = allAvatars.filter(avatar =>
@@ -59,76 +57,70 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6 animate-slide-up">
-      <div className="flex justify-center gap-4 mt-6">
-        <Button
-          onClick={() => setShowAvatars(!showAvatars)}
-          className="gap-2 w-full max-w-sm"
-          variant={showAvatars ? "default" : "outline"}
-        >
-          <UserRound className="h-5 w-5" />
-          {showAvatars ? "Avatarları Gizle" : "Avatarlarımı Görüntüle"}
-        </Button>
-        <Button
-          onClick={() => setShowAchievements(!showAchievements)}
-          className="gap-2 w-full max-w-sm"
-          variant={showAchievements ? "default" : "outline"}
-        >
-          <Trophy className="h-5 w-5" />
-          {showAchievements ? "Başarımları Gizle" : "Başarımlarımı Görüntüle"}
-        </Button>
-      </div>
+      <Tabs defaultValue="avatarlar" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="avatarlar" className="flex items-center gap-2">
+            <UserRound className="h-4 w-4" />
+            Avatarlarım
+          </TabsTrigger>
+          <TabsTrigger value="basarimlar" className="flex items-center gap-2">
+            <Trophy className="h-4 w-4" />
+            Başarımlarım
+          </TabsTrigger>
+        </TabsList>
 
-      {showAvatars && (
-        <Card className="card-canli gradient-mor shadow-lg border-none">
-          <CardHeader>
-            <CardTitle className="text-2xl metin-beyaz">Profil ve Avatarlar</CardTitle>
-            <CardDescription className="metin-acik-gri">Mevcut avatarını seç.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
-              {sortedAvatars.map(avatar => {
-                const isCurrent = userAvatars?.current === avatar.id;
+        <TabsContent value="avatarlar">
+          <Card className="card-canli gradient-mor shadow-lg border-none">
+            <CardHeader>
+              <CardTitle className="text-2xl metin-beyaz font-bold">Profil ve Avatarlar</CardTitle>
+              <CardDescription className="metin-acik-gri">Mevcut avatarını seç.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                {sortedAvatars.map(avatar => {
+                  const isCurrent = userAvatars?.current === avatar.id;
 
-                return (
-                  <div
-                    key={avatar.id}
-                    className={cn(
-                      "relative flex flex-col items-center gap-2 p-2 rounded-lg border-2 transition-all duration-300",
-                      isCurrent ? 'border-white shadow-lg scale-105 bg-white/20' : 'border-transparent',
-                      'cursor-pointer hover:border-white/50'
-                    )}
-                    onClick={() => handleSetAvatar(avatar.id)}
-                  >
-                    <img
-                      src={avatar.image}
-                      alt={avatar.name}
-                      className="w-20 h-20 md:w-24 md:h-24 rounded-full aspect-square object-cover"
-                    />
-                    {isCurrent && (
-                      <div className="absolute top-0 right-0 bg-white text-violet-500 rounded-full p-1">
-                        <CheckCircle className="h-5 w-5" />
-                      </div>
-                    )}
-                    <p className="text-xs text-center font-medium metin-beyaz">{avatar.name}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                  return (
+                    <div
+                      key={avatar.id}
+                      className={cn(
+                        "relative flex flex-col items-center gap-2 p-2 rounded-lg border-2 transition-all duration-300",
+                        isCurrent ? 'border-white shadow-lg scale-105 bg-white/20' : 'border-transparent',
+                        'cursor-pointer hover:border-white/50'
+                      )}
+                      onClick={() => handleSetAvatar(avatar.id)}
+                    >
+                      <img
+                        src={avatar.image}
+                        alt={avatar.name}
+                        className="w-20 h-20 md:w-24 md:h-24 rounded-full aspect-square object-cover"
+                      />
+                      {isCurrent && (
+                        <div className="absolute top-0 right-0 bg-white text-violet-500 rounded-full p-1">
+                          <CheckCircle className="h-5 w-5" />
+                        </div>
+                      )}
+                      <p className="text-xs text-center font-medium metin-beyaz">{avatar.name}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {showAchievements && (
-        <Card className="card-canli gradient-yesil shadow-lg border-none">
-          <CardHeader>
-            <CardTitle className="metin-beyaz">Başarımlarım</CardTitle>
-            <CardDescription className="metin-acik-gri">Kazandığın tüm başarımları buradan görebilirsin.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {renderAchievements()}
-          </CardContent>
-        </Card>
-      )}
+        <TabsContent value="basarimlar">
+          <Card className="card-canli gradient-yesil shadow-lg border-none">
+            <CardHeader>
+              <CardTitle className="metin-beyaz font-bold">Başarımlarım</CardTitle>
+              <CardDescription className="metin-acik-gri">Kazandığın tüm başarımları buradan görebilirsin.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {renderAchievements()}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
