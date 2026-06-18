@@ -93,9 +93,7 @@ serve(async (req) => {
     if (recordsError) throw recordsError;
 
     // 5. Yetki kontrolü ve yanıt
-    if (userProfile.rol === 'koç' && userProfile.koc_kodu !== studentData.koc_kodu) {
-        throw new Error("Authorization error: Coach can only view their own students.");
-    }
+    // (Tüm koçların diğer öğrencileri görebilmesi için kısıtlama kaldırıldı)
     return new Response(JSON.stringify({ records: records, student_name: studentData.ad_soyad }), {
       headers: { ...headers, "Content-Type": "application/json" },
       status: 200,
