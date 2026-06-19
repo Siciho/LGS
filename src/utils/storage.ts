@@ -158,6 +158,15 @@ export const storage = {
   },
   saveNotificationSettings: (settings: NotificationSettings) => localStorage.setItem(createGlobalKey(BASE_KEYS.NOTIFICATION_SETTINGS), JSON.stringify(settings)),
 
+  loadUnlockedThemes: (userId: string): string[] => {
+    const data = localStorage.getItem(createKey(userId, 'unlocked_themes'));
+    return data ? JSON.parse(data) : ['default'];
+  },
+  saveUnlockedThemes: (userId: string, themes: string[]) => localStorage.setItem(createKey(userId, 'unlocked_themes'), JSON.stringify(themes)),
+
+  loadActiveTheme: (userId: string): string => localStorage.getItem(createKey(userId, 'active_theme')) || 'default',
+  saveActiveTheme: (userId: string, theme: string) => localStorage.setItem(createKey(userId, 'active_theme'), theme),
+
   removeAllUserData: (userId: string) => {
     Object.keys(localStorage).forEach(key => {
       if (key.startsWith(`lgs_app_${userId}_`)) {

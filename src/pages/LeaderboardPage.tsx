@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAppContext } from './AppLayout';
 import { getLevelInfo } from "@/utils/level";
+import { getThemeById } from "@/data/themes";
 
 interface LeaderboardEntry {
   rank: number; // Bu artık SADECE 'Tümü' filtresi için kullanılacak
@@ -26,6 +27,7 @@ interface LeaderboardEntry {
   seri: number;
   challenge_wins: number;
   lifetime_points: number;
+  active_theme?: string;
 }
 
 const defaultAvatar = avatars.find(a => a.id === 'default')?.image || '';
@@ -168,13 +170,12 @@ export default function LeaderboardPage() {
                           "Bu sınıfta öğrenci bulunamadı."}
                       </div>
                     ) : (
-                      // --- DEĞİŞİKLİK 2: '.map((entry)' -> '.map((entry, index)' ---
                       filteredLeaderboard.map((entry, index) => {
-                        
-                        // --- DEĞİŞİKLİK 3: YENİ RANK HESAPLAMASI ---
-                        // Eğer filtre 'Tümü' ise SQL'den gelen rank'i kullan (entry.rank)
-                        // Eğer filtre 'Tümü' DEĞİLSE, o anki index'i kullan (index + 1)
                         const currentRank = selectedClass === 'Tümü' ? entry.rank : index + 1;
+                        const theme = getThemeById(entry.active_theme || 'default');
+                        const rowStyle = theme.id === 'default' 
+                          ? getRankClass(currentRank) 
+                          : theme.className;
                         
                         return (
                           <Button
@@ -183,8 +184,7 @@ export default function LeaderboardPage() {
                             className={cn(
                               'p-4 h-auto w-full justify-start text-left', 
                               'border rounded-lg transition-all',
-                              // --- DEĞİŞİKLİK 4: getRankClass yeni rank'i kullanıyor ---
-                              getRankClass(currentRank) 
+                              rowStyle
                             )}
                             onClick={() => handleStudentClick(entry)}
                           >
@@ -199,10 +199,17 @@ export default function LeaderboardPage() {
                                 />
                                 <div>
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <p className="font-semibold text-foreground">{entry.user_name}</p>
+                                    <p className={cn("font-semibold text-foreground", theme.id !== 'default' && theme.textClassName)}>
+                                      {entry.user_name}
+                                    </p>
                                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-sm shrink-0">
                                       LVL {getLevelInfo(entry.lifetime_points || 0).level}
                                     </span>
+                                    {theme.id !== 'default' && (
+                                      <span className={cn("inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider shrink-0", theme.badgeClassName)}>
+                                        {theme.label}
+                                      </span>
+                                    )}
                                   </div>
                                   <p className="text-xs text-muted-foreground mt-0.5">
                                     {/* --- DEĞİŞİKLİK 6: 'getRankText' yeni rank'i kullanıyor --- */}

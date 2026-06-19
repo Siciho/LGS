@@ -8,6 +8,7 @@ import { Achievement, UserAvatars, Subject } from '@/types';
 import { achievements as initialAchievementsData } from '@/data/achievements';
 import { avatars as allAvatars } from "@/data/avatars";
 import { playPurchaseSound, playConfirmSound } from "@/utils/sounds";
+import { cardThemes } from '@/data/themes';
 
 export const useCoreData = (
   userId: string | null,
@@ -25,6 +26,8 @@ export const useCoreData = (
   const [achievements, setAchievements] = useState<Achievement[]>(initialAchievementsData);
   const [userAvatars, setUserAvatars] = useState<UserAvatars>({ current: 'default', unlocked: ['default'] });
   const [challengeWins, setChallengeWins] = useState(0);
+  const [unlockedThemes, setUnlockedThemes] = useState<string[]>(['default']);
+  const [activeTheme, setActiveTheme] = useState<string>('default');
   const [isCloudDataLoaded, setIsCloudDataLoaded] = useState(false);
   const [isTestAccount, setIsTestAccount] = useState(false);
   const [pendingGiftPoints, setPendingGiftPoints] = useState<number>(0);
@@ -61,8 +64,8 @@ export const useCoreData = (
     const fetchCoreData = async () => {
       try {
         const [cloudDataRes, winsDataRes] = await Promise.all([
-          // --- DEĞİŞİKLİK 2: 'toplam_kazanilan_puan' sütunu da çekiliyor ---
-          supabase.from('kullanicilar').select('puan, toplam_kazanilan_puan, seri, seri_dondurma, avatar, kazanilan_basarimlar, is_test_account, pending_gift_points, pending_gift_reason').eq('id', userId).maybeSingle(),
+          // --- DEĞİŞİKLİK 2: 'toplam_kazanilan_puan' ve tema sütunları da çekiliyor ---
+          supabase.from('kullanicilar').select('puan, toplam_kazanilan_puan, seri, seri_dondurma, avatar, kazanilan_basarimlar, is_test_account, pending_gift_points, pending_gift_reason, unlocked_themes, active_theme').eq('id', userId).maybeSingle(),
           supabase.rpc('get_challenge_win_count', { p_user_id: userId })
         ]);
 
@@ -90,6 +93,13 @@ export const useCoreData = (
                 setStreakFreezes(99);
                 setAchievements(initialAchievementsData.map(a => ({ ...a, unlocked: true, unlockedAt: new Date() })));
                 setChallengeWins(999);
+                
+                // Ayrıcalıklı kullanıcılar tüm temalara sahip olsun
+                const allThemeIds = ['default', 'gold', 'neon', 'space'];
+                setUnlockedThemes(allThemeIds);
+                setActiveTheme(cloudData.active_theme || 'default');
+                storage.saveUnlockedThemes(userId, allThemeIds);
+                storage.saveActiveTheme(userId, cloudData.active_theme || 'default');
             } else {
                 // --- DEĞİŞİKLİK 3: Her iki puan da set ediliyor ---
                 setTotalPoints(cloudData.puan ?? 0); // Cüzdan
@@ -116,6 +126,14 @@ export const useCoreData = (
                 const unlockedAchievementIds = new Set(cloudData.kazanilan_basarimlar || []);
                 const syncedAchievements = initialAchievementsData.map(ach => ({ ...ach, unlocked: unlockedAchievementIds.has(ach.id) }));
                 setAchievements(syncedAchievements);
+
+                // Temaları buluttan yükle
+                const finalThemes = cloudData.unlocked_themes || ['default'];
+                const finalActiveTheme = cloudData.active_theme || 'default';
+                setUnlockedThemes(finalThemes);
+                setActiveTheme(finalActiveTheme);
+                storage.saveUnlockedThemes(userId, finalThemes);
+                storage.saveActiveTheme(userId, finalActiveTheme);
             }
         } else {
             setIsTestAccount(false);
@@ -126,6 +144,10 @@ export const useCoreData = (
             setStreakFreezes(storage.loadStreakFreezes(userId));
             setUserAvatars(storage.loadUserAvatars(userId));
             setAchievements(storage.loadAchievements(userId));
+
+            // Lokal depolamadan yükle
+            setUnlockedThemes(storage.loadUnlockedThemes(userId));
+            setActiveTheme(storage.loadActiveTheme(userId));
         }
       } catch (e) {
           console.error("fetchCoreData içinde beklenmedik bir hata oluştu:", e);
@@ -327,6 +349,46 @@ export const useCoreData = (
     }
   };
 
+  const handleSetTheme = (themeId: string) => {
+    if (!userId) return;
+    if (unlockedThemes.includes(themeId)) {
+      setActiveTheme(themeId);
+      storage.saveActiveTheme(userId, themeId);
+      if (!isPrivilegedUser) {
+        updateUserCloudData({ active_theme: themeId });
+      }
+      toast.success("Kart teman değiştirildi!");
+      playConfirmSound(isMuted);
+    }
+  };
+
+  const handleBuyTheme = (themeId: string) => {
+    if (!userId || isPrivilegedUser) return;
+    const theme = cardThemes.find(t => t.id === themeId);
+    if (!theme) return;
+    const price = theme.price;
+    
+    if (totalPoints >= price && !unlockedThemes.includes(themeId)) {
+      const newTotalPoints = totalPoints - price;
+      const newThemes = [...unlockedThemes, themeId];
+      
+      setTotalPoints(newTotalPoints);
+      setUnlockedThemes(newThemes);
+      
+      storage.saveUnlockedThemes(userId, newThemes);
+      
+      updateUserCloudData({
+        unlocked_themes: newThemes,
+        puan: newTotalPoints
+      });
+      
+      toast.success(`${theme.name} satın alındı!`);
+      playPurchaseSound(isMuted);
+    } else {
+      toast.error("Yetersiz puan veya bu temaya zaten sahipsin.");
+    }
+  };
+
   return {
     totalPoints, setTotalPoints, // Cüzdan
     lifetimePoints, setLifetimePoints, // Sıralama Puanı (Yeni eklendi)
@@ -344,5 +406,9 @@ export const useCoreData = (
     pendingGiftPoints,
     pendingGiftReason,
     claimGiftPoints,
+    unlockedThemes,
+    activeTheme,
+    handleSetTheme,
+    handleBuyTheme,
   };
 };

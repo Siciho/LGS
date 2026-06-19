@@ -4,9 +4,10 @@ import { ShoppingCart, Star, CheckCircle, Lock, Award, Snowflake, Flame } from "
 import { useAppContext } from "./AppLayout";
 import { avatars as allAvatars } from "@/data/avatars";
 import { achievements as initialAchievementsData } from "@/data/achievements";
+import { cardThemes } from "@/data/themes";
 
 export const MarketPage = () => {
-  const { totalPoints, streakFreezes, userAvatars, handleBuyStreakFreeze, handleBuyAvatar } = useAppContext();
+  const { totalPoints, streakFreezes, userAvatars, unlockedThemes, handleBuyStreakFreeze, handleBuyAvatar, handleBuyTheme } = useAppContext();
   const freezePrice = 200;
 
   const purchasableAvatars = allAvatars.filter(a => a.unlockMethod === 'purchase');
@@ -134,6 +135,56 @@ export const MarketPage = () => {
                     <Lock className="h-4 w-4 mr-2" /> Başarımla Açılır
                   </Button>
                 )}
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-card border border-border/50 dark:border-white/10">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5 text-indigo-500" /> Liderlik Tablosu Kart Temaları
+          </CardTitle>
+          <CardDescription>Kazandığın puanlarla liderlik tablosundaki satırını özelleştirebilirsin.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {cardThemes.map(theme => {
+            const isUnlocked = (unlockedThemes || []).includes(theme.id);
+            const canAfford = totalPoints >= theme.price;
+            return (
+              <div 
+                key={theme.id} 
+                className={`flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-xl border transition-all ${theme.className}`}
+              >
+                <div className="flex flex-col gap-1 w-full md:w-2/3">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h4 className={`font-black text-sm md:text-base ${theme.textClassName}`}>{theme.name}</h4>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] uppercase font-black ${theme.badgeClassName}`}>
+                      {theme.label}
+                    </span>
+                  </div>
+                  <p className="text-xs text-foreground/80 leading-relaxed mt-1">{theme.description}</p>
+                </div>
+                <div className="w-full md:w-auto shrink-0 flex items-center justify-center">
+                  {theme.price === 0 ? (
+                    <Button variant="outline" disabled className="w-full md:w-auto bg-background/50">
+                      <CheckCircle className="h-4 w-4 mr-2" /> Varsayılan
+                    </Button>
+                  ) : isUnlocked ? (
+                    <Button variant="outline" disabled className="w-full md:w-auto bg-background/50">
+                      <CheckCircle className="h-4 w-4 mr-2" /> Sahipsin
+                    </Button>
+                  ) : (
+                    <Button 
+                      className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm" 
+                      disabled={!canAfford} 
+                      onClick={() => handleBuyTheme(theme.id)}
+                    >
+                      <Star className="h-4 w-4 mr-2" /> {theme.price} Puan
+                    </Button>
+                  )}
+                </div>
               </div>
             );
           })}
