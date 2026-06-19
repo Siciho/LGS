@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { avatars } from "@/data/avatars";
 import { cn } from "@/lib/utils";
 import { getLevelInfo } from "@/utils/level";
+import { getThemeById } from "@/data/themes";
 
 interface HeaderProps {
   userName: string | null;
@@ -20,6 +21,7 @@ interface HeaderProps {
   isHomePage: boolean;
   userRole: string | null;
   lifetimePoints?: number;
+  activeTheme?: string; // ✅ Yeni prop eklendi
 }
 
 export default function Header({
@@ -36,12 +38,14 @@ export default function Header({
   toggleMute,
   isHomePage,
   userRole,
-  lifetimePoints = 0
+  lifetimePoints = 0,
+  activeTheme = 'default' // ✅ Yeni parametre
 }: HeaderProps) {
 
   const currentAvatar = avatars.find(a => a.id === currentAvatarId) || avatars[0];
   const firstName = userName ? userName.split(' ')[0] : 'Misafir';
   const lvlInfo = getLevelInfo(lifetimePoints);
+  const userTheme = getThemeById(activeTheme);
 
   const renderHeaderContent = () => (
     <div className={cn(
@@ -53,7 +57,10 @@ export default function Header({
           <img
             src={currentAvatar.image}
             alt="Kullanıcı Avatarı"
-            className="w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-primary/50 shadow-md transition-transform duration-300 hover:scale-105 aspect-square object-cover flex-shrink-0"
+            className={cn(
+              "w-14 h-14 md:w-16 md:h-16 rounded-full transition-transform duration-300 hover:scale-105 aspect-square object-cover flex-shrink-0",
+              userTheme.id === 'default' ? 'border-2 border-primary/50 shadow-md' : userTheme.avatarClassName
+            )}
           />
         </Link>
         <div className="flex-1 min-w-0">
