@@ -274,7 +274,46 @@ export default function AppLayout() {
   };
   
   if (auth.authLoading || !coreData.isCloudDataLoaded) {
-    return <div className="fixed inset-0 flex items-center justify-center bg-background"><p>Uygulama Yükleniyor...</p></div>;
+    return (
+      <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#090514] overflow-hidden">
+        {/* Neon Işıma Arka Plan Halkaları (Galaxy Aura) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-purple-500/10 blur-[80px] animate-[pulse_3s_infinite]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] rounded-full bg-cyan-500/10 blur-[60px] animate-[pulse_2s_infinite]" />
+        
+        {/* Ortadaki Pulsing Logo ve Çerçeve */}
+        <div className="relative flex flex-col items-center">
+          <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center border-4 border-purple-500/30 bg-[#120b24] shadow-[0_0_30px_rgba(168,85,247,0.25)] animate-[pulse_1.5s_infinite]">
+            {/* Pulsing Işıma Halkası (Radar Ping) */}
+            <div className="absolute inset-0 rounded-full border-2 border-cyan-400 animate-ping opacity-20" />
+            
+            <img 
+              src="/logo.png" 
+              alt="LGS Logo" 
+              className="w-16 h-16 md:w-20 md:h-20 object-contain animate-bounce-slow"
+              onError={(e) => {
+                // Logo yüklenemezse yedek ikon göster
+                e.currentTarget.style.display = 'none';
+                const parent = e.currentTarget.parentElement;
+                if (parent) {
+                  const fallback = document.createElement('span');
+                  fallback.className = 'text-5xl';
+                  fallback.innerText = '🚀';
+                  parent.appendChild(fallback);
+                }
+              }}
+            />
+          </div>
+          
+          {/* Neon Yükleniyor Yazısı */}
+          <h2 className="text-xl md:text-2xl font-black mt-8 tracking-wider bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(168,85,247,0.3)]">
+            LGS ASİSTANIN
+          </h2>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-2 animate-pulse">
+            Veriler Yükleniyor...
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
