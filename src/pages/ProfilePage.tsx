@@ -6,9 +6,13 @@ import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Achievement } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getLevelInfo } from "@/utils/level";
+import { Progress } from "@/components/ui/progress";
 
 export default function ProfilePage() {
-  const { userAvatars, handleSetAvatar, achievements } = useAppContext();
+  const { userAvatars, handleSetAvatar, achievements, lifetimePoints } = useAppContext();
+
+  const lvlInfo = getLevelInfo(lifetimePoints);
 
   const sortedAvatars = useMemo(() => {
     const unlockedAvatars = allAvatars.filter(avatar =>
@@ -57,6 +61,37 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6 animate-slide-up">
+      {/* Seviye ve İlerleme Kartı */}
+      <Card className="shadow-card border border-border/50 dark:border-white/10 bg-card/90 backdrop-blur-sm p-5 flex flex-col md:flex-row items-center gap-6">
+        <div className="relative flex items-center justify-center h-20 w-20 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg shrink-0">
+          <div className="flex flex-col items-center justify-center">
+            <span className="text-[10px] font-black uppercase tracking-wider opacity-90">SEVİYE</span>
+            <span className="text-3xl font-black leading-none">{lvlInfo.level}</span>
+          </div>
+          <div className="absolute -bottom-1 bg-primary text-[10px] font-black uppercase px-2 py-0.5 rounded-full border border-card shadow-sm">
+            LVL
+          </div>
+        </div>
+
+        <div className="flex-1 w-full space-y-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <div>
+              <h2 className="text-xl font-extrabold tracking-tight">{lvlInfo.title}</h2>
+              <p className="text-xs text-muted-foreground font-medium">Toplam kazanılan puana göre unvanın.</p>
+            </div>
+            <div className="text-sm font-bold text-muted-foreground text-right">
+              <span className="text-foreground font-extrabold">{lifetimePoints || 0}</span> / {lvlInfo.maxPoints} XP
+            </div>
+          </div>
+
+          <Progress value={lvlInfo.progress} className="h-3 bg-muted" />
+          <div className="flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-wider">
+            <span>Seviye {lvlInfo.level}</span>
+            <span>Seviye {lvlInfo.level + 1}</span>
+          </div>
+        </div>
+      </Card>
+
       <Tabs defaultValue="avatarlar" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger value="avatarlar" className="flex items-center gap-2">

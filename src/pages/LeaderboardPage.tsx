@@ -13,6 +13,7 @@ import { UserAvatars } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAppContext } from './AppLayout';
+import { getLevelInfo } from "@/utils/level";
 
 interface LeaderboardEntry {
   rank: number; // Bu artık SADECE 'Tümü' filtresi için kullanılacak
@@ -24,6 +25,7 @@ interface LeaderboardEntry {
   total_questions: number;
   seri: number;
   challenge_wins: number;
+  lifetime_points: number;
 }
 
 const defaultAvatar = avatars.find(a => a.id === 'default')?.image || '';
@@ -196,8 +198,13 @@ export default function LeaderboardPage() {
                                   className="w-12 h-12 rounded-full border-2 border-border"
                                 />
                                 <div>
-                                  <p className="font-semibold text-foreground">{entry.user_name}</p>
-                                  <p className="text-sm text-muted-foreground">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <p className="font-semibold text-foreground">{entry.user_name}</p>
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-sm shrink-0">
+                                      LVL {getLevelInfo(entry.lifetime_points || 0).level}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground mt-0.5">
                                     {/* --- DEĞİŞİKLİK 6: 'getRankText' yeni rank'i kullanıyor --- */}
                                     {entry.user_class} Sınıfı - {getRankText(currentRank)}
                                   </p>
@@ -243,13 +250,18 @@ export default function LeaderboardPage() {
                     selectedStudent.user_name
                   )}
                 </DialogTitle>
-                <DialogDescription>
-                  {selectedStudent.user_class} Sınıfı
-                  {' - '}
-                  {timeFilter === 'all' && 'Tüm Zamanlar'}
-                  {timeFilter === 'month' && 'Bu Ay'}
-                  {timeFilter === 'last_week' && 'Geçen Hafta'}
-                  {' İstatistikleri'}
+                <DialogDescription className="text-center mt-1">
+                  <span className="block font-bold text-foreground mb-1">
+                    Seviye {getLevelInfo(selectedStudent.lifetime_points || 0).level} - {getLevelInfo(selectedStudent.lifetime_points || 0).title}
+                  </span>
+                  <span>
+                    {selectedStudent.user_class} Sınıfı
+                    {' - '}
+                    {timeFilter === 'all' && 'Tüm Zamanlar'}
+                    {timeFilter === 'month' && 'Bu Ay'}
+                    {timeFilter === 'last_week' && 'Geçen Hafta'}
+                    {' İstatistikleri'}
+                  </span>
                 </DialogDescription>
               </div>
             )}

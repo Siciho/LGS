@@ -13,6 +13,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { UserAvatars } from "@/types";
+import { avatars } from "@/data/avatars";
+import { getLevelInfo } from "@/utils/level";
+
+const defaultAvatar = avatars.find(a => a.id === 'default')?.image || '';
+
+const getAvatarImage = (avatarData: UserAvatars | null) => {
+    const currentAvatarId = avatarData?.current || 'default';
+    return avatars.find(a => a.id === currentAvatarId)?.image || defaultAvatar;
+};
 
 // Arayüz için tipler
 interface DenemeSonucuDetay {
@@ -138,6 +148,8 @@ export default function StudentDetailPage() {
   const [openSubjectId, setOpenSubjectId] = useState<string | null>(null);
   const [openDenemeId, setOpenDenemeId] = useState<number | null>(null);
   const [timeFilter, setTimeFilter] = useState('all');
+  const [studentLifetimePoints, setStudentLifetimePoints] = useState<number>(0);
+  const [studentAvatar, setStudentAvatar] = useState<UserAvatars | null>(null);
 
   useEffect(() => {
     if (!studentId) return;
@@ -169,7 +181,36 @@ export default function StudentDetailPage() {
         // Denemeler her zaman hepsi çekilir
         const denemelerPromise = supabase.rpc('get_student_denemeler', { p_student_id: studentId });
 
-        const [edgeFunctionResult, denemelerResult] = await Promise.all([edgeFunctionPromise, denemelerPromise]);
+        // Öğrencinin profil bilgilerini çek
+        const profilePromise = supabase
+          .from('kullanicilar')
+          .select('puan, toplam_kazanilan_puan, avatar')
+          .eq('id', studentId)
+          .maybeSingle();
+
+        const [edgeFunctionResult, denemelerResult, profileResult] = await Promise.all([
+          edgeFunctionPromise, 
+          denemelerPromise,
+          profilePromise
+        ]);
+
+        // Profil sonuçlarını işle
+        if (profileResult.data) {
+          const lp = profileResult.data.toplam_kazanilan_puan ?? profileResult.data.puan ?? 0;
+          setStudentLifetimePoints(lp);
+          
+          let avatarData = null;
+          if (profileResult.data.avatar) {
+            try {
+              avatarData = typeof profileResult.data.avatar === 'string' 
+                ? JSON.parse(profileResult.data.avatar) 
+                : profileResult.data.avatar;
+            } catch (e) {
+              avatarData = null;
+            }
+          }
+          setStudentAvatar(avatarData);
+        }
 
         // Edge Function sonuçlarını işle
         if (edgeFunctionResult.error) {
@@ -281,9 +322,23 @@ export default function StudentDetailPage() {
       </Link>
       <Card className="shadow-card border border-border/50 bg-card/90 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-6 flex-wrap gap-4">
-          <div>
-            <CardTitle className="text-2xl font-bold tracking-tight">{studentName}</CardTitle>
-            <CardDescription className="mt-1">Öğrencinin genel ve deneme performans analizi.</CardDescription>
+          <div className="flex items-center gap-4">
+            <img
+              src={getAvatarImage(studentAvatar)}
+              alt={studentName}
+              className="w-16 h-16 rounded-full border-2 border-primary/30 aspect-square object-cover"
+            />
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <CardTitle className="text-2xl font-bold tracking-tight">{studentName}</CardTitle>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-sm">
+                  LVL {getLevelInfo(studentLifetimePoints).level}
+                </span>
+              </div>
+              <CardDescription className="mt-1 font-semibold text-primary">
+                Unvan: {getLevelInfo(studentLifetimePoints).title} • {studentLifetimePoints} Toplam Puan
+              </CardDescription>
+            </div>
           </div>
           {isCoach && (
             <Button 

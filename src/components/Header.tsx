@@ -3,6 +3,7 @@ import { Moon, Sun, Trophy, Flame, Target, Star, Volume2, VolumeX, ShoppingCart,
 import { Link } from "react-router-dom";
 import { avatars } from "@/data/avatars";
 import { cn } from "@/lib/utils";
+import { getLevelInfo } from "@/utils/level";
 
 interface HeaderProps {
   userName: string | null;
@@ -18,6 +19,7 @@ interface HeaderProps {
   toggleMute: () => void;
   isHomePage: boolean;
   userRole: string | null;
+  lifetimePoints?: number;
 }
 
 export default function Header({
@@ -33,11 +35,13 @@ export default function Header({
   isMuted,
   toggleMute,
   isHomePage,
-  userRole
+  userRole,
+  lifetimePoints = 0
 }: HeaderProps) {
 
   const currentAvatar = avatars.find(a => a.id === currentAvatarId) || avatars[0];
   const firstName = userName ? userName.split(' ')[0] : 'Misafir';
+  const lvlInfo = getLevelInfo(lifetimePoints);
 
   const renderHeaderContent = () => (
     <div className={cn(
@@ -53,9 +57,16 @@ export default function Header({
           />
         </Link>
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl md:text-2xl font-bold text-foreground truncate">Hey, {firstName}!</h1>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl md:text-2xl font-bold text-foreground truncate">Hey, {firstName}!</h1>
+            {userRole !== 'koç' && userRole !== 'admin' && userRole !== 'hoca' && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-sm shrink-0">
+                LVL {lvlInfo.level}
+              </span>
+            )}
+          </div>
           {isHomePage && userRole !== 'koç' && (
-            <p className="text-xs md:text-sm text-muted-foreground">
+            <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
               Bugünkü hedeflerine ulaşmaya hazır mısın?
             </p>
           )}

@@ -294,6 +294,7 @@ export default function AppLayout() {
           toggleMute={toggleMute}
           isHomePage={isHomePage}
           userRole={userRole}
+          lifetimePoints={coreData.lifetimePoints}
         />
         <main className="flex-1 pb-32">
           {scheduler.notificationSettings.challengeReminder && (
