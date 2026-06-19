@@ -11,6 +11,52 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { playYaySound, playFailSound } from "@/utils/sounds";
 import { useAppContext } from "@/pages/AppLayout";
 
+export function parseMathText(text: string): string {
+  if (!text) return "";
+  let cleaned = text;
+  
+  // Çift ters eğik çizgileri teke indir
+  cleaned = cleaned.replace(/\\\\/g, '\\');
+  
+  // Karekök düzeltme: \sqrt{50} -> √50
+  cleaned = cleaned.replace(/\\sqrt{([^}]+)}/g, '√$1');
+  cleaned = cleaned.replace(/\\sqrt/g, '√');
+  
+  // Derece sembolü: \circ -> °
+  cleaned = cleaned.replace(/\^{\\circ}/g, '°');
+  cleaned = cleaned.replace(/\^\\circ/g, '°');
+  cleaned = cleaned.replace(/\\circ/g, '°');
+  
+  // Üslü sayılar: 5^{-2} -> 5⁻², x^2 -> x²
+  const superscripts: Record<string, string> = {
+    '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+    '+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾', 'n': 'ⁿ', 'x': 'ˣ', 'y': 'ʸ'
+  };
+  
+  cleaned = cleaned.replace(/\^{([^}]+)}/g, (_, p1) => {
+    return p1.split('').map((char: string) => superscripts[char] || char).join('');
+  });
+  cleaned = cleaned.replace(/\^([0-9nx-y])/g, (_, p1) => superscripts[p1] || p1);
+  
+  // Alt indisler: a_{1} -> a₁
+  const subscripts: Record<string, string> = {
+    '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
+    '+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎'
+  };
+  cleaned = cleaned.replace(/_{([^}]+)}/g, (_, p1) => {
+    return p1.split('').map((char: string) => subscripts[char] || char).join('');
+  });
+  cleaned = cleaned.replace(/_([0-9])/g, (_, p1) => subscripts[p1] || p1);
+  
+  // Çarpım noktası
+  cleaned = cleaned.replace(/\\cdot/g, ' · ');
+  
+  // Dolar işaretlerini kaldır
+  cleaned = cleaned.replace(/\$/g, '');
+  
+  return cleaned;
+}
+
 interface QuestionSolverProps {
   questions: Question[];
   subjects: Subject[];
@@ -89,7 +135,7 @@ export default function QuestionSolver({ questions, subjects, onFinish, onClose 
             className="pt-6 text-center text-lg md:text-xl notranslate" 
             translate="no"
           >
-            {currentQuestion.question}
+            {parseMathText(currentQuestion.question)}
           </CardTitle>
 
         </CardHeader>
@@ -128,7 +174,7 @@ export default function QuestionSolver({ questions, subjects, onFinish, onClose 
                       className="flex-1 text-base text-wrap break-words notranslate" 
                       translate="no"
                     >
-                      {option}
+                      {parseMathText(option)}
                     </span>
 
                     {showResult && isCorrectAnswer && (<CheckCircle className="h-5 w-5 text-success-foreground" />)}
@@ -150,7 +196,7 @@ export default function QuestionSolver({ questions, subjects, onFinish, onClose 
               className="notranslate" 
               translate="no"
             > 
-              {currentQuestion.explanation || (isCorrect ? 'Tebrikler!' : 'Bir dahaki sefere!')}
+              {parseMathText(currentQuestion.explanation || (isCorrect ? 'Tebrikler!' : 'Bir dahaki sefere!'))}
             </DialogDescription>
 
           </DialogHeader>
