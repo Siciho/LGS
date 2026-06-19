@@ -240,3 +240,47 @@
     transition: var(--transition-bounce);
   }
 }
+
+/* Custom Card Theme Avatar Pulsing Animations */
+.animate-avatar-gold {
+  animation: avatar-pulse-gold 2s ease-in-out infinite;
+}
+.animate-avatar-neon {
+  animation: avatar-pulse-neon 1.5s ease-in-out infinite;
+}
+.animate-avatar-space {
+  animation: avatar-pulse-space 2.5s ease-in-out infinite;
+}
+
+@keyframes avatar-pulse-gold {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(245, 158, 11, 0.4);
+    border-color: rgba(245, 158, 11, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.9);
+    border-color: rgba(245, 158, 11, 1);
+  }
+}
+
+@keyframes avatar-pulse-neon {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(168, 85, 247, 0.4);
+    border-color: rgba(168, 85, 247, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(236, 72, 153, 0.9);
+    border-color: rgba(236, 72, 153, 1);
+  }
+}
+
+@keyframes avatar-pulse-space {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(59, 130, 246, 0.4);
+    border-color: rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.9);
+    border-color: rgba(99, 102, 241, 1);
+  }
+}

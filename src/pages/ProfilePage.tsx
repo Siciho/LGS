@@ -8,7 +8,7 @@ import { Achievement } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getLevelInfo } from "@/utils/level";
 import { Progress } from "@/components/ui/progress";
-import { cardThemes } from "@/data/themes";
+import { cardThemes, getThemeById } from "@/data/themes";
 
 export default function ProfilePage() {
   const { userAvatars, handleSetAvatar, achievements, lifetimePoints, unlockedThemes, activeTheme, handleSetTheme } = useAppContext();
@@ -119,13 +119,15 @@ export default function ProfilePage() {
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                 {sortedAvatars.map(avatar => {
                   const isCurrent = userAvatars?.current === avatar.id;
+                  const theme = getThemeById(activeTheme || 'default');
 
                   return (
                     <div
                       key={avatar.id}
                       className={cn(
                         "relative flex flex-col items-center gap-2 p-2 rounded-lg border-2 transition-all duration-300",
-                        isCurrent ? 'border-white shadow-lg scale-105 bg-white/20' : 'border-transparent',
+                        isCurrent ? 'shadow-lg scale-105 bg-white/20' : 'border-transparent',
+                        isCurrent ? theme.avatarClassName : '',
                         'cursor-pointer hover:border-white/50'
                       )}
                       onClick={() => handleSetAvatar(avatar.id)}

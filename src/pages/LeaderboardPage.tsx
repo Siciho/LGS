@@ -195,7 +195,7 @@ export default function LeaderboardPage() {
                                 <img
                                   src={getAvatarImage(entry.user_avatar)}
                                   alt={entry.user_name}
-                                  className="w-12 h-12 rounded-full border-2 border-border"
+                                  className={cn("w-12 h-12 rounded-full object-cover shrink-0 transition-all duration-300", theme.avatarClassName)}
                                 />
                                 <div>
                                   <div className="flex items-center gap-2 flex-wrap">
