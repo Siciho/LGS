@@ -11,9 +11,13 @@ import { App } from '@capacitor/app';
 import { supabase } from "@/supabaseClient";
 import { Browser } from '@capacitor/browser';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { FileTransfer } from '@capacitor/file-transfer';
+import { FileOpener } from '@capacitor-community/file-opener';
+import { Capacitor } from '@capacitor/core';
 import { Button } from "@/components/ui/button";
 
-const CURRENT_VERSION = "1.0.0";
+const CURRENT_VERSION = "1.1.0";
 
 const isNewerVersion = (current: string, latest: string) => {
   const cParts = current.split('.').map(Number);
@@ -60,6 +64,11 @@ export default function AppLayout() {
     changelog: string;
     apkUrl: string;
   }>({ show: false, latestVersion: "", changelog: "", apkUrl: "" });
+  const [downloadState, setDownloadState] = useState<{
+    status: 'idle' | 'downloading' | 'installing' | 'error';
+    progress: number;
+    errorMessage?: string;
+  }>({ status: 'idle', progress: 0 });
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -99,18 +108,77 @@ export default function AppLayout() {
       }
     };
 
-    if (isInitialized && userId) {
+    if (isInitialized && userId && Capacitor.getPlatform() === 'android') {
       checkUpdate();
     }
   }, [isInitialized, userId]);
 
   const handleUpdateClick = async () => {
-    if (updateInfo.apkUrl) {
+    if (!updateInfo.apkUrl) return;
+
+    if (!Capacitor.isNativePlatform()) {
+      // Fallback for web
       try {
         await Browser.open({ url: updateInfo.apkUrl });
       } catch (e) {
         window.open(updateInfo.apkUrl, '_blank');
       }
+      return;
+    }
+
+    // Native OTA Download & Installation
+    try {
+      setDownloadState({ status: 'downloading', progress: 0 });
+
+      // Resolve absolute local cache directory path
+      const uriResult = await Filesystem.getUri({
+        directory: Directory.Cache,
+        path: 'LGS_Kocluk_Update.apk'
+      });
+      const localFilePath = uriResult.uri;
+
+      // Proactively clean up any previous file to avoid conflicts
+      try {
+        await Filesystem.deleteFile({
+          directory: Directory.Cache,
+          path: 'LGS_Kocluk_Update.apk'
+        });
+      } catch (e) {
+        // Ignore if file doesn't exist
+      }
+
+      // Add file-transfer listener
+      const progressListener = await FileTransfer.addListener('progress', (progress) => {
+        const pct = progress.contentLength > 0 
+          ? Math.round((progress.bytes / progress.contentLength) * 100) 
+          : 0;
+        setDownloadState({ status: 'downloading', progress: isNaN(pct) ? 0 : pct });
+      });
+
+      // Start the download
+      await FileTransfer.downloadFile({
+        url: updateInfo.apkUrl,
+        path: localFilePath,
+        progress: true
+      });
+
+      // Remove the progress listener
+      progressListener.remove();
+
+      setDownloadState({ status: 'installing', progress: 100 });
+
+      // Trigger the OS native package installer
+      await FileOpener.open({
+        filePath: localFilePath,
+        contentType: 'application/vnd.android.package-archive'
+      });
+    } catch (err: any) {
+      console.error("Native OTA update error:", err);
+      setDownloadState({
+        status: 'error',
+        progress: 0,
+        errorMessage: err.message || "Güncelleme paketi indirilirken veya kurulurken bir hata oluştu."
+      });
     }
   };
 
@@ -351,52 +419,183 @@ export default function AppLayout() {
       <Dialog 
         open={updateInfo.show} 
         onOpenChange={(open) => {
+          if (downloadState.status === 'downloading' || downloadState.status === 'installing') return;
           if (!open) {
             sessionStorage.setItem("update_prompt_dismissed", "true");
             setUpdateInfo(prev => ({ ...prev, show: false }));
+            setDownloadState({ status: 'idle', progress: 0 });
           }
         }}
       >
-        <DialogContent className="max-w-sm sm:max-w-md rounded-2xl p-6">
-          <DialogHeader className="flex flex-col items-center text-center space-y-3">
-            <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-3xl animate-bounce">
-              🚀
-            </div>
-            <DialogTitle className="text-2xl font-black tracking-tight text-center">Yeni Güncelleme Mevcut!</DialogTitle>
-            <DialogDescription className="text-sm text-center">
-              Uygulamanın en son sürümü hazır. Daha iyi bir deneyim için lütfen güncelleyin.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className={`max-w-sm sm:max-w-md rounded-2xl p-6 overflow-hidden transition-all duration-500 ${downloadState.status !== 'idle' ? 'bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-950 border-purple-500/30' : ''}`}>
+          {downloadState.status !== 'idle' && (
+            <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]" />
+          )}
 
-          <div className="my-4 bg-muted/30 p-4 rounded-xl border border-border/50 max-h-[180px] overflow-y-auto">
-            <div className="flex justify-between items-center text-xs font-bold text-muted-foreground mb-3 pb-2 border-b border-border/40">
-              <span>Mevcut Sürüm: v{CURRENT_VERSION}</span>
-              <span className="text-primary bg-primary/10 px-2 py-0.5 rounded-full font-extrabold">Yeni: v{updateInfo.latestVersion}</span>
-            </div>
-            <h5 className="text-xs font-black uppercase tracking-wider text-muted-foreground mb-1">Yenilikler</h5>
-            <p className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed font-medium">
-              {updateInfo.changelog || "Çeşitli iyileştirmeler ve hata düzeltmeleri."}
-            </p>
-          </div>
+          {downloadState.status === 'idle' ? (
+            <>
+              <DialogHeader className="flex flex-col items-center text-center space-y-3">
+                <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-3xl animate-bounce">
+                  🚀
+                </div>
+                <DialogTitle className="text-2xl font-black tracking-tight text-center">Yeni Güncelleme Mevcut!</DialogTitle>
+                <DialogDescription className="text-sm text-center">
+                  Uygulamanın en son sürümü hazır. Daha iyi bir deneyim için lütfen güncelleyin.
+                </DialogDescription>
+              </DialogHeader>
 
-          <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                sessionStorage.setItem("update_prompt_dismissed", "true");
-                setUpdateInfo(prev => ({ ...prev, show: false }));
-              }}
-              className="w-full sm:w-auto font-semibold order-2 sm:order-1"
-            >
-              Daha Sonra
-            </Button>
-            <Button 
-              onClick={handleUpdateClick}
-              className="w-full sm:w-auto font-bold bg-primary text-primary-foreground shadow-lg hover:shadow-xl hover:translate-y-[-1px] transition-all order-1 sm:order-2"
-            >
-              Şimdi Güncelle
-            </Button>
-          </DialogFooter>
+              <div className="my-4 bg-muted/30 p-4 rounded-xl border border-border/50 max-h-[180px] overflow-y-auto">
+                <div className="flex justify-between items-center text-xs font-bold text-muted-foreground mb-3 pb-2 border-b border-border/40">
+                  <span>Mevcut Sürüm: v{CURRENT_VERSION}</span>
+                  <span className="text-primary bg-primary/10 px-2 py-0.5 rounded-full font-extrabold">Yeni: v{updateInfo.latestVersion}</span>
+                </div>
+                <h5 className="text-xs font-black uppercase tracking-wider text-muted-foreground mb-1">Yenilikler</h5>
+                <p className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed font-medium">
+                  {updateInfo.changelog || "Çeşitli iyileştirmeler ve hata düzeltmeleri."}
+                </p>
+              </div>
+
+              <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    sessionStorage.setItem("update_prompt_dismissed", "true");
+                    setUpdateInfo(prev => ({ ...prev, show: false }));
+                  }}
+                  className="w-full sm:w-auto font-semibold order-2 sm:order-1"
+                >
+                  Daha Sonra
+                </Button>
+                <Button 
+                  onClick={handleUpdateClick}
+                  className="w-full sm:w-auto font-bold bg-primary text-primary-foreground shadow-lg hover:shadow-xl hover:translate-y-[-1px] transition-all order-1 sm:order-2"
+                >
+                  Şimdi Güncelle
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <div className="flex flex-col items-center text-center py-6 space-y-6 relative z-10 text-white">
+              {downloadState.status === 'downloading' && (
+                <>
+                  <div className="relative h-32 w-32 flex items-center justify-center">
+                    {/* Glowing outer ring */}
+                    <div className="absolute inset-0 rounded-full bg-cyan-500/10 blur-xl animate-pulse" />
+                    
+                    {/* SVG Circular Progress */}
+                    <svg className="w-full h-full transform -rotate-90">
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r="52"
+                        className="stroke-white/10"
+                        strokeWidth="8"
+                        fill="transparent"
+                      />
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r="52"
+                        className="stroke-cyan-400 transition-all duration-300 ease-out"
+                        strokeWidth="8"
+                        fill="transparent"
+                        strokeDasharray={2 * Math.PI * 52}
+                        strokeDashoffset={2 * Math.PI * 52 - (downloadState.progress / 100) * (2 * Math.PI * 52)}
+                        strokeLinecap="round"
+                        style={{ filter: "drop-shadow(0 0 8px rgba(34, 211, 238, 0.6))" }}
+                      />
+                    </svg>
+                    
+                    <div className="absolute flex flex-col items-center">
+                      <span className="text-3xl font-black tracking-tighter text-cyan-300 drop-shadow-md">
+                        %{downloadState.progress}
+                      </span>
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">
+                        İndiriliyor
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-extrabold tracking-tight text-white animate-pulse">Yeni Sürüm Yükleniyor</h3>
+                    <p className="text-xs text-slate-300 max-w-[280px]">
+                      Güncelleme paketi güvenli bir şekilde indiriliyor. Lütfen uygulamayı kapatmayın.
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {downloadState.status === 'installing' && (
+                <>
+                  <div className="relative h-32 w-32 flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full bg-purple-500/20 blur-xl animate-ping" />
+                    <div className="h-24 w-24 rounded-full bg-purple-500/10 border-2 border-purple-400/50 flex items-center justify-center text-4xl animate-bounce shadow-[0_0_20px_rgba(192,132,252,0.4)]">
+                      🛠️
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-extrabold tracking-tight text-purple-300">Kurulum Hazırlanıyor</h3>
+                    <p className="text-xs text-slate-300 max-w-[280px]">
+                      Sistem yükleyicisi başlatılıyor. Lütfen ekranda çıkacak olan onay penceresini onaylayın.
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {downloadState.status === 'error' && (
+                <>
+                  <div className="relative h-32 w-32 flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full bg-rose-500/20 blur-xl animate-pulse" />
+                    <div className="h-24 w-24 rounded-full bg-rose-500/10 border-2 border-rose-400/50 flex items-center justify-center text-4xl shadow-[0_0_20px_rgba(251,113,133,0.4)]">
+                      ❌
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-extrabold tracking-tight text-rose-400">Güncelleme Başarısız</h3>
+                    <p className="text-xs text-rose-200/80 max-w-[280px] font-medium">
+                      {downloadState.errorMessage || "İndirme sırasında beklenmedik bir hata oluştu."}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2 w-full pt-2">
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setDownloadState({ status: 'idle', progress: 0 });
+                      }}
+                      className="flex-1 font-semibold text-slate-300 hover:text-white hover:bg-white/10"
+                    >
+                      Vazgeç
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setDownloadState({ status: 'idle', progress: 0 });
+                        handleUpdateClick();
+                      }}
+                      className="flex-1 font-bold bg-rose-500 text-white hover:bg-rose-600 shadow-[0_0_15px_rgba(244,63,94,0.4)]"
+                    >
+                      Tekrar Dene
+                    </Button>
+                  </div>
+
+                  <button
+                    onClick={async () => {
+                      try {
+                        await Browser.open({ url: updateInfo.apkUrl });
+                      } catch (e) {
+                        window.open(updateInfo.apkUrl, '_blank');
+                      }
+                    }}
+                    className="text-[10px] text-slate-400 hover:text-cyan-400 underline transition-colors font-medium"
+                  >
+                    Tarayıcı ile indirmeyi dene (Alternatif)
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

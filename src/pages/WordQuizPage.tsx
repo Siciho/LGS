@@ -169,6 +169,19 @@ export default function WordQuizPage() {
           setTotalPoints(prev => prev + earnedPoints);
           setLifetimePoints(prev => prev + earnedPoints);
           toast.success(`${earnedPoints} puan kazandın! 🪙`);
+          
+          // Log to cozulen_sorular so it counts in monthly/weekly leaderboard
+          try {
+            await supabase.from('cozulen_sorular').insert({
+              kullanici_id: userId,
+              ders_id: 'english',
+              dogru_sayisi: finalCorrectCount,
+              yanlis_sayisi: questions.length - finalCorrectCount,
+              konu: challengeId ? 'Kelime Düellosu' : 'Kelime Çalışması'
+            });
+          } catch (e) {
+            console.error("Error logging word quiz to cozulen_sorular:", e);
+          }
         }
 
         if (challengeId) {

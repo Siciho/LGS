@@ -141,7 +141,7 @@ export default function LeaderboardPage() {
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="all">Tüm Zamanlar</TabsTrigger>
                 <TabsTrigger value="month">Bu Ay</TabsTrigger>
-                <TabsTrigger value="last_week">Geçen Hafta</TabsTrigger>
+                <TabsTrigger value="last_week">Bu Hafta</TabsTrigger>
               </TabsList>
               
               <div className="flex gap-2 overflow-x-auto pb-2 pt-4 mb-2">
