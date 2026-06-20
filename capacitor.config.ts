@@ -7,7 +7,7 @@ const config: CapacitorConfig = {
   // YENİ EKLENEN BÖLÜM
   plugins: {
     SplashScreen: {
-      launchShowDuration: 3000, // Açılış ekranı 3 saniye görünecek
+      launchShowDuration: 5000, // Açılış ekranı 5 saniye görünecek
       launchAutoHide: true,
       backgroundColor: "#1e1b4b", // Görsel yüklenemezse görünecek arkaplan rengi
       androidSplashResourceName: "splash",

@@ -17,7 +17,7 @@ import { FileOpener } from '@capacitor-community/file-opener';
 import { Capacitor } from '@capacitor/core';
 import { Button } from "@/components/ui/button";
 
-const CURRENT_VERSION = "1.1.0";
+export const CURRENT_VERSION = "1.1.0";
 
 const isNewerVersion = (current: string, latest: string) => {
   const cParts = current.split('.').map(Number);
@@ -51,6 +51,7 @@ export type AppContextType =
     toggleMute: () => void;
     pendingChallenges: Challenge[];
     dismissChallenge: (challengeId: string) => void;
+    checkForUpdatesManual: (showFeedback: boolean) => Promise<void>;
   };
 
 export default function AppLayout() {
@@ -334,11 +335,45 @@ export default function AppLayout() {
   const totalQuestions = useMemo(() => studyData.subjects?.reduce((sum, s) => sum + s.correct + s.incorrect, 0) || 0, [studyData.subjects]);
   const unlockedAchievements = useMemo(() => coreData.achievements?.filter(a => a.unlocked).length || 0, [coreData.achievements]);
 
+  const checkForUpdatesManual = async (showFeedback: boolean) => {
+    try {
+      const { data, error } = await supabase
+        .from("app_settings")
+        .select("latest_version, changelog, apk_url")
+        .eq("id", "config")
+        .maybeSingle();
+
+      if (error) {
+        if (showFeedback) toast.error("Güncelleme kontrolü başarısız oldu.");
+        return;
+      }
+
+      if (data && data.latest_version) {
+        const isNew = isNewerVersion(CURRENT_VERSION, data.latest_version);
+        if (isNew) {
+          setUpdateInfo({
+            show: true,
+            latestVersion: data.latest_version,
+            changelog: data.changelog || "",
+            apkUrl: data.apk_url || ""
+          });
+        } else {
+          if (showFeedback) toast.success("Uygulamanız güncel! 🎉");
+        }
+      } else {
+        if (showFeedback) toast.success("Uygulamanız güncel! 🎉");
+      }
+    } catch (err) {
+      if (showFeedback) toast.error("Beklenmeyen bir hata oluştu.");
+    }
+  };
+
   const contextValue: AppContextType = {
     ...auth, ...studyData, ...coreData, ...scheduler,
     handleQuizCompletion, handleEnglishUnitUnlocked,
     isMuted, toggleMute,
     pendingChallenges, dismissChallenge,
+    checkForUpdatesManual,
   };
   
   if (auth.authLoading || !coreData.isCloudDataLoaded) {

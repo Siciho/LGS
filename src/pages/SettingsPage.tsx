@@ -3,9 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BellRing, History, ChevronRight, LogOut, User, Swords, KeyRound } from "lucide-react";
+import { BellRing, History, ChevronRight, LogOut, User, Swords, KeyRound, Info, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAppContext } from "./AppLayout";
+import { useAppContext, CURRENT_VERSION } from "./AppLayout";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription as DialogDescriptionComponent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -19,13 +19,21 @@ export const SettingsPage = () => {
     handleUpdateNotificationSettings, 
     handleLogout, 
     userName, 
-    handleChangePassword 
+    handleChangePassword,
+    checkForUpdatesManual
   } = useAppContext();
 
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
+
+  const handleCheckUpdates = async () => {
+    setIsCheckingUpdates(true);
+    await checkForUpdatesManual(true);
+    setIsCheckingUpdates(false);
+  };
 
   if (!notificationSettings) {
     return <div>Yükleniyor...</div>;
@@ -213,6 +221,36 @@ export const SettingsPage = () => {
               <p className="text-sm text-muted-foreground">Günlük görevini yapmadığında serini korumak için bildirim al.</p>
             </div>
             <Switch id="streak-reminder" checked={notificationSettings.streakReminder ?? false} onCheckedChange={handleStreakReminderToggle} />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-card border-border/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Info className="h-5 w-5 text-primary" /> Uygulama Hakkında</CardTitle>
+          <CardDescription>Mevcut sürüm bilgisi ve güncelleme kontrolleri.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="font-semibold text-sm">Versiyon</p>
+              <p className="text-sm text-muted-foreground">v{CURRENT_VERSION}</p>
+            </div>
+            <Button 
+              variant="outline"
+              disabled={isCheckingUpdates}
+              onClick={handleCheckUpdates}
+              className="font-semibold"
+            >
+              {isCheckingUpdates ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Denetleniyor...
+                </>
+              ) : (
+                "Güncellemeleri Denetle"
+              )}
+            </Button>
           </div>
         </CardContent>
       </Card>
