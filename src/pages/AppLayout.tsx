@@ -108,7 +108,7 @@ export default function AppLayout() {
       }
     };
 
-    if (isInitialized && userId && Capacitor.getPlatform() === 'android') {
+    if (isInitialized && userId && Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
       checkUpdate();
     }
   }, [isInitialized, userId]);
