@@ -266,7 +266,7 @@ export default function LeaderboardPage() {
                     {' - '}
                     {timeFilter === 'all' && 'Tüm Zamanlar'}
                     {timeFilter === 'month' && 'Bu Ay'}
-                    {timeFilter === 'last_week' && 'Geçen Hafta'}
+                    {timeFilter === 'last_week' && 'Bu Hafta'}
                     {' İstatistikleri'}
                   </span>
                 </DialogDescription>

@@ -17,7 +17,7 @@ import { FileOpener } from '@capacitor-community/file-opener';
 import { Capacitor } from '@capacitor/core';
 import { Button } from "@/components/ui/button";
 
-export const CURRENT_VERSION = "1.1.0";
+export const CURRENT_VERSION = "1.1.1";
 
 const isNewerVersion = (current: string, latest: string) => {
   const cParts = current.split('.').map(Number);
@@ -73,6 +73,12 @@ export default function AppLayout() {
   
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [location.pathname]);
+
   const isHomePage = location.pathname === '/' || location.pathname === '/derslerim';
   const auth = useAuthContext();
   const { userId, userName, userRole } = auth;

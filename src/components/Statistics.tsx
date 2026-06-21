@@ -242,7 +242,7 @@ export default function Statistics({ subjects, sessions }: StatisticsProps) {
           <div className="space-y-4">
             {subjects.map(subject => {
               const totalSolved = subject.correct + subject.incorrect;
-              const overallProgress = subject.targetQuestions > 0 ? (totalSolved / subject.targetQuestions) * 100 : 0;
+              const successRate = totalSolved > 0 ? Math.round((subject.correct / totalSolved) * 100) : 0;
               const subjectSessions = sessionsBySubject[subject.id] || [];
               
               return (
@@ -257,17 +257,24 @@ export default function Statistics({ subjects, sessions }: StatisticsProps) {
                     <div className="flex flex-col flex-1 gap-2">
                       <div className="flex items-center gap-3">
                         <div className="text-3xl">{subject.icon}</div>
-                        <div>
+                        <div className="flex-1">
                           <h3 className="font-bold text-lg">{subject.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Toplam Soru: {totalSolved} / {subject.targetQuestions}
-                          </p>
+                          <div className="text-xs sm:text-sm text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 mt-0.5">
+                            <span>Doğru: <span className="text-success font-bold">{subject.correct}</span></span>
+                            <span className="text-border">|</span>
+                            <span>Yanlış: <span className="text-destructive font-bold">{subject.incorrect}</span></span>
+                            <span className="text-border">|</span>
+                            <span>Başarı: <span className="text-primary dark:text-primary-glow font-bold">%{successRate}</span></span>
+                            <span className="text-border">|</span>
+                            <span className="text-muted-foreground/80">(Toplam: {totalSolved} Soru)</span>
+                          </div>
                         </div>
                       </div>
                       <div className="mt-2 w-full">
                         <Progress 
-                          value={overallProgress} 
-                          className={cn("h-2", {
+                          value={successRate} 
+                          className="h-2"
+                          indicatorClassName={cn({
                             "bg-primary": subject.color === "primary",
                             "bg-success": subject.color === "success",
                             "bg-warning": subject.color === "warning"
@@ -301,11 +308,15 @@ export default function Statistics({ subjects, sessions }: StatisticsProps) {
                                   <span className="font-medium">{topic}</span>
                                   <span className="font-semibold">%{Math.round(progressValue)}</span>
                                 </div>
-                                <Progress value={progressValue} className={cn("h-2", {
-                                  "bg-primary": subject.color === "primary",
-                                  "bg-success": subject.color === "success",
-                                  "bg-warning": subject.color === "warning"
-                                })} />
+                                <Progress 
+                                  value={progressValue} 
+                                  className="h-2" 
+                                  indicatorClassName={cn({
+                                    "bg-primary": subject.color === "primary",
+                                    "bg-success": subject.color === "success",
+                                    "bg-warning": subject.color === "warning"
+                                  })} 
+                                />
                                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                                   <div className="flex items-center gap-1 text-success">
                                     <TrendingUp className="h-3 w-3" /> {correctCount} Doğru
@@ -319,7 +330,7 @@ export default function Statistics({ subjects, sessions }: StatisticsProps) {
                           })
                         ) : (
                           <div className="flex items-center justify-center gap-2 text-center text-muted-foreground p-4">
-                            <Info className="h-4 w-4" />
+                             <Info className="h-4 w-4" />
                             <p>Bu ders için henüz manuel konu girişi yapılmamış.</p>
                           </div>
                         )}
