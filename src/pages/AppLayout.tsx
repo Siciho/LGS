@@ -115,7 +115,8 @@ export default function AppLayout() {
       }
     };
 
-    if (isInitialized && userId && Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
+    const isWeb = !Capacitor.isNativePlatform() || Capacitor.getPlatform() === 'web';
+    if (isInitialized && userId && !isWeb && Capacitor.getPlatform() === 'android') {
       checkUpdate();
     }
   }, [isInitialized, userId]);
@@ -342,6 +343,11 @@ export default function AppLayout() {
   const unlockedAchievements = useMemo(() => coreData.achievements?.filter(a => a.unlocked).length || 0, [coreData.achievements]);
 
   const checkForUpdatesManual = async (showFeedback: boolean) => {
+    const isWeb = !Capacitor.isNativePlatform() || Capacitor.getPlatform() === 'web';
+    if (isWeb) {
+      if (showFeedback) toast.success("Web sürümünüz güncel! 🎉");
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from("app_settings")
