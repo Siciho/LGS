@@ -51,3 +51,4 @@ build/
 # IDE dosyaları
 .idea/
 *.iml
+.vercel

@@ -1,0 +1,25 @@
+# Ignore Android native directories
+android/
+android
+/android
+
+# Ignore APK builds
+*.apk
+*.aab
+LGS_Kocluk_Debug.apk
+LGS_Kocluk_Debug_v1.1.0.apk
+LGS_Kocluk_Debug_v1.1.1.apk
+
+# Ignore cache directories
+.gradle/
+.gradle
+/caches
+/daemon
+/jdks
+/wrapper
+
+# Standard web build ignores
+node_modules/
+dist/
+.git/
+.vercel
