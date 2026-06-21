@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Swords, Trophy, Lock, History, ChevronDown } from "lucide-react";
+import { Swords, Trophy, Lock, History, ChevronDown, Gamepad2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { dailyWords } from "@/data/dailywords";
 import { cn } from "@/lib/utils";
@@ -131,6 +131,28 @@ export default function PracticePage() {
         </TabsContent>
 
         <TabsContent value="vocab-world" className="mt-6 space-y-6">
+          <Card className="border border-primary/20 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Gamepad2 className="text-primary h-6 w-6" /> Günün Cümle Avı
+              </CardTitle>
+              <CardDescription>
+                Karışık harflerle cümlelerdeki eksik LGS kelimelerini tamamla ve günlük puanını kazan!
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {dailySolvedSubjects.includes('english_scramble') ? (
+                <Button disabled className="w-full py-6 bg-success/20 text-success border border-success/30 font-bold">
+                  Bugün Tamamlandı ✓
+                </Button>
+              ) : (
+                <Button onClick={() => navigate('/daily-scramble')} className="w-full py-6 font-bold text-lg shadow-md animate-pulse-glow">
+                  Başla (+50 Puan) ➔
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

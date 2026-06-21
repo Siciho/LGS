@@ -25,6 +25,7 @@ import WordQuizPage from "./pages/WordQuizPage";
 import AdminPage from "./pages/AdminPage";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import DenemeKayitlarimPage from "./pages/DenemeKayitlarimPage";
+import DailyScramblePage from "./pages/DailyScramblePage";
 
 // Bu küçük bileşenler burada kalabilir
 const StatisticsPage = () => {
@@ -75,6 +76,7 @@ function App() {
         <Route path="word-quiz/:unitId" element={<WordQuizPage />} />
         <Route path="student/:studentId" element={<StudentDetailPage />} />
         <Route path="deneme-kayitlarim" element={<DenemeKayitlarimPage />} />
+        <Route path="daily-scramble" element={<DailyScramblePage />} />
         <Route path="coach" element={<SchedulePage />} />
         <Route path="admin/reset-password" element={<AdminPage />} />
         <Route path="update-password" element={<UpdatePasswordPage />} />
