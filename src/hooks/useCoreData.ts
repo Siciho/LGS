@@ -159,9 +159,9 @@ export const useCoreData = (
 
   }, [userId, userRole, userName, isPrivilegedUser]);
 
-  // --- DEĞİŞİKLİK 4: Bu useEffect artık HER İKİ PUANI da güncelliyor ---
+  // --- DEĞİŞİKLİK 4: Bu useEffect artık HER İKİ PUANI da güncelliyor ve bulut verisinin yüklenmesini bekliyor ---
   useEffect(() => {
-    if (!isInitialized || !userId || isPrivilegedUser) return;
+    if (!isInitialized || !userId || isPrivilegedUser || !isCloudDataLoaded) return;
     
     // NOT: Bu zamanlayıcı puan kazanma (quiz sonrası) veya seri artışı içindir.
     // 'harcama' işlemleri (handleBuyAvatar) GECİKMEZ.
@@ -181,8 +181,8 @@ export const useCoreData = (
     }, 1500);
 
     return () => clearTimeout(debounceTimer);
-  // 'lifetimePoints' bağımlılıklara eklendi
-  }, [totalPoints, lifetimePoints, streak, streakFreezes, isInitialized, userId, isPrivilegedUser, isTestAccount]);
+  // 'lifetimePoints' ve 'isCloudDataLoaded' bağımlılıklara eklendi
+  }, [totalPoints, lifetimePoints, streak, streakFreezes, isInitialized, userId, isPrivilegedUser, isCloudDataLoaded, isTestAccount]);
 
   useEffect(() => {
     if (isInitialized && userId && achievements.length > 0 && !isPrivilegedUser) {
