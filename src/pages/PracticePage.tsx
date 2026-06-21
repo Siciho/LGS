@@ -142,9 +142,9 @@ export default function PracticePage() {
             </CardHeader>
             <CardContent>
               {dailySolvedSubjects.includes('english_scramble') ? (
-                <Button disabled className="w-full py-6 bg-success/20 text-success border border-success/30 font-bold">
+                <div className="w-full py-5 text-center rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-bold text-base flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
                   Bugün Tamamlandı ✓
-                </Button>
+                </div>
               ) : (
                 <Button onClick={() => navigate('/daily-scramble')} className="w-full py-6 font-bold text-lg shadow-md animate-pulse-glow">
                   Başla (+50 Puan) ➔

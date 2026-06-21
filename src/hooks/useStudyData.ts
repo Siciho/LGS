@@ -185,6 +185,15 @@ export const useStudyData = (
     storage.saveDailySolvedSubjects(userId, newDailySolved);
   };
 
+  const completeDailyTask = (taskId: string) => {
+    if (dailySolvedSubjects.includes(taskId)) return;
+    const newDailySolved = [...dailySolvedSubjects, taskId];
+    setDailySolvedSubjects(newDailySolved);
+    if (userId) {
+      storage.saveDailySolvedSubjects(userId, newDailySolved);
+    }
+  };
+
   return {
     subjects,
     sessions,
@@ -193,6 +202,7 @@ export const useStudyData = (
     setLastActiveDate,
     handleAddQuestions,
     handleQuizCompletion,
-    isLoading // --- DEĞİŞİKLİK 3: isLoading dışarı aktarıldı ---
+    completeDailyTask,
+    isLoading
   };
 };

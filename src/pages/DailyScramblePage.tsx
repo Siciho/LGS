@@ -60,7 +60,7 @@ const getUnitName = (unitNum: number): string => {
 };
 
 export default function DailyScramblePage() {
-  const { userId, isMuted, setTotalPoints, setLifetimePoints, dailySolvedSubjects } = useAppContext();
+  const { userId, isMuted, setTotalPoints, setLifetimePoints, dailySolvedSubjects, completeDailyTask } = useAppContext();
   const navigate = useNavigate();
 
   const [questions, setQuestions] = useState<ScrambleQuestion[]>([]);
@@ -75,6 +75,14 @@ export default function DailyScramblePage() {
   const [isSaving, setIsSaving] = useState(false);
 
   const activeUnit = useMemo(() => getActiveUnitForCurrentMonth(), []);
+
+  // Redirect if already solved today
+  useEffect(() => {
+    if (dailySolvedSubjects && dailySolvedSubjects.includes('english_scramble')) {
+      toast.info("Bugünkü Cümle Avı'nı zaten tamamladınız.");
+      navigate('/practice', { replace: true });
+    }
+  }, [dailySolvedSubjects, navigate]);
 
   // 1. Generate questions on mount
   useEffect(() => {
@@ -281,6 +289,11 @@ export default function DailyScramblePage() {
         setTotalPoints(prev => prev + earnedPoints);
         setLifetimePoints(prev => prev + earnedPoints);
         toast.success(`Günlük görev tamamlandı! +${earnedPoints} Puan cüzdanınıza eklendi! 🎉`);
+      }
+
+      // 4. Update daily solved subjects locally to sync the state across tabs instantly
+      if (completeDailyTask) {
+        completeDailyTask('english_scramble');
       }
     } catch (e) {
       console.error("Save Daily Scramble results error:", e);
