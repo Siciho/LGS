@@ -19,29 +19,44 @@ const getMonday = (d: Date) => {
 
 serve(async (req) => {
   const origin = req.headers.get("Origin") || "";
-  const allowedOrigins = [
-    'http://localhost:8080', 'capacitor://localhost', 'http://localhost',
-    'https://siciho2026.vercel.app' // Vercel adresinizi de ekleyebilirsiniz
-  ];
-  const headers: { [key: string]: string } = { ...corsHeaders };
-  if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
-    headers['Access-Control-Allow-Origin'] = origin;
-  }
+  
+  // CORS başlıkları: capacitor, local dev (5173 vb.) ve vercel için uyumlu hale getirildi
+  const headers = {
+    'Access-Control-Allow-Origin': origin || '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
+  };
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers });
   }
 
   try {
-    // 1. Kullanıcıyı ve rolünü doğrula
+    // 1. Kullanıcıyı doğrula
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error("Yetkilendirme başlığı bulunamadı.");
+    }
+
     const userSupabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
     );
-    const { data: { user } } = await userSupabaseClient.auth.getUser();
-    if (!user) throw new Error("Authentication error: User not found.");
-    const { data: userProfile, error: profileError } = await userSupabaseClient
+    
+    const { data: { user }, error: authError } = await userSupabaseClient.auth.getUser();
+    if (authError || !user) throw new Error("Authentication error: User not found.");
+
+    // Admin istemcisini oluştur
+    const adminSupabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // RLS kısıtlamalarından etkilenmemek için rol kontrolünü admin client ile yapıyoruz
+    const { data: userProfile, error: profileError } = await adminSupabaseClient
       .from('kullanicilar').select('rol, koc_kodu').eq('id', user.id).single();
-    if (profileError) throw profileError;
+
+    if (profileError || !userProfile) throw new Error("Kullanıcı profili alınamadı.");
     if (userProfile.rol !== 'admin' && userProfile.rol !== 'koç') {
       throw new Error("Authorization error: Not an admin or a coach.");
     }
@@ -49,11 +64,6 @@ serve(async (req) => {
     // 2. İstekten öğrenci ID'sini ve zaman filtresini al
     const { student_id, time_frame } = await req.json(); // time_frame: 'all', 'week', 'month-9', 'month-10' vb.
     if (!student_id) throw new Error("Request error: 'student_id' is required.");
-
-    // 3. Admin istemcisini oluştur
-    const adminSupabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
 
     // 4. Veritabanı sorgusunu hazırla
     const studentPromise = adminSupabaseClient.from('kullanicilar').select('ad_soyad, koc_kodu').eq('id', student_id).single();

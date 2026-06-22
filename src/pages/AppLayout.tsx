@@ -17,7 +17,7 @@ import { FileOpener } from '@capacitor-community/file-opener';
 import { Capacitor } from '@capacitor/core';
 import { Button } from "@/components/ui/button";
 
-export const CURRENT_VERSION = "1.1.4";
+export const CURRENT_VERSION = "1.1.5";
 
 const isNewerVersion = (current: string, latest: string) => {
   const cParts = current.split('.').map(Number);
@@ -263,7 +263,7 @@ export default function AppLayout() {
   }, [navigate]);
 
   useEffect(() => {
-    if (userId && userRole !== 'koç' && userRole !== 'admin' && !studyData.isLoading && studyData.lastActiveDate && coreData.setStreak) {
+    if (userId && userRole !== 'koç' && userRole !== 'admin' && !studyData.isLoading && coreData.isCloudDataLoaded && studyData.lastActiveDate && coreData.setStreak) {
       const { lastActiveDate, setLastActiveDate } = studyData;
       const { streak, streakFreezes, setStreak, setStreakFreezes } = coreData;
       const today = new Date();
@@ -278,9 +278,18 @@ export default function AppLayout() {
             if (streakFreezes > 0) {
               setStreakFreezes(prev => prev - 1);
               setLastActiveDate(yesterdayStr);
+              storage.saveLastActiveDate(userId, yesterdayStr);
+              supabase.from('kullanicilar').update({ son_aktif_tarih: yesterdayStr }).eq('id', userId).then(({ error }) => {
+                if (error) console.error("Dondurma tarihi güncelleme hatası:", error);
+              });
               toast.info("Bir gün ara verdin ama Seri Dondurma serini kurtardı! ❄️");
             } else {
               setStreak(0);
+              setLastActiveDate(yesterdayStr);
+              storage.saveLastActiveDate(userId, yesterdayStr);
+              supabase.from('kullanicilar').update({ son_aktif_tarih: yesterdayStr }).eq('id', userId).then(({ error }) => {
+                if (error) console.error("Seri sıfırlama tarihi güncelleme hatası:", error);
+              });
               playFailSound(isMuted);
               toast.error("Serin sıfırlandı! 😢");
             }
@@ -288,7 +297,7 @@ export default function AppLayout() {
         }
       }
     }
-  }, [userId, userRole, studyData.isLoading, studyData.lastActiveDate, coreData.streak, isMuted]);
+  }, [userId, userRole, studyData.isLoading, coreData.isCloudDataLoaded, studyData.lastActiveDate, coreData.streak, isMuted]);
 
   useEffect(() => {
     const requestPermissions = async () => {

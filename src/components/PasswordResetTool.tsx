@@ -72,7 +72,28 @@ export default function PasswordResetTool() {
     });
 
     if (error) {
-      toast.error(`Şifre sıfırlanırken hata oluştu: ${error.message}`);
+      let errorMessage = error.message;
+      if (error.context) {
+        if (typeof error.context.json === 'function') {
+          try {
+            const body = await error.context.json();
+            if (body && body.error) {
+              errorMessage = body.error;
+            }
+          } catch (_) {
+            try {
+              const text = await error.context.text();
+              if (text) errorMessage = text;
+            } catch (_) {}
+          }
+        } else if ((error.context as any).responseBody) {
+          const body = (error.context as any).responseBody;
+          if (body && body.error) {
+            errorMessage = body.error;
+          }
+        }
+      }
+      toast.error(`Şifre sıfırlanırken hata oluştu: ${errorMessage}`);
     } else {
       toast.success(`${selectedStudent.ad_soyad} adlı kullanıcının şifresi başarıyla güncellendi.`);
       setNewPassword("");

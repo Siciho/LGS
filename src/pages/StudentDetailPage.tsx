@@ -215,11 +215,29 @@ export default function StudentDetailPage() {
         // Edge Function sonuçlarını işle
         if (edgeFunctionResult.error) {
           // Edge Function'dan gelen özel hatayı yakala
-          const errorBody = edgeFunctionResult.error.context?.responseBody;
-          if (errorBody && errorBody.error) {
-            throw new Error(errorBody.error);
+          let errorMessage = edgeFunctionResult.error.message;
+          const context = edgeFunctionResult.error.context;
+          if (context) {
+            if (typeof context.json === 'function') {
+              try {
+                const body = await context.json();
+                if (body && body.error) {
+                  errorMessage = body.error;
+                }
+              } catch (_) {
+                try {
+                  const text = await context.text();
+                  if (text) errorMessage = text;
+                } catch (_) {}
+              }
+            } else if ((context as any).responseBody) {
+              const body = (context as any).responseBody;
+              if (body && body.error) {
+                errorMessage = body.error;
+              }
+            }
           }
-          throw new Error(edgeFunctionResult.error.message);
+          throw new Error(errorMessage);
         }
         
         const { records: allRecords, student_name } = edgeFunctionResult.data;
