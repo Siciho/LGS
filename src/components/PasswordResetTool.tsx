@@ -63,37 +63,17 @@ export default function PasswordResetTool() {
 
     setIsResetting(true);
     
-    // === DEĞİŞİKLİK BURADA: Fonksiyon adı, sizin oluşturduğunuz doğru isimle güncellendi ===
-    const { error } = await supabase.functions.invoke('admin-change-password', {
-      body: {
-        user_id: selectedStudent.id,
-        new_password: newPassword,
-      },
+    // Edge Function yerine doğrudan Supabase üzerinde çalışan güvenli bir Postgres RPC fonksiyonu çağırıyoruz.
+    // Bu sayede CORS, Docker veya CLI deploy yetkisi sorunları tamamen aşılmış olur.
+    const { data, error: rpcError } = await supabase.rpc('admin_change_password_sql', {
+      p_user_id: selectedStudent.id,
+      p_new_password: newPassword,
     });
 
-    if (error) {
-      let errorMessage = error.message;
-      if (error.context) {
-        if (typeof error.context.json === 'function') {
-          try {
-            const body = await error.context.json();
-            if (body && body.error) {
-              errorMessage = body.error;
-            }
-          } catch (_) {
-            try {
-              const text = await error.context.text();
-              if (text) errorMessage = text;
-            } catch (_) {}
-          }
-        } else if ((error.context as any).responseBody) {
-          const body = (error.context as any).responseBody;
-          if (body && body.error) {
-            errorMessage = body.error;
-          }
-        }
-      }
-      toast.error(`Şifre sıfırlanırken hata oluştu: ${errorMessage}`);
+    if (rpcError) {
+      toast.error(`Şifre sıfırlanırken hata oluştu: ${rpcError.message}`);
+    } else if (data && data.success === false) {
+      toast.error(`Şifre sıfırlanırken hata oluştu: ${data.error}`);
     } else {
       toast.success(`${selectedStudent.ad_soyad} adlı kullanıcının şifresi başarıyla güncellendi.`);
       setNewPassword("");
