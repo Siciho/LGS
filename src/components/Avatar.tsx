@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { getThemeById } from "@/data/themes";
 
-// Matrix 1s and 0s falling rain canvas effect
+// Matrix 1s and 0s falling rain canvas effect (Back Face of Matrix Theme)
 function MatrixRainCanvas({ width = 80, height = 80 }: { width?: number; height?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -39,7 +39,6 @@ function MatrixRainCanvas({ width = 80, height = 80 }: { width?: number; height?
 
         ctx.fillText(text, x, y);
 
-        // Reset drops when they hit the bottom randomly
         if (y > height && Math.random() > 0.96) {
           drops[i] = 0;
         }
@@ -62,7 +61,174 @@ function MatrixRainCanvas({ width = 80, height = 80 }: { width?: number; height?
   );
 }
 
-// Particle system overlay for Lava (embers rising) and Frost (snow falling)
+// Magma boiling canvas effect (Back Face of Lava Theme)
+function MagmaCanvas({ width = 80, height = 80 }: { width?: number; height?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    interface Bubble {
+      x: number;
+      y: number;
+      radius: number;
+      color: string;
+      speedY: number;
+      life: number;
+      maxLife: number;
+    }
+
+    const bubbles: Bubble[] = [];
+    const colors = ["#f97316", "#ef4444", "#facc15"];
+
+    let animationId: number;
+
+    const draw = () => {
+      ctx.fillStyle = "#1a0505";
+      ctx.fillRect(0, 0, width, height);
+
+      const gradient = ctx.createRadialGradient(width/2, height/2, 5, width/2, height/2, width/2);
+      gradient.addColorStop(0, "rgba(239, 68, 68, 0.25)");
+      gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+
+      if (bubbles.length < 10 && Math.random() > 0.4) {
+        bubbles.push({
+          x: Math.random() * width,
+          y: height - Math.random() * 5,
+          radius: Math.random() * 3 + 1.5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          speedY: -(Math.random() * 0.4 + 0.2),
+          life: 0,
+          maxLife: Math.random() * 30 + 15
+        });
+      }
+
+      for (let i = bubbles.length - 1; i >= 0; i--) {
+        const b = bubbles[i];
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius * (1 - b.life / b.maxLife), 0, Math.PI * 2);
+        ctx.fillStyle = b.color;
+        ctx.shadowBlur = 5;
+        ctx.shadowColor = b.color;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        b.y += b.speedY;
+        b.life++;
+
+        if (b.life >= b.maxLife || b.y < 0) {
+          bubbles.splice(i, 1);
+        }
+      }
+
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => cancelAnimationFrame(animationId);
+  }, [width, height]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ width: `${width}px`, height: `${height}px` }}
+      className="absolute inset-0 rounded-full bg-black pointer-events-none"
+    />
+  );
+}
+
+// Blizzard swirling snow storm canvas effect (Back Face of Frost Theme)
+function BlizzardCanvas({ width = 80, height = 80 }: { width?: number; height?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    interface Snowflake {
+      x: number;
+      y: number;
+      radius: number;
+      speedY: number;
+      speedX: number;
+      opacity: number;
+    }
+
+    const flakes: Snowflake[] = [];
+    const maxFlakes = 16;
+
+    for (let i = 0; i < maxFlakes; i++) {
+      flakes.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 1.2 + 0.4,
+        speedY: Math.random() * 1.2 + 0.8,
+        speedX: -(Math.random() * 0.8 + 0.5),
+        opacity: Math.random() * 0.7 + 0.3
+      });
+    }
+
+    let animationId: number;
+
+    const draw = () => {
+      ctx.fillStyle = "#0c4a6e"; // sky-900
+      ctx.fillRect(0, 0, width, height);
+
+      const gradient = ctx.createRadialGradient(width/2, height/2, 5, width/2, height/2, width/2);
+      gradient.addColorStop(0, "rgba(56, 189, 248, 0.2)");
+      gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+
+      flakes.forEach((f) => {
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${f.opacity})`;
+        ctx.fill();
+
+        f.y += f.speedY;
+        f.x += f.speedX;
+
+        if (f.y > height || f.x < 0) {
+          f.y = -5;
+          f.x = Math.random() * (width + 10);
+        }
+      });
+
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => cancelAnimationFrame(animationId);
+  }, [width, height]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ width: `${width}px`, height: `${height}px` }}
+      className="absolute inset-0 rounded-full bg-black pointer-events-none"
+    />
+  );
+}
+
+// Particle system overlay (Front Face overlay for Lava and Frost)
 function ThemeParticleCanvas({ themeId, width = 80, height = 80 }: { themeId: string; width?: number; height?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -89,12 +255,11 @@ function ThemeParticleCanvas({ themeId, width = 80, height = 80 }: { themeId: st
     const particles: Particle[] = [];
     const maxParticles = 6;
 
-    // Initialize particles
     for (let i = 0; i < maxParticles; i++) {
       particles.push({
         x: Math.random() * width,
         y: themeId === "lava" ? height + Math.random() * 20 : Math.random() * -20,
-        size: Math.random() * 2 + 1,
+        size: Math.random() * 1.8 + 0.8,
         speedY: themeId === "lava" ? -(Math.random() * 0.4 + 0.2) : (Math.random() * 0.4 + 0.2),
         speedX: (Math.random() - 0.5) * 0.3,
         opacity: Math.random() * 0.6 + 0.4,
@@ -111,23 +276,21 @@ function ThemeParticleCanvas({ themeId, width = 80, height = 80 }: { themeId: st
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         
         if (themeId === "lava") {
-          ctx.fillStyle = `rgba(249, 115, 22, ${p.opacity})`; // Orange glow
+          ctx.fillStyle = `rgba(249, 115, 22, ${p.opacity})`;
           ctx.shadowBlur = 4;
           ctx.shadowColor = "#ef4444";
         } else {
-          ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`; // Snow white
+          ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
           ctx.shadowBlur = 2;
           ctx.shadowColor = "#e0f2fe";
         }
         
         ctx.fill();
-        ctx.shadowBlur = 0; // Reset shadow
+        ctx.shadowBlur = 0;
 
-        // Move particle
         p.y += p.speedY;
         p.x += p.speedX;
 
-        // Reset if goes out of bounds
         if (themeId === "lava" && p.y < -5) {
           p.y = height + Math.random() * 10;
           p.x = Math.random() * width;
@@ -143,9 +306,7 @@ function ThemeParticleCanvas({ themeId, width = 80, height = 80 }: { themeId: st
     };
 
     draw();
-    return () => {
-      cancelAnimationFrame(animationId);
-    };
+    return () => cancelAnimationFrame(animationId);
   }, [themeId, width, height]);
 
   return (
@@ -183,29 +344,31 @@ export default function Avatar({
   const [isAnimating, setIsAnimating] = useState(false);
   const userTheme = getThemeById(themeId);
 
-  // Auto flip effect on mount/src changes if theme is Matrix
+  const isFlipTheme = themeId === "matrix" || themeId === "lava" || themeId === "frost";
+
+  // Auto flip effect on mount if it's a 3D flip theme
   useEffect(() => {
-    if (themeId === "matrix") {
+    if (isFlipTheme) {
       const flipTimer = setTimeout(() => {
         setIsFlipped(true);
 
         const unflipTimer = setTimeout(() => {
           setIsFlipped(false);
-        }, 2200); // Keep flipped showing matrix code for 2.2 seconds
+        }, 2200);
 
         return () => clearTimeout(unflipTimer);
-      }, 1500); // Wait 1.5 seconds before starting the flip
+      }, 1500);
 
       return () => clearTimeout(flipTimer);
     }
   }, [themeId, src]);
 
-  // Sync highlighting state
+  // Sync highlighting
   useEffect(() => {
     setShowHighlight(highlight);
   }, [highlight]);
 
-  // Auto clean highlight after 5 seconds
+  // Auto clean highlight
   useEffect(() => {
     if (showHighlight) {
       const timer = setTimeout(() => {
@@ -215,7 +378,7 @@ export default function Avatar({
     }
   }, [showHighlight]);
 
-  // Auto stop click animation after 700ms
+  // Auto stop click animation
   useEffect(() => {
     if (isAnimating) {
       const timer = setTimeout(() => {
@@ -235,7 +398,6 @@ export default function Avatar({
 
   const currentSizeClass = sizeClasses[size];
 
-  // Extract numeric dimensions for canvas scaling
   const getDimensions = () => {
     switch (size) {
       case "sm":
@@ -256,10 +418,10 @@ export default function Avatar({
   const dim = getDimensions();
 
   const handleInteraction = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent trigger navigation if nested inside link/button
+    e.stopPropagation();
     setIsAnimating(true);
     
-    if (themeId === "matrix" && interactive) {
+    if (isFlipTheme && interactive) {
       setIsFlipped((prev) => !prev);
     }
     
@@ -269,14 +431,16 @@ export default function Avatar({
     }
   };
 
-  // Base theme styles for normal avatars (non-matrix)
+  // Base theme styles for borders
   const isDefaultTheme = themeId === "default";
   const avatarBorderClass = isDefaultTheme 
     ? "border-2 border-primary/50 shadow-md" 
     : userTheme.avatarClassName;
 
-  // Render flip structure for siber matrix theme
-  if (themeId === "matrix") {
+  // Render 3D flip card structure for Matrix, Lava, and Frost
+  if (isFlipTheme) {
+    const showFrontParticles = themeId === "lava" || themeId === "frost";
+    
     return (
       <div
         className={cn(
@@ -292,31 +456,42 @@ export default function Avatar({
           className={cn(
             "w-full h-full flipper preserve-3d rounded-full relative transition-transform duration-500",
             isFlipped ? "rotate-y-180" : "",
-            isAnimating ? "animate-matrix-click" : "",
+            isAnimating ? `animate-${themeId}-click` : "",
             showHighlight ? "animate-pulse-red-glow border-2" : avatarBorderClass
           )}
         >
-          {/* Front Face: Avatar Image */}
-          <div className="absolute inset-0 w-full h-full rounded-full backface-hidden overflow-hidden bg-background">
+          {/* Front Face: Avatar Image with optional particles overlay */}
+          <div 
+            className="absolute inset-0 w-full h-full rounded-full backface-hidden overflow-hidden bg-background"
+            style={{ transform: "translateZ(2px)" }}
+          >
             <img
               src={src}
               alt={alt}
               className="w-full h-full rounded-full aspect-square object-cover"
             />
+            {showFrontParticles && <ThemeParticleCanvas themeId={themeId} width={dim} height={dim} />}
           </div>
 
-          {/* Back Face: Matrix Code Rain */}
-          <div className="absolute inset-0 w-full h-full rounded-full backface-hidden rotate-y-180 bg-black overflow-hidden flex items-center justify-center">
-            {isFlipped && <MatrixRainCanvas width={dim} height={dim} />}
+          {/* Back Face: Dynamic Animation Canvas (Matrix, Magma, or Blizzard) */}
+          <div 
+            className="absolute inset-0 w-full h-full rounded-full backface-hidden rotate-y-180 bg-black overflow-hidden flex items-center justify-center"
+            style={{ transform: "rotateY(180deg) translateZ(2px)" }}
+          >
+            {isFlipped && (
+              <>
+                {themeId === "matrix" && <MatrixRainCanvas width={dim} height={dim} />}
+                {themeId === "lava" && <MagmaCanvas width={dim} height={dim} />}
+                {themeId === "frost" && <BlizzardCanvas width={dim} height={dim} />}
+              </>
+            )}
           </div>
         </div>
       </div>
     );
   }
 
-  // Standard static render for other themes
-  const showParticles = themeId === "lava" || themeId === "frost";
-
+  // Standard static render for other themes (Gold, Neon, Space)
   return (
     <div
       className={cn(
@@ -333,7 +508,6 @@ export default function Avatar({
         alt={alt}
         className="w-full h-full rounded-full object-cover"
       />
-      {showParticles && <ThemeParticleCanvas themeId={themeId} width={dim} height={dim} />}
     </div>
   );
 }
