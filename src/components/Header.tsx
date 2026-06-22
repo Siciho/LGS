@@ -5,6 +5,7 @@ import { avatars } from "@/data/avatars";
 import { cn } from "@/lib/utils";
 import { getLevelInfo } from "@/utils/level";
 import { getThemeById } from "@/data/themes";
+import Avatar from "@/components/Avatar";
 
 interface HeaderProps {
   userName: string | null;
@@ -54,13 +55,12 @@ export default function Header({
     )}>
       <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
         <Link to="/profile">
-          <img
+          <Avatar
             src={currentAvatar.image}
             alt="Kullanıcı Avatarı"
-            className={cn(
-              "w-14 h-14 md:w-16 md:h-16 rounded-full transition-transform duration-300 hover:scale-105 aspect-square object-cover flex-shrink-0",
-              userTheme.id === 'default' ? 'border-2 border-primary/50 shadow-md' : userTheme.avatarClassName
-            )}
+            themeId={activeTheme}
+            size="md"
+            className="hover:scale-105 transition-transform duration-300"
           />
         </Link>
         <div className="flex-1 min-w-0">

@@ -56,6 +56,17 @@ export const cardThemes: CardTheme[] = [
     label: 'Kozmik',
     badgeClassName: 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-sm font-black',
     avatarClassName: 'border-2 animate-avatar-space' // ✅ Kozmik nabız (pulse) çerçevesi
+  },
+  {
+    id: 'matrix',
+    name: 'Siber Matrix Teması',
+    price: 1500,
+    description: 'Akan yeşil Matrix kodları ve 3D takla atan siberpunk avatar tasarımı.',
+    className: 'border-emerald-500 dark:border-emerald-400 bg-black/95 hover:bg-black hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] transition-all duration-300 border-2',
+    textClassName: 'text-emerald-500 font-mono font-black tracking-widest',
+    label: 'Hacker',
+    badgeClassName: 'bg-emerald-500 text-black shadow-sm font-mono font-black',
+    avatarClassName: 'border-2 border-emerald-500 animate-avatar-matrix'
   }
 ];
 

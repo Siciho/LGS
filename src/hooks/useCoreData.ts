@@ -1,5 +1,3 @@
-// src/hooks/useCoreData.ts
-
 import { useState, useEffect, useMemo } from 'react';
 import { storage } from '@/utils/storage';
 import { supabase } from '@/supabaseClient';
@@ -9,6 +7,7 @@ import { achievements as initialAchievementsData } from '@/data/achievements';
 import { avatars as allAvatars } from "@/data/avatars";
 import { playPurchaseSound, playConfirmSound } from "@/utils/sounds";
 import { cardThemes } from '@/data/themes';
+import { useNavigate } from 'react-router-dom';
 
 export const useCoreData = (
   userId: string | null,
@@ -17,6 +16,7 @@ export const useCoreData = (
   isInitialized: boolean,
   isMuted: boolean
 ) => {
+  const navigate = useNavigate();
   const [totalPoints, setTotalPoints] = useState(0); // Bu artık "CÜZDAN"
   // --- DEĞİŞİKLİK 1: Yeni state eklendi ---
   const [lifetimePoints, setLifetimePoints] = useState(0); // Bu "TOPLAM KAZANILAN PUAN" (Sıralama için)
@@ -326,7 +326,12 @@ export const useCoreData = (
 
       if (conditionMet) {
         newAchievementsUnlocked = true;
-        toast.info(`Başarım Kazanıldı: ${ach.title}`);
+        toast.info(`Başarım Kazanıldı: ${ach.title} 🏆`, {
+          action: {
+            label: "Görüntüle",
+            onClick: () => navigate("/profile", { state: { activeTab: "basarimlar" } })
+          }
+        });
         const avatarToUnlock = allAvatars.find(avatar => avatar.achievementId === ach.id);
         if (avatarToUnlock && userId) {
             setUserAvatars(currentAvatars => {
@@ -336,7 +341,18 @@ export const useCoreData = (
                 };
                 storage.saveUserAvatars(userId, newAvatarsState);
                 updateUserCloudData({ avatar: newAvatarsState });
-                toast.success("Yeni bir avatar kazandın! 🥳");
+                toast.success(`Yeni bir avatar kazandın: ${avatarToUnlock.name}! 🥳`, {
+                  duration: 8000,
+                  action: {
+                    label: "Kuşan",
+                    onClick: () => navigate("/profile", { 
+                      state: { 
+                        activeTab: "avatarlar",
+                        highlightAvatarId: avatarToUnlock.id 
+                      } 
+                    })
+                  }
+                });
                 return newAvatarsState;
             });
         }

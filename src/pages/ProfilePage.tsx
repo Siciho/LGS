@@ -2,16 +2,42 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CheckCircle, Lock, Trophy, UserRound, Palette } from "lucide-react";
 import { useAppContext } from "@/pages/AppLayout";
 import { avatars as allAvatars } from "@/data/avatars";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Achievement } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getLevelInfo } from "@/utils/level";
 import { Progress } from "@/components/ui/progress";
 import { cardThemes, getThemeById } from "@/data/themes";
+import { useLocation } from "react-router-dom";
+import Avatar from "@/components/Avatar";
 
 export default function ProfilePage() {
   const { userAvatars, handleSetAvatar, achievements, lifetimePoints, unlockedThemes, activeTheme, handleSetTheme } = useAppContext();
+  const location = useLocation();
+  const state = location.state as { activeTab?: string; highlightAvatarId?: string } | null;
+
+  const [activeTab, setActiveTab] = useState("avatarlar");
+
+  useEffect(() => {
+    if (state?.activeTab) {
+      setActiveTab(state.activeTab);
+    }
+  }, [state?.activeTab]);
+
+  const highlightAvatarId = state?.highlightAvatarId;
+
+  useEffect(() => {
+    if (highlightAvatarId) {
+      const element = document.getElementById(`avatar-card-${highlightAvatarId}`);
+      if (element) {
+        const timer = setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [highlightAvatarId]);
 
   const lvlInfo = getLevelInfo(lifetimePoints);
 
@@ -93,7 +119,7 @@ export default function ProfilePage() {
         </div>
       </Card>
 
-      <Tabs defaultValue="avatarlar" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-6">
           <TabsTrigger value="avatarlar" className="flex items-center gap-2">
             <UserRound className="h-4 w-4" />
@@ -119,30 +145,33 @@ export default function ProfilePage() {
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                 {sortedAvatars.map(avatar => {
                   const isCurrent = userAvatars?.current === avatar.id;
-                  const theme = getThemeById(activeTheme || 'default');
+                  const isHighlighted = highlightAvatarId === avatar.id;
 
                   return (
                     <div
                       key={avatar.id}
+                      id={`avatar-card-${avatar.id}`}
                       className={cn(
                         "relative flex flex-col items-center gap-2 p-2 rounded-lg border-2 transition-all duration-300",
-                        isCurrent ? 'shadow-lg scale-105 bg-white/20' : 'border-transparent',
-                        isCurrent ? theme.avatarClassName : '',
-                        'cursor-pointer hover:border-white/50'
+                        isCurrent ? 'shadow-lg scale-105 bg-white/20' : 'border-transparent hover:border-white/50',
+                        'cursor-pointer'
                       )}
                       onClick={() => handleSetAvatar(avatar.id)}
                     >
-                      <img
+                      <Avatar
                         src={avatar.image}
                         alt={avatar.name}
-                        className="w-20 h-20 md:w-24 md:h-24 rounded-full aspect-square object-cover"
+                        themeId={isCurrent ? (activeTheme || 'default') : 'default'}
+                        size="lg"
+                        highlight={isHighlighted}
+                        interactive={false}
                       />
                       {isCurrent && (
-                        <div className="absolute top-0 right-0 bg-white text-violet-500 rounded-full p-1">
+                        <div className="absolute top-0 right-0 bg-white text-violet-500 rounded-full p-1 z-10">
                           <CheckCircle className="h-5 w-5" />
                         </div>
                       )}
-                      <p className="text-xs text-center font-medium metin-beyaz">{avatar.name}</p>
+                      <p className="text-xs text-center font-medium metin-beyaz mt-1">{avatar.name}</p>
                     </div>
                   );
                 })}

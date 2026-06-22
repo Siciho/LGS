@@ -16,6 +16,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { UserAvatars } from "@/types";
 import { avatars } from "@/data/avatars";
 import { getLevelInfo } from "@/utils/level";
+import Avatar from "@/components/Avatar";
 
 const defaultAvatar = avatars.find(a => a.id === 'default')?.image || '';
 
@@ -150,6 +151,7 @@ export default function StudentDetailPage() {
   const [timeFilter, setTimeFilter] = useState('all');
   const [studentLifetimePoints, setStudentLifetimePoints] = useState<number>(0);
   const [studentAvatar, setStudentAvatar] = useState<UserAvatars | null>(null);
+  const [studentActiveTheme, setStudentActiveTheme] = useState<string>("default");
 
   useEffect(() => {
     if (!studentId) return;
@@ -159,7 +161,7 @@ export default function StudentDetailPage() {
       setError(null);
       setReport(null); // Raporu temizle
       setTopicReport([]); // Konu raporunu temizle
-
+ 
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
@@ -184,7 +186,7 @@ export default function StudentDetailPage() {
         // Öğrencinin profil bilgilerini çek
         const profilePromise = supabase
           .from('kullanicilar')
-          .select('puan, toplam_kazanilan_puan, avatar')
+          .select('puan, toplam_kazanilan_puan, avatar, active_theme')
           .eq('id', studentId)
           .maybeSingle();
 
@@ -198,6 +200,7 @@ export default function StudentDetailPage() {
         if (profileResult.data) {
           const lp = profileResult.data.toplam_kazanilan_puan ?? profileResult.data.puan ?? 0;
           setStudentLifetimePoints(lp);
+          setStudentActiveTheme(profileResult.data.active_theme || "default");
           
           let avatarData = null;
           if (profileResult.data.avatar) {
@@ -341,10 +344,12 @@ export default function StudentDetailPage() {
       <Card className="shadow-card border border-border/50 bg-card/90 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-6 flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <img
+            <Avatar
               src={getAvatarImage(studentAvatar)}
               alt={studentName}
-              className="w-16 h-16 rounded-full border-2 border-primary/30 aspect-square object-cover"
+              themeId={studentActiveTheme}
+              size="md"
+              interactive={true}
             />
             <div>
               <div className="flex items-center gap-2 flex-wrap">

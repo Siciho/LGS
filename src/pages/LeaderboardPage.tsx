@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 import { useAppContext } from './AppLayout';
 import { getLevelInfo } from "@/utils/level";
 import { getThemeById } from "@/data/themes";
+import Avatar from "@/components/Avatar";
 
 interface LeaderboardEntry {
   rank: number; // Bu artık SADECE 'Tümü' filtresi için kullanılacak
@@ -192,11 +193,14 @@ export default function LeaderboardPage() {
                               <div className="flex items-center gap-3">
                                 {/* --- DEĞİŞİKLİK 5: 'entry.rank' yerine 'currentRank' gösteriliyor --- */}
                                 <span className="text-lg font-bold w-6 text-center">{currentRank}</span>
-                                <img
-                                  src={getAvatarImage(entry.user_avatar)}
-                                  alt={entry.user_name}
-                                  className={cn("w-12 h-12 rounded-full object-cover shrink-0 transition-all duration-300", theme.avatarClassName)}
-                                />
+                                 <Avatar
+                                   src={getAvatarImage(entry.user_avatar)}
+                                   alt={entry.user_name}
+                                   themeId={entry.active_theme || 'default'}
+                                   size="custom"
+                                   className="w-12 h-12 shrink-0 transition-all duration-300"
+                                   interactive={true}
+                                 />
                                 <div>
                                   <div className="flex items-center gap-2 flex-wrap">
                                     <p className={cn("font-semibold text-foreground", theme.id !== 'default' && theme.textClassName)}>
