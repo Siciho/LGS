@@ -346,9 +346,9 @@ export default function Avatar({
 
   const isFlipTheme = themeId === "matrix" || themeId === "lava" || themeId === "frost";
 
-  // Auto flip effect on mount if it's a 3D flip theme
+  // Auto flip effect on mount if it's a 3D flip theme and interactive is true
   useEffect(() => {
-    if (isFlipTheme) {
+    if (isFlipTheme && interactive) {
       const flipTimer = setTimeout(() => {
         setIsFlipped(true);
 
@@ -361,7 +361,7 @@ export default function Avatar({
 
       return () => clearTimeout(flipTimer);
     }
-  }, [themeId, src]);
+  }, [themeId, src, interactive]);
 
   // Sync highlighting
   useEffect(() => {
@@ -418,7 +418,7 @@ export default function Avatar({
   const dim = getDimensions();
 
   const handleInteraction = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    // DO NOT stop propagation so parent click handlers (like avatar selection) can execute
     setIsAnimating(true);
     
     if (isFlipTheme && interactive) {
