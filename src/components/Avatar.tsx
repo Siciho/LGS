@@ -85,6 +85,7 @@ export default function Avatar({
 }: AvatarProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [showHighlight, setShowHighlight] = useState(highlight);
+  const [isAnimating, setIsAnimating] = useState(false);
   const userTheme = getThemeById(themeId);
 
   // Auto flip effect on mount/src changes if theme is Matrix
@@ -119,6 +120,16 @@ export default function Avatar({
     }
   }, [showHighlight]);
 
+  // Auto stop click animation after 800ms
+  useEffect(() => {
+    if (isAnimating) {
+      const timer = setTimeout(() => {
+        setIsAnimating(false);
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, [isAnimating]);
+
   const sizeClasses = {
     sm: "w-10 h-10",
     md: "w-14 h-14 md:w-16 md:h-16",
@@ -149,10 +160,14 @@ export default function Avatar({
 
   const dim = getDimensions();
 
-  const handleInteraction = () => {
+  const handleInteraction = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent trigger navigation if nested inside link/button
+    setIsAnimating(true);
+    
     if (themeId === "matrix" && interactive) {
       setIsFlipped((prev) => !prev);
     }
+    
     if (showHighlight) {
       setShowHighlight(false);
       if (onHighlightClick) onHighlightClick();
@@ -182,6 +197,7 @@ export default function Avatar({
           className={cn(
             "w-full h-full flipper preserve-3d rounded-full relative transition-transform duration-500",
             isFlipped ? "rotate-y-180" : "",
+            isAnimating ? "animate-matrix-click" : "",
             showHighlight ? "animate-pulse-red-glow border-2" : avatarBorderClass
           )}
         >
@@ -207,8 +223,9 @@ export default function Avatar({
   return (
     <div
       className={cn(
-        "relative rounded-full aspect-square object-cover flex-shrink-0 cursor-pointer overflow-hidden",
+        "relative rounded-full aspect-square object-cover flex-shrink-0 cursor-pointer overflow-hidden transition-all duration-300",
         currentSizeClass,
+        isAnimating ? `animate-${themeId}-click scale-110 z-10` : "hover:scale-105",
         showHighlight ? "animate-pulse-red-glow border-2" : avatarBorderClass,
         className
       )}

@@ -54,18 +54,19 @@ export default function Header({
       "bg-card backdrop-blur-sm border border-border" 
     )}>
       <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-        <Link to="/profile">
-          <Avatar
-            src={currentAvatar.image}
-            alt="Kullanıcı Avatarı"
-            themeId={activeTheme}
-            size="md"
-            className="hover:scale-105 transition-transform duration-300"
-          />
-        </Link>
-        <div className="flex-1 min-w-0">
+        <Avatar
+          src={currentAvatar.image}
+          alt="Kullanıcı Avatarı"
+          themeId={activeTheme}
+          size="md"
+          className="hover:scale-105 transition-transform duration-300"
+          interactive={true}
+        />
+        <Link to="/profile" className="flex-1 min-w-0 group hover:opacity-90 transition-opacity">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl md:text-2xl font-bold text-foreground truncate">Hey, {firstName}!</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-foreground truncate group-hover:text-primary transition-colors">
+              Hey, {firstName}!
+            </h1>
             {userRole !== 'koç' && userRole !== 'admin' && userRole !== 'hoca' && (
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-sm shrink-0">
                 LVL {lvlInfo.level}
@@ -77,7 +78,7 @@ export default function Header({
               Bugünkü hedeflerine ulaşmaya hazır mısın?
             </p>
           )}
-        </div>
+        </Link>
       </div>
 
       <div className="flex items-center gap-1 md:gap-2">
