@@ -62,6 +62,101 @@ function MatrixRainCanvas({ width = 80, height = 80 }: { width?: number; height?
   );
 }
 
+// Particle system overlay for Lava (embers rising) and Frost (snow falling)
+function ThemeParticleCanvas({ themeId, width = 80, height = 80 }: { themeId: string; width?: number; height?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    interface Particle {
+      x: number;
+      y: number;
+      size: number;
+      speedY: number;
+      speedX: number;
+      opacity: number;
+    }
+
+    const particles: Particle[] = [];
+    const maxParticles = 6;
+
+    // Initialize particles
+    for (let i = 0; i < maxParticles; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: themeId === "lava" ? height + Math.random() * 20 : Math.random() * -20,
+        size: Math.random() * 2 + 1,
+        speedY: themeId === "lava" ? -(Math.random() * 0.4 + 0.2) : (Math.random() * 0.4 + 0.2),
+        speedX: (Math.random() - 0.5) * 0.3,
+        opacity: Math.random() * 0.6 + 0.4,
+      });
+    }
+
+    let animationId: number;
+
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      particles.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        
+        if (themeId === "lava") {
+          ctx.fillStyle = `rgba(249, 115, 22, ${p.opacity})`; // Orange glow
+          ctx.shadowBlur = 4;
+          ctx.shadowColor = "#ef4444";
+        } else {
+          ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`; // Snow white
+          ctx.shadowBlur = 2;
+          ctx.shadowColor = "#e0f2fe";
+        }
+        
+        ctx.fill();
+        ctx.shadowBlur = 0; // Reset shadow
+
+        // Move particle
+        p.y += p.speedY;
+        p.x += p.speedX;
+
+        // Reset if goes out of bounds
+        if (themeId === "lava" && p.y < -5) {
+          p.y = height + Math.random() * 10;
+          p.x = Math.random() * width;
+          p.opacity = Math.random() * 0.6 + 0.4;
+        } else if (themeId === "frost" && p.y > height + 5) {
+          p.y = -Math.random() * 10;
+          p.x = Math.random() * width;
+          p.opacity = Math.random() * 0.6 + 0.4;
+        }
+      });
+
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, [themeId, width, height]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ width: `${width}px`, height: `${height}px` }}
+      className="absolute inset-0 rounded-full pointer-events-none z-10"
+    />
+  );
+}
+
 interface AvatarProps {
   src: string;
   alt?: string;
@@ -120,7 +215,7 @@ export default function Avatar({
     }
   }, [showHighlight]);
 
-  // Auto stop click animation after 800ms
+  // Auto stop click animation after 700ms
   useEffect(() => {
     if (isAnimating) {
       const timer = setTimeout(() => {
@@ -146,9 +241,9 @@ export default function Avatar({
       case "sm":
         return 40;
       case "md":
-        return 60; // Average of w-14 and w-16
+        return 60;
       case "lg":
-        return 90; // Average of w-20 and w-24
+        return 90;
       case "xl":
         return 120;
       case "2xl":
@@ -220,6 +315,8 @@ export default function Avatar({
   }
 
   // Standard static render for other themes
+  const showParticles = themeId === "lava" || themeId === "frost";
+
   return (
     <div
       className={cn(
@@ -236,6 +333,7 @@ export default function Avatar({
         alt={alt}
         className="w-full h-full rounded-full object-cover"
       />
+      {showParticles && <ThemeParticleCanvas themeId={themeId} width={dim} height={dim} />}
     </div>
   );
 }

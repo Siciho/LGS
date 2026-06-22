@@ -67,6 +67,28 @@ export const cardThemes: CardTheme[] = [
     label: 'Hacker',
     badgeClassName: 'bg-emerald-500 text-black shadow-sm font-mono font-black',
     avatarClassName: 'border-2 border-emerald-500 animate-avatar-matrix'
+  },
+  {
+    id: 'lava',
+    name: 'Volkanik Alev Teması',
+    price: 1300,
+    description: 'Kenarlarından kızgın lav akan ve dokunulduğunda magma patlaması yaratan volkanik tasarım.',
+    className: 'border-orange-500 dark:border-red-500 bg-gradient-to-r from-red-950/20 via-orange-950/15 to-red-950/20 hover:from-red-950/30 hover:to-orange-950/25 shadow-[0_0_18px_rgba(249,115,22,0.25)] hover:shadow-[0_0_25px_rgba(239,68,68,0.4)] transition-all duration-300 border-2',
+    textClassName: 'text-orange-500 dark:text-red-400 font-extrabold tracking-wide',
+    label: 'Magma',
+    badgeClassName: 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm font-black',
+    avatarClassName: 'border-2 border-orange-500 animate-avatar-lava'
+  },
+  {
+    id: 'frost',
+    name: 'Kutup Rüzgarı Teması',
+    price: 1100,
+    description: 'Buz tutmuş kristal kenarlıklar ve dokunulduğunda donma/çatlama efekti veren kış teması.',
+    className: 'border-cyan-300 dark:border-sky-300 bg-gradient-to-r from-cyan-950/20 via-sky-950/10 to-cyan-950/20 hover:from-cyan-950/30 hover:to-sky-950/25 shadow-[0_0_18px_rgba(34,211,238,0.25)] hover:shadow-[0_0_25px_rgba(56,189,248,0.4)] transition-all duration-300 border-2',
+    textClassName: 'text-cyan-600 dark:text-sky-300 font-black tracking-wide',
+    label: 'Kutup',
+    badgeClassName: 'bg-gradient-to-r from-cyan-400 to-sky-500 text-white shadow-sm font-black',
+    avatarClassName: 'border-2 border-cyan-300 animate-avatar-frost'
   }
 ];
 
