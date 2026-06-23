@@ -143,14 +143,14 @@ const WordSwiper: React.FC = () => {
             className="absolute w-full h-full"
           >
             <div 
-              className={`relative w-full h-full rounded-xl shadow-lg transition-transform duration-500`} 
+              className={`relative w-full h-full rounded-xl transition-transform duration-500`} 
               style={{ transformStyle: 'preserve-3d', transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
             >
-              <div className="absolute inset-0 w-full h-full bg-sky-500 text-white flex flex-col items-center justify-center rounded-xl p-4 text-center" style={{ backfaceVisibility: 'hidden' }}>
-                <p className="text-2xl font-bold capitalize notranslate" translate="no">{currentWord.word}</p>
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white flex flex-col items-center justify-center rounded-xl p-4 text-center shadow-[0_10px_25px_-5px_rgba(168,85,247,0.4)]" style={{ backfaceVisibility: 'hidden' }}>
+                <p className="text-2xl font-bold capitalize notranslate drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" translate="no">{currentWord.word}</p>
               </div>
-              <div className="absolute inset-0 w-full h-full bg-indigo-500 text-white flex flex-col items-center justify-center rounded-xl p-4 text-center" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
-                <p className="text-lg font-bold capitalize mb-2">{wordData?.meaning}</p>
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-slate-900 via-indigo-950 to-violet-900 text-white flex flex-col items-center justify-center rounded-xl p-4 text-center border border-indigo-500/30 shadow-[0_10px_25px_-5px_rgba(99,102,241,0.4)]" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                <p className="text-lg font-bold capitalize mb-2 text-purple-200">{wordData?.meaning}</p>
                 <p className="text-sm italic opacity-90">"{wordData?.example}"</p>
                 <p className="text-xs mt-1 italic opacity-70">
                   {wordData?.exampleMeaning}

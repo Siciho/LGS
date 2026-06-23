@@ -367,15 +367,25 @@ export default function WordQuizPage() {
             </CardTitle>
             <CardDescription className="text-center">Doğru anlamı seç.</CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4 pt-4">
-            {currentQuestion.options.map((option: string, index: number) => {
-                const isSelected = selectedAnswer === option;
-                const isCorrect = currentQuestion.correctMeaning === option;
-                let buttonVariant: "default" | "secondary" | "destructive" | "success" = "secondary";
-                if(showResult) { if(isCorrect) buttonVariant = "success"; else if (isSelected && !isCorrect) buttonVariant = "destructive"; }
-                return (<Button key={index} variant={buttonVariant} className="h-24 text-lg text-wrap" onClick={() => handleAnswerClick(option)} disabled={showResult}>{option}</Button>)
-            })}
-        </CardContent>
+         <CardContent className="grid grid-cols-2 gap-4 pt-4">
+             {currentQuestion.options.map((option: string, index: number) => {
+                 const isSelected = selectedAnswer === option;
+                 const isCorrect = currentQuestion.correctMeaning === option;
+                 let buttonVariant: "default" | "secondary" | "destructive" | "success" = "secondary";
+                 if(showResult) { if(isCorrect) buttonVariant = "success"; else if (isSelected && !isCorrect) buttonVariant = "destructive"; }
+                 return (
+                   <Button 
+                     key={index} 
+                     variant={buttonVariant} 
+                     className="h-24 text-lg text-wrap hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 shadow-sm hover:shadow-[0_0_15px_rgba(99,102,241,0.2)]" 
+                     onClick={() => handleAnswerClick(option)} 
+                     disabled={showResult}
+                   >
+                     {option}
+                   </Button>
+                 )
+             })}
+         </CardContent>
       </Card>
     </div>
   );

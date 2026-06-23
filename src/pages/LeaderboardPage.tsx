@@ -222,11 +222,11 @@ export default function LeaderboardPage() {
                                 </div>
                               </div>
                               {/* --- DEĞİŞİKLİK 7: Rozetler de yeni rank'e göre gösteriliyor --- */}
-                              {currentRank === 1 && <Crown className="h-5 w-5 text-yellow-400" />}
-                              {currentRank === 2 && <Crown className="h-5 w-5 text-gray-400" />}
-                              {currentRank === 3 && <Crown className="h-5 w-5 text-yellow-600" />}
+                              {currentRank === 1 && <Crown className="h-5 w-5 text-yellow-400 animate-crown-gold" />}
+                              {currentRank === 2 && <Crown className="h-5 w-5 text-gray-400 animate-crown-silver" />}
+                              {currentRank === 3 && <Crown className="h-5 w-5 text-yellow-600 animate-crown-bronze" />}
                             </div>
-                          </Button>
+                           </Button>
                         )
                       })
                     )}

@@ -443,4 +443,51 @@
 .animate-frost-click {
   animation: frost-click-shiver 0.45s ease-in-out;
 }
+
+/* --- YENİ EKLENEN: Liderlik Kürsüsü Rozet (Tac) Animasyonları --- */
+@keyframes golden-crown-bounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 0 2px rgba(250, 204, 21, 0.4));
+  }
+  50% {
+    transform: translateY(-3px) scale(1.15);
+    filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.95));
+  }
+}
+
+.animate-crown-gold {
+  animation: golden-crown-bounce 2s ease-in-out infinite;
+}
+
+@keyframes silver-crown-bounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 0 2px rgba(156, 163, 175, 0.3));
+  }
+  50% {
+    transform: translateY(-2px) scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(156, 163, 175, 0.8));
+  }
+}
+
+.animate-crown-silver {
+  animation: silver-crown-bounce 2.2s ease-in-out infinite;
+}
+
+@keyframes bronze-crown-bounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 0 2px rgba(180, 83, 9, 0.2));
+  }
+  50% {
+    transform: translateY(-2px) scale(1.08);
+    filter: drop-shadow(0 0 6px rgba(180, 83, 9, 0.7));
+  }
+}
+
+.animate-crown-bronze {
+  animation: bronze-crown-bounce 2.4s ease-in-out infinite;
+}
+
 
