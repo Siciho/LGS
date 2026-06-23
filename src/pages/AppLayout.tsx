@@ -458,6 +458,7 @@ export default function AppLayout() {
           userRole={userRole}
           lifetimePoints={coreData.lifetimePoints}
           activeTheme={coreData.activeTheme} // ✅ Yeni prop: Aktif kart teması çerçeve efekti için
+          latestApkUrl={updateInfo.apkUrl}
         />
         <main className="flex-1 pb-32">
           {scheduler.notificationSettings.challengeReminder && (
