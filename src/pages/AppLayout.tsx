@@ -52,6 +52,7 @@ export type AppContextType =
     pendingChallenges: Challenge[];
     dismissChallenge: (challengeId: string) => void;
     checkForUpdatesManual: (showFeedback: boolean) => Promise<void>;
+    latestApkUrl: string;
   };
 
 export default function AppLayout() {
@@ -84,10 +85,8 @@ export default function AppLayout() {
   const { userId, userName, userRole } = auth;
 
   useEffect(() => {
-    const checkUpdate = async () => {
+    const fetchLatestVersionInfo = async () => {
       try {
-        if (sessionStorage.getItem("update_prompt_dismissed") === "true") return;
-
         const { data, error } = await supabase
           .from("app_settings")
           .select("latest_version, changelog, apk_url")
@@ -95,29 +94,28 @@ export default function AppLayout() {
           .maybeSingle();
 
         if (error) {
-          console.warn("Uygulama güncelleme kontrolü başarısız:", error);
+          console.warn("Uygulama güncelleme bilgisi alınamadı:", error);
           return;
         }
 
         if (data && data.latest_version) {
+          const isWeb = !Capacitor.isNativePlatform() || Capacitor.getPlatform() === 'web';
           const isNew = isNewerVersion(CURRENT_VERSION, data.latest_version);
-          if (isNew) {
-            setUpdateInfo({
-              show: true,
-              latestVersion: data.latest_version,
-              changelog: data.changelog || "",
-              apkUrl: data.apk_url || ""
-            });
-          }
+          
+          setUpdateInfo({
+            show: isNew && !isWeb && Capacitor.getPlatform() === 'android' && sessionStorage.getItem("update_prompt_dismissed") !== "true",
+            latestVersion: data.latest_version,
+            changelog: data.changelog || "",
+            apkUrl: data.apk_url || ""
+          });
         }
       } catch (err) {
         console.error("Güncelleme kontrolü sırasında beklenmeyen hata:", err);
       }
     };
 
-    const isWeb = !Capacitor.isNativePlatform() || Capacitor.getPlatform() === 'web';
-    if (isInitialized && userId && !isWeb && Capacitor.getPlatform() === 'android') {
-      checkUpdate();
+    if (isInitialized && userId) {
+      fetchLatestVersionInfo();
     }
   }, [isInitialized, userId]);
 
@@ -395,6 +393,7 @@ export default function AppLayout() {
     isMuted, toggleMute,
     pendingChallenges, dismissChallenge,
     checkForUpdatesManual,
+    latestApkUrl: updateInfo.apkUrl,
   };
   
   if (auth.authLoading || !coreData.isCloudDataLoaded) {

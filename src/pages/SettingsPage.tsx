@@ -3,8 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BellRing, History, ChevronRight, LogOut, User, Swords, KeyRound, Info, Loader2 } from "lucide-react";
+import { BellRing, History, ChevronRight, LogOut, User, Swords, KeyRound, Info, Loader2, Download } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Capacitor } from "@capacitor/core";
 import { useAppContext, CURRENT_VERSION } from "./AppLayout";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -20,8 +21,11 @@ export const SettingsPage = () => {
     handleLogout, 
     userName, 
     handleChangePassword,
-    checkForUpdatesManual
+    checkForUpdatesManual,
+    latestApkUrl
   } = useAppContext();
+
+  const isWeb = !Capacitor.isNativePlatform() || Capacitor.getPlatform() === 'web';
 
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -252,6 +256,27 @@ export const SettingsPage = () => {
               )}
             </Button>
           </div>
+
+          {isWeb && latestApkUrl && (
+            <div className="mt-4 pt-4 border-t border-border/50 space-y-3">
+              <div className="rounded-xl bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/20 p-4">
+                <h4 className="text-sm font-bold text-emerald-400 flex items-center gap-1.5 mb-1">
+                  <span>🤖</span> Android Uygulamamızı İndirin
+                </h4>
+                <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+                  En son sürümü doğrudan telefonunuza APK olarak indirip kurabilirsiniz.
+                </p>
+                <Button
+                  asChild
+                  className="w-full font-bold bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <a href={latestApkUrl} download="LGS_Kocluk.apk" target="_blank" rel="noopener noreferrer">
+                    <Download className="h-4 w-4" /> Uygulamayı İndir (APK)
+                  </a>
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
