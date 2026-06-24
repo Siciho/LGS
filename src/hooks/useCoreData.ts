@@ -281,7 +281,7 @@ export const useCoreData = (
 
   const handleBuyMysteryChest = async (): Promise<{ 
     success: boolean; 
-    rewardType?: 'avatar' | 'freeze'; 
+    rewardType?: 'avatar' | 'freeze' | 'theme'; 
     rewardId?: string;
     amount?: number;
     rarity?: 'common' | 'rare' | 'legendary';
@@ -295,40 +295,72 @@ export const useCoreData = (
       
       const roll = Math.random();
       let rarity: 'common' | 'rare' | 'legendary' = 'common';
-      let rewardType: 'avatar' | 'freeze' = 'freeze';
+      let rewardType: 'avatar' | 'freeze' | 'theme' = 'freeze';
       let rewardId: string | undefined = undefined;
       let amount = 1;
       
-      if (roll < 0.70) {
-        // Common: 1 Freeze (70% chance)
-        rarity = 'common';
-        rewardType = 'freeze';
-        amount = 1;
-      } else if (roll < 0.90) {
-        // Rare: 2 Freezes (20% chance)
-        rarity = 'rare';
-        rewardType = 'freeze';
-        amount = 2;
-      } else {
-        // Legendary: Avatar or 5 Freezes (10% chance)
+      if (roll < 0.005) {
+        // 0.5% (0.005) chance to get a Card Theme! (Ultra Legendary)
+        rewardType = 'theme';
         rarity = 'legendary';
-        const rollableAvatars = allAvatars.filter(a => a.unlockMethod === 'purchase' || a.unlockMethod === 'achievement');
-        const lockedAvatars = rollableAvatars.filter(a => !(userAvatars?.unlocked || []).includes(a.id));
+        const rollableThemes = cardThemes.filter(t => t.id !== 'default');
+        const lockedThemesList = rollableThemes.filter(t => !(unlockedThemes || []).includes(t.id));
         
-        // 70% chance of Legendary gives Avatar if any locked, otherwise 5 Freezes
-        const avatarRoll = Math.random();
-        if (avatarRoll < 0.70 && lockedAvatars.length > 0) {
-          rewardType = 'avatar';
-          const randomAvatar = lockedAvatars[Math.floor(Math.random() * lockedAvatars.length)];
-          rewardId = randomAvatar.id;
+        if (lockedThemesList.length > 0) {
+          const randomTheme = lockedThemesList[Math.floor(Math.random() * lockedThemesList.length)];
+          rewardId = randomTheme.id;
         } else {
+          // Fallback if all themes are already unlocked: 5 Freezes
           rewardType = 'freeze';
+          rarity = 'legendary';
           amount = 5;
+        }
+      } else {
+        // Remaining 99.5% chance: Freeze or Avatar (split as 70/20/10)
+        const subRoll = Math.random();
+        if (subRoll < 0.70) {
+          // Common: 1 Freeze
+          rarity = 'common';
+          rewardType = 'freeze';
+          amount = 1;
+        } else if (subRoll < 0.90) {
+          // Rare: 2 Freezes
+          rarity = 'rare';
+          rewardType = 'freeze';
+          amount = 2;
+        } else {
+          // Legendary: Avatar or 5 Freezes
+          rarity = 'legendary';
+          const rollableAvatars = allAvatars.filter(a => a.unlockMethod === 'purchase' || a.unlockMethod === 'achievement');
+          const lockedAvatars = rollableAvatars.filter(a => !(userAvatars?.unlocked || []).includes(a.id));
+          
+          const avatarRoll = Math.random();
+          if (avatarRoll < 0.70 && lockedAvatars.length > 0) {
+            rewardType = 'avatar';
+            const randomAvatar = lockedAvatars[Math.floor(Math.random() * lockedAvatars.length)];
+            rewardId = randomAvatar.id;
+          } else {
+            rewardType = 'freeze';
+            amount = 5;
+          }
         }
       }
       
       // Update local and remote state
-      if (rewardType === 'avatar' && rewardId) {
+      if (rewardType === 'theme' && rewardId) {
+        const newUnlockedThemes = [...(unlockedThemes || []), rewardId];
+        storage.saveUnlockedThemes(userId, newUnlockedThemes);
+        
+        await updateUserCloudData({
+          puan: newTotalPoints,
+          unlocked_themes: newUnlockedThemes
+        });
+
+        // Delay local state update to match the modal reveal animation (2100ms)
+        setTimeout(() => {
+          setUnlockedThemes(newUnlockedThemes);
+        }, 2100);
+      } else if (rewardType === 'avatar' && rewardId) {
         const newAvatarsState: UserAvatars = {
           current: userAvatars?.current || 'default',
           unlocked: [...(userAvatars?.unlocked || []), rewardId],

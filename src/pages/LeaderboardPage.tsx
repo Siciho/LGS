@@ -128,21 +128,36 @@ export default function LeaderboardPage() {
 
   return (
     <>
-      <div className="space-y-6 animate-slide-up">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Crown className="h-6 w-6 text-yellow-500" />
+      <div className="space-y-6 animate-slide-up max-w-3xl mx-auto p-6 bg-gradient-to-br from-slate-950 via-indigo-950/10 to-slate-950 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-lg pb-24">
+        <Card className="border-indigo-500/20 bg-slate-900/60 backdrop-blur-md shadow-2xl rounded-2xl overflow-hidden">
+          <CardHeader className="border-b border-indigo-500/10 pb-4">
+            <CardTitle className="flex items-center gap-2 text-xl font-extrabold text-white">
+              <Crown className="h-6 w-6 text-yellow-500 animate-pulse" />
               Liderlik Tablosu
             </CardTitle>
-            <CardDescription>Skorlara göz at ve rekabete katıl! (Bir öğrencinin detayını görmek için tıkla)</CardDescription>
+            <CardDescription className="text-slate-300 text-sm font-medium">Skorlara göz at ve rekabete katıl! (Bir öğrencinin detayını görmek için tıkla)</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <Tabs value={timeFilter} onValueChange={(v) => setTimeFilter(v as 'all' | 'month' | 'last_week')}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="all">Tüm Zamanlar</TabsTrigger>
-                <TabsTrigger value="month">Bu Ay</TabsTrigger>
-                <TabsTrigger value="last_week">Bu Hafta</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3 h-14 bg-muted/60 p-1.5 rounded-2xl border border-border/40 shadow-inner">
+                <TabsTrigger 
+                  value="all"
+                  className="rounded-xl font-bold py-2.5 transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(245,158,11,0.3)] hover:text-amber-500 active:scale-95 flex items-center justify-center gap-1.5"
+                >
+                  <span className="text-base">👑</span> Tüm Zamanlar
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="month"
+                  className="rounded-xl font-bold py-2.5 transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(168,85,247,0.3)] hover:text-purple-500 active:scale-95 flex items-center justify-center gap-1.5"
+                >
+                  <span className="text-base">📅</span> Bu Ay
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="last_week"
+                  className="rounded-xl font-bold py-2.5 transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(6,182,212,0.3)] hover:text-cyan-500 active:scale-95 flex items-center justify-center gap-1.5"
+                >
+                  <span className="text-base">⚡</span> Bu Hafta
+                </TabsTrigger>
               </TabsList>
               
               <div className="flex gap-2 overflow-x-auto pb-2 pt-4 mb-2">
@@ -152,7 +167,12 @@ export default function LeaderboardPage() {
                     variant={selectedClass === className ? "default" : "outline"}
                     size="sm"
                     onClick={() => setSelectedClass(className)}
-                    className="flex-shrink-0"
+                    className={cn(
+                      "flex-shrink-0 rounded-lg font-bold transition-all",
+                      selectedClass === className 
+                        ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md"
+                        : "border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10"
+                    )}
                   >
                     {className}
                   </Button>
@@ -161,11 +181,11 @@ export default function LeaderboardPage() {
 
               <TabsContent value={timeFilter}>
                 {loading ? (
-                  <div className="text-center p-10">Yükleniyor...</div>
+                  <div className="text-center p-10 text-slate-300 font-bold">Yükleniyor...</div>
                 ) : (
                   <div className="mt-4 space-y-2">
                     {filteredLeaderboard.length === 0 ? (
-                      <div className="text-center p-10 text-muted-foreground">
+                      <div className="text-center p-10 text-slate-400 font-medium">
                         {leaderboard.length === 0 ? 
                           "Bu zaman aralığı için veri bulunamadı." : 
                           "Bu sınıfta öğrenci bulunamadı."}
@@ -184,7 +204,7 @@ export default function LeaderboardPage() {
                             variant="ghost" 
                             className={cn(
                               'p-4 h-auto w-full justify-start text-left', 
-                              'border rounded-lg transition-all',
+                              'border rounded-xl transition-all shadow-sm',
                               rowStyle
                             )}
                             onClick={() => handleStudentClick(entry)}
@@ -192,7 +212,7 @@ export default function LeaderboardPage() {
                             <div className="flex items-center justify-between w-full">
                               <div className="flex items-center gap-3">
                                 {/* --- DEĞİŞİKLİK 5: 'entry.rank' yerine 'currentRank' gösteriliyor --- */}
-                                <span className="text-lg font-bold w-6 text-center">{currentRank}</span>
+                                <span className="text-lg font-black w-6 text-center text-white">{currentRank}</span>
                                  <Avatar
                                    src={getAvatarImage(entry.user_avatar)}
                                    alt={entry.user_name}
@@ -204,7 +224,16 @@ export default function LeaderboardPage() {
                                  />
                                 <div>
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <p className={cn("font-semibold text-foreground", theme.id !== 'default' && theme.textClassName)}>
+                                    <p className={cn(
+                                         "font-extrabold text-white", 
+                                         currentRank === 1 
+                                           ? "text-gold-premium shrink-0"
+                                           : currentRank === 2
+                                             ? "text-silver-premium shrink-0"
+                                             : currentRank === 3
+                                               ? "text-bronze-premium shrink-0"
+                                               : ""
+                                       )}>
                                       {entry.user_name}
                                     </p>
                                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-sm shrink-0">
@@ -216,16 +245,16 @@ export default function LeaderboardPage() {
                                       </span>
                                     )}
                                   </div>
-                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                  <p className="text-xs text-slate-300 font-medium mt-0.5">
                                     {/* --- DEĞİŞİKLİK 6: 'getRankText' yeni rank'i kullanıyor --- */}
                                     {entry.user_class} Sınıfı - {getRankText(currentRank)}
                                   </p>
                                 </div>
                               </div>
                               {/* --- DEĞİŞİKLİK 7: Rozetler de yeni rank'e göre gösteriliyor --- */}
-                              {currentRank === 1 && <Crown className="h-5 w-5 text-yellow-400 animate-crown-gold" />}
-                              {currentRank === 2 && <Crown className="h-5 w-5 text-gray-400 animate-crown-silver" />}
-                              {currentRank === 3 && <Crown className="h-5 w-5 text-yellow-600 animate-crown-bronze" />}
+                              {currentRank === 1 && <Crown className="h-5 w-5 text-yellow-400 animate-crown-gold shrink-0" />}
+                              {currentRank === 2 && <Crown className="h-5 w-5 text-gray-400 animate-crown-silver shrink-0" />}
+                              {currentRank === 3 && <Crown className="h-5 w-5 text-yellow-600 animate-crown-bronze shrink-0" />}
                             </div>
                            </Button>
                         )
@@ -244,10 +273,14 @@ export default function LeaderboardPage() {
           <DialogHeader>
             {selectedStudent && (
               <div className="flex flex-col items-center pt-4">
-                <img
+                <Avatar
                   src={getAvatarImage(selectedStudent.user_avatar)}
                   alt={selectedStudent.user_name}
-                  className="w-24 h-24 rounded-full border-4 border-primary/20"
+                  themeId={selectedStudent.active_theme || 'default'}
+                  activeBadge={selectedStudent.user_avatar?.activeBadge}
+                  size="custom"
+                  className="w-24 h-24 shrink-0 transition-all duration-300"
+                  interactive={true}
                 />
                 <DialogTitle className="text-2xl mt-4">
                   {isCoach ? (

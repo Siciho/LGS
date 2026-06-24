@@ -174,49 +174,60 @@ export default function ProgramimSayfasi() {
   };
 
   return (
-    <div className="space-y-6 animate-slide-up relative pb-20">
+    <div className="space-y-6 animate-slide-up max-w-3xl mx-auto p-6 relative bg-gradient-to-br from-slate-950 via-indigo-950/10 to-slate-950 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-lg pb-24">
       <Tabs defaultValue="ders-programi">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="ders-programi">Ders Programım</TabsTrigger>
-          <TabsTrigger value="calisma-plani">Çalışma Planım</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 h-14 bg-muted/60 p-1.5 rounded-2xl border border-border/40 shadow-inner">
+          <TabsTrigger 
+            value="ders-programi"
+            className="rounded-xl font-bold py-2.5 transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(99,102,241,0.3)] hover:text-indigo-500 active:scale-95 flex items-center justify-center gap-1.5"
+          >
+            <span className="text-base">📅</span> Ders Programım
+          </TabsTrigger>
+          <TabsTrigger 
+            value="calisma-plani"
+            className="rounded-xl font-bold py-2.5 transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(16,185,129,0.3)] hover:text-emerald-500 active:scale-95 flex items-center justify-center gap-1.5"
+          >
+            <span className="text-base">🎯</span> Çalışma Planım
+          </TabsTrigger>
         </TabsList>
 
         {/* DERS PROGRAMIM SEKMESİ */}
         <TabsContent value="ders-programi">
-          <Card className="shadow-card bg-card/90 backdrop-blur-sm">
-            <CardHeader>
+          <Card className="border-indigo-500/20 bg-slate-900/60 backdrop-blur-md shadow-2xl rounded-2xl overflow-hidden mt-6">
+            <CardHeader className="border-b border-indigo-500/10 pb-4">
               <div className="flex justify-between items-center">
                 <div>
-                    <CardTitle>Haftalık Ders Programı</CardTitle>
-                    <CardDescription>Okul ders programını buradan yönetebilirsin.</CardDescription>
+                    <CardTitle className="text-xl font-extrabold text-white">Haftalık Ders Programı</CardTitle>
+                    <CardDescription className="text-slate-300 text-sm font-medium">Okul ders programını buradan yönetebilirsin.</CardDescription>
                 </div>
                 {isEditingManual ? (
                   <div className="flex gap-2">
-                    <Button variant="secondary" size="sm" onClick={handleCancelEdit}><X className="h-4 w-4 mr-2"/>İptal</Button>
-                    <Button size="sm" onClick={handleSaveManualSchedule}><Save className="h-4 w-4 mr-2"/>Kaydet</Button>
+                    <Button variant="secondary" size="sm" onClick={handleCancelEdit} className="rounded-lg font-semibold"><X className="h-4 w-4 mr-2"/>İptal</Button>
+                    <Button size="sm" onClick={handleSaveManualSchedule} className="bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white font-bold rounded-lg shadow-md"><Save className="h-4 w-4 mr-2"/>Kaydet</Button>
                   </div>
                 ) : (
-                  <Button variant="outline" size="sm" onClick={handleEditClick}><Pencil className="h-4 w-4 mr-2"/>Düzenle</Button>
+                  <Button variant="outline" size="sm" onClick={handleEditClick} className="border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10 rounded-lg font-bold"><Pencil className="h-4 w-4 mr-2"/>Düzenle</Button>
                 )}
               </div>
             </CardHeader>
             <CardContent className="p-4 md:p-6">
-                <div className="bg-muted/30 rounded-lg p-1.5 mb-6 border border-border/40 shadow-sm">
+                <div className="bg-slate-950/50 rounded-xl p-1.5 mb-6 border border-slate-800 shadow-inner">
                     <div className="grid grid-cols-6 md:grid-cols-5 gap-1.5">
                         {weekDays.map((day, idx) => {
                           const colSpan = idx < 3 ? "col-span-2 md:col-span-1" : "col-span-3 md:col-span-1";
+                          const isSelected = selectedDay === day;
                           return (
                             <Button 
                                 key={day} 
-                                variant={selectedDay === day ? "default" : "ghost"}
+                                variant={isSelected ? "default" : "ghost"}
                                 size="sm"
                                 onClick={() => setSelectedDay(day)}
                                 className={cn(
-                                  "font-semibold rounded-md transition-all duration-200 py-2.5 h-auto w-full",
+                                  "font-bold rounded-lg transition-all duration-200 py-2.5 h-auto w-full",
                                   colSpan,
-                                  selectedDay === day 
-                                    ? "shadow-sm bg-primary text-primary-foreground font-bold" 
-                                    : "text-muted-foreground hover:text-foreground"
+                                  isSelected 
+                                    ? "shadow-md bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-extrabold" 
+                                    : "text-slate-400 hover:text-white hover:bg-slate-800"
                                 )}
                             >
                                 <span className="hidden md:inline">{day}</span>
@@ -234,9 +245,8 @@ export default function ProgramimSayfasi() {
                       <div 
                         key={lessonIndex} 
                         className={cn(
-                          "flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl border bg-muted/20 border-l-4 shadow-sm transition-all duration-200",
-                          visuals.sideBorder,
-                          "border-border/60"
+                          "flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl border bg-slate-950/20 border-l-4 shadow-sm transition-all duration-200 border-slate-800",
+                          visuals.sideBorder
                         )}
                       >
                         <div className="flex items-center gap-2 shrink-0">
@@ -246,7 +256,7 @@ export default function ProgramimSayfasi() {
                           )}>
                             {lessonIndex + 1}
                           </div>
-                          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground sm:hidden">. Ders</span>
+                          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 sm:hidden">. Ders</span>
                         </div>
                         
                         <div className="grid grid-cols-2 gap-3 flex-1">
@@ -255,7 +265,7 @@ export default function ProgramimSayfasi() {
                               value={lesson.subject}
                               onChange={(e) => handleManualEditChange(selectedDay, lessonIndex, 'subject', e.target.value)}
                               placeholder="Ders Adı (Örn: MAT)"
-                              className="uppercase h-10 pr-8 font-semibold tracking-wide"
+                              className="uppercase h-10 pr-8 font-semibold tracking-wide bg-slate-950/50 border-slate-800 text-white"
                             />
                             <span className="absolute right-2.5 top-2.5 text-base pointer-events-none" role="img" aria-label="subject icon">
                               {visuals.icon}
@@ -265,7 +275,7 @@ export default function ProgramimSayfasi() {
                             value={lesson.teacher}
                             onChange={(e) => handleManualEditChange(selectedDay, lessonIndex, 'teacher', e.target.value)}
                             placeholder="Öğretmen"
-                            className="uppercase h-10 font-medium"
+                            className="uppercase h-10 font-medium bg-slate-950/50 border-slate-800 text-white"
                           />
                         </div>
                       </div>
@@ -273,7 +283,7 @@ export default function ProgramimSayfasi() {
                       <div 
                         key={lessonIndex} 
                         className={cn(
-                          "flex items-center gap-4 p-3.5 rounded-xl border-l-4 shadow-sm bg-card hover:bg-muted/10 transition-all duration-300 border border-border/50 hover:translate-x-1",
+                          "flex items-center gap-4 p-3.5 rounded-xl border-l-4 shadow-md bg-slate-950/30 hover:bg-slate-900/30 transition-all duration-300 border border-slate-800/50 hover:translate-x-1",
                           visuals.sideBorder
                         )}
                       >
@@ -286,25 +296,25 @@ export default function ProgramimSayfasi() {
                         </div>
 
                         {/* Ders İkonu */}
-                        <div className="text-2xl shrink-0 p-1 bg-muted/40 rounded-lg border border-border/20">
+                        <div className="text-2xl shrink-0 p-1 bg-slate-900/60 rounded-lg border border-slate-800">
                           {visuals.icon}
                         </div>
 
                         {/* Ders ve Öğretmen Bilgisi */}
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-extrabold text-base tracking-tight truncate text-foreground leading-tight">
+                          <h4 className="font-extrabold text-base tracking-tight truncate text-white leading-tight">
                             {lesson.subject ? visuals.label : "Boş Ders"}
                           </h4>
                           {lesson.subject && (
                             <div className="flex items-center gap-2 mt-1 flex-wrap">
-                              <span className="text-[10px] font-black uppercase tracking-widest bg-muted px-1.5 py-0.5 rounded border border-border/50 text-muted-foreground">
+                              <span className="text-[10px] font-black uppercase tracking-widest bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 text-slate-400">
                                 {lesson.subject}
                               </span>
                               {lesson.teacher && (
                                 <>
-                                  <span className="text-muted-foreground/30 text-xs">•</span>
-                                  <p className="text-xs text-muted-foreground flex items-center gap-1 font-medium truncate max-w-[150px]">
-                                    <User className="h-3 w-3 inline text-muted-foreground/60" />
+                                  <span className="text-slate-600 text-xs">•</span>
+                                  <p className="text-xs text-slate-300 flex items-center gap-1 font-medium truncate max-w-[150px]">
+                                    <User className="h-3 w-3 inline text-slate-400" />
                                     {lesson.teacher}
                                   </p>
                                 </>
@@ -316,7 +326,7 @@ export default function ProgramimSayfasi() {
                     );
                   })
                 ) : (
-                  <div className="text-center text-muted-foreground py-10 bg-muted/10 rounded-xl border border-dashed border-border/60">
+                  <div className="text-center text-slate-400 py-10 bg-slate-950/35 rounded-xl border border-dashed border-slate-800">
                     <p className="font-medium">Seçili gün için ders programı boş.</p>
                   </div>
                 )}
@@ -327,33 +337,33 @@ export default function ProgramimSayfasi() {
 
         {/* ÇALIŞMA PLANIM SEKMESİ */}
         <TabsContent value="calisma-plani">
-          <Card className="shadow-card bg-card/90 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Kişisel Çalışma Planı</CardTitle>
-              <CardDescription>Kendi çalışma rutinini oluştur ve takip et.</CardDescription>
+          <Card className="border-emerald-500/20 bg-slate-900/60 backdrop-blur-md shadow-2xl rounded-2xl overflow-hidden mt-6">
+            <CardHeader className="border-b border-emerald-500/10 pb-4">
+              <CardTitle className="text-xl font-extrabold text-white">Kişisel Çalışma Planı</CardTitle>
+              <CardDescription className="text-slate-300 text-sm font-medium">Kendi çalışma rutinini oluştur ve takip et.</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               {sortedPlanDays.length > 0 ? (
                 sortedPlanDays.map(day => (
-                  <div key={day} className="mb-6">
-                    <h3 className="font-bold mb-3 border-b pb-2 text-lg">{day}</h3>
+                  <div key={day} className="mb-6 last:mb-0">
+                    <h3 className="font-extrabold mb-3 border-b border-slate-800 pb-2 text-lg text-emerald-400">{day}</h3>
                     <div className="space-y-3">
                       {(customPlan?.[day] || []).sort((a,b) => a.timeRange.localeCompare(b.timeRange)).map(entry => (
-                        <div key={entry.id} className="flex items-center justify-between border-l-4 border-primary bg-muted/40 p-3 rounded-r-md hover:bg-muted/60 transition-colors">
+                        <div key={entry.id} className="flex items-center justify-between border-l-4 border-emerald-500 bg-slate-950/40 p-4 rounded-r-xl hover:bg-slate-900/40 transition-all border border-slate-800/40">
                            <div className="flex items-center gap-4">
-                            <div className="flex flex-col items-center justify-center p-2">
-                                <Clock className="h-5 w-5 text-primary mb-1"/>
-                                <p className="text-xs font-mono text-muted-foreground">{entry.timeRange.split(' - ')[0]}</p>
+                            <div className="flex flex-col items-center justify-center p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                                <Clock className="h-5 w-5 text-emerald-400 mb-1"/>
+                                <p className="text-[10px] font-mono font-bold text-slate-300">{entry.timeRange.split(' - ')[0]}</p>
                             </div>
                             <div>
-                                <p className="font-semibold flex items-center gap-2">
-                                    <BookOpen className="h-4 w-4 text-muted-foreground"/>
+                                <p className="font-extrabold flex items-center gap-2 text-white">
+                                    <BookOpen className="h-4 w-4 text-slate-400"/>
                                     {getSubjectName(entry.subjectId)}
                                 </p>
-                                <p className="text-sm text-muted-foreground">{entry.studyType}</p>
+                                <p className="text-xs font-semibold text-slate-400 mt-0.5">{entry.studyType}</p>
                             </div>
                           </div>
-                          <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => handleRemovePlanEntry(entry.id)}>
+                          <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg" onClick={() => handleRemovePlanEntry(entry.id)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -362,9 +372,9 @@ export default function ProgramimSayfasi() {
                   </div>
                 ))
               ) : (
-                <div className="text-center text-muted-foreground py-10">
-                  <p>Henüz kişisel çalışma planı oluşturmadın.</p>
-                  <p className="text-sm">Yeni etkinlik eklemek için (+) butonuna tıkla.</p>
+                <div className="text-center text-slate-400 py-10 bg-slate-950/35 rounded-xl border border-dashed border-slate-800">
+                  <p className="font-semibold text-white">Henüz kişisel çalışma planı oluşturmadın.</p>
+                  <p className="text-sm mt-1">Yeni etkinlik eklemek için (+) butonuna tıkla.</p>
                 </div>
               )}
             </CardContent>
@@ -372,7 +382,7 @@ export default function ProgramimSayfasi() {
 
           <Button
             onClick={() => setIsPlanDialogOpen(true)}
-            className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg z-10 animate-pulse-glow"
+            className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-lg z-10 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white animate-pulse-glow"
             variant="hero"
           >
             <Plus className="h-6 w-6" />

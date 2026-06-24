@@ -22,7 +22,9 @@ export default function ProfilePage() {
     activeTheme, 
     handleSetTheme,
     challengeWins,
-    handleSetBadge
+    handleSetBadge,
+    subjects,
+    streak
   } = useAppContext();
   const location = useLocation();
   const state = location.state as { activeTab?: string; highlightAvatarId?: string } | null;
@@ -72,26 +74,190 @@ export default function ProfilePage() {
     });
   }, [achievements]);
 
+  const totalQuestions = useMemo(() => {
+    return subjects?.reduce((sum, s) => sum + (s.correct || 0) + (s.incorrect || 0), 0) || 0;
+  }, [subjects]);
+
   const renderAchievements = () => {
+    const totalCount = achievements?.length || 0;
+    const unlockedCount = achievements?.filter(a => a.unlocked).length || 0;
+    const percent = totalCount > 0 ? Math.round((unlockedCount / totalCount) * 100) : 0;
+
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {sortedAchievements.map((achievement: Achievement) => (
-          <Card
-            key={achievement.id}
-            className={cn(
-              "relative transition-all duration-300",
-              achievement.unlocked ? "bg-card/90" : "bg-card/50 opacity-60"
-            )}
-          >
-            <CardContent className="flex flex-col items-center justify-center text-center p-4">
-              <span className="text-4xl">
-                {achievement.unlocked ? achievement.icon : <Lock className="h-10 w-10 text-muted-foreground" />}
+      <div className="space-y-6">
+        {/* Başarı İstatistikleri Üst Paneli */}
+        <div className="bg-slate-900/80 backdrop-blur-md rounded-2xl border border-slate-800 p-5 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden">
+          {/* Arka plan dekoratif daireleri */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full filter blur-3xl pointer-events-none -mr-16 -mt-16" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/5 rounded-full filter blur-2xl pointer-events-none -ml-12 -mb-12" />
+
+          <div className="flex items-center gap-4 w-full md:w-auto relative z-10">
+            <div className="h-14 w-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] shrink-0">
+              <Trophy className="h-7 w-7 text-emerald-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-white tracking-wide">Başarım İlerlemesi</h3>
+              <p className="text-xs text-slate-450 font-semibold mt-0.5">LGS Asistanım yolculuğunda kazandığın ödüller</p>
+            </div>
+          </div>
+
+          <div className="w-full md:w-80 space-y-2 relative z-10">
+            <div className="flex justify-between text-xs font-black tracking-wider text-slate-350">
+              <span className="bg-slate-950/50 px-2.5 py-1 rounded-md border border-slate-850 flex items-center gap-1.5 text-emerald-400">
+                <span className="h-2 w-2 rounded-full bg-emerald-550 animate-pulse" />
+                {unlockedCount} / {totalCount} Kazanıldı
               </span>
-              <p className="font-semibold mt-2">{achievement.title}</p>
-              <p className="text-xs text-muted-foreground mt-1">{achievement.description}</p>
-            </CardContent>
-          </Card>
-        ))}
+              <span className="text-emerald-400 font-black text-sm">{percent}%</span>
+            </div>
+            <div className="h-2.5 w-full bg-slate-950/80 rounded-full border border-slate-800 overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-emerald-550 via-teal-500 to-emerald-450 rounded-full transition-all duration-750 shadow-[0_0_10px_rgba(16,185,129,0.4)]"
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Başarı Kartları Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {sortedAchievements.map((achievement: Achievement) => {
+            const isUnlocked = achievement.unlocked;
+
+            // Kilitli başarımlar için ilerleme hesaplama
+            const getProgressInfo = () => {
+              if (isUnlocked) return null;
+              if (achievement.category === 'questions' && achievement.requiredQuestions) {
+                return { current: totalQuestions, target: achievement.requiredQuestions };
+              }
+              if (achievement.category === 'subject' && achievement.requiredSubjectId && achievement.requiredQuestions) {
+                const subject = subjects?.find(s => s.id === achievement.requiredSubjectId);
+                const solved = subject ? ((subject.correct || 0) + (subject.incorrect || 0)) : 0;
+                return { current: solved, target: achievement.requiredQuestions };
+              }
+              if (achievement.category === 'streak' && achievement.requiredQuestions) {
+                return { current: streak || 0, target: achievement.requiredQuestions };
+              }
+              return null;
+            };
+
+            const progressInfo = getProgressInfo();
+
+            // Tarih formatlama
+            const formatUnlockDate = (dateVal: any) => {
+              if (!dateVal) return "";
+              try {
+                const d = new Date(dateVal);
+                if (isNaN(d.getTime())) return "";
+                return d.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+              } catch (e) {
+                return "";
+              }
+            };
+            const unlockDateStr = formatUnlockDate(achievement.unlockedAt);
+
+            return (
+              <Card
+                key={achievement.id}
+                className={cn(
+                  "relative overflow-hidden transition-all duration-500 border-2 flex flex-col justify-between h-full min-h-[240px]",
+                  isUnlocked 
+                    ? "border-emerald-500/25 bg-gradient-to-br from-slate-900/98 via-slate-900/90 to-emerald-950/20 hover:scale-[1.03] hover:shadow-[0_12px_24px_rgba(16,185,129,0.18)] shadow-md animate-glow-emerald achievement-shine"
+                    : "border-slate-800 bg-slate-950/40 opacity-70 hover:opacity-90 hover:border-slate-700/80 hover:bg-slate-900/40"
+                )}
+              >
+                {/* Top Glowing Edge Strip */}
+                <div className={cn(
+                  "absolute top-0 left-0 right-0 h-1.5",
+                  isUnlocked 
+                    ? "bg-gradient-to-r from-emerald-500 via-teal-400 to-green-500 shadow-[0_1px_5px_rgba(16,185,129,0.5)]" 
+                    : "bg-slate-800/40"
+                )} />
+
+                <CardContent className="flex flex-col items-center text-center p-6 space-y-4 pt-8 h-full justify-between">
+                  <div className="flex flex-col items-center space-y-3 w-full">
+                    {/* Icon Container */}
+                    <div className={cn(
+                      "relative h-18 w-18 rounded-2xl flex items-center justify-center border transition-all duration-500",
+                      isUnlocked 
+                        ? "border-emerald-400/45 bg-gradient-to-br from-emerald-500/20 to-teal-500/10 shadow-[0_0_15px_rgba(16,185,129,0.3)] animate-float-slow" 
+                        : "border-slate-800 bg-slate-950/60 text-slate-500"
+                    )}>
+                      {isUnlocked ? (
+                        <span className="text-4xl filter drop-shadow-[0_0_8px_rgba(16,185,129,0.55)] select-none">
+                          {achievement.icon}
+                        </span>
+                      ) : (
+                        <Lock className="h-6 w-6 text-slate-600" />
+                      )}
+                      
+                      {isUnlocked && (
+                        <span className="absolute -bottom-1.5 -right-1.5 text-[10px] bg-emerald-500 text-white rounded-full h-5 w-5 flex items-center justify-center shadow-lg border-2 border-slate-900 font-black select-none">
+                          ✓
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="space-y-1">
+                      <h4 className={cn(
+                        "font-black text-base tracking-wide transition-colors",
+                        isUnlocked ? "text-emerald-400 drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]" : "text-slate-400"
+                      )}>
+                        {achievement.title}
+                      </h4>
+                      <p className={cn(
+                        "text-xs font-medium leading-relaxed max-w-[210px] mx-auto",
+                        isUnlocked ? "text-slate-350" : "text-slate-500"
+                      )}>
+                        {achievement.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="w-full space-y-2.5">
+                    {/* Progress Bar (Kilitli ve İlerlemeli ise) */}
+                    {progressInfo ? (
+                      <div className="w-full space-y-1 px-1 bg-slate-950/30 p-2 rounded-xl border border-slate-900/40">
+                        <div className="flex justify-between text-[9px] text-slate-450 font-bold uppercase tracking-wider">
+                          <span>İlerleme</span>
+                          <span>{progressInfo.current} / {progressInfo.target}</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-500" 
+                            style={{ width: `${Math.min(100, (progressInfo.current / progressInfo.target) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      !isUnlocked && achievement.requirement && (
+                        <p className="text-[10px] text-slate-500 bg-slate-950/20 py-1.5 px-2 rounded-lg border border-slate-900/40 font-semibold italic">
+                          Gereksinim: {achievement.requirement}
+                        </p>
+                      )
+                    )}
+
+                    <div className="flex flex-col items-center w-full gap-1">
+                      <span className={cn(
+                        "inline-flex items-center px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm",
+                        isUnlocked 
+                          ? "bg-emerald-950/80 text-emerald-300 border-emerald-800 shadow-[0_0_8px_rgba(16,185,129,0.2)]" 
+                          : "bg-slate-950/40 text-slate-500 border-slate-800"
+                      )}>
+                        {isUnlocked ? "Kazanıldı" : "Kilitli"}
+                      </span>
+                      
+                      {isUnlocked && unlockDateStr && (
+                        <span className="text-[9px] text-emerald-500/60 font-semibold tracking-wide mt-0.5">
+                          {unlockDateStr} tarihinde açıldı
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
     );
   };

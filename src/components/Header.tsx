@@ -70,7 +70,12 @@ export default function Header({
         />
         <Link to="/profile" className="flex-1 min-w-0 group hover:opacity-90 transition-opacity">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl md:text-2xl font-bold text-foreground truncate group-hover:text-primary transition-colors">
+            <h1 className={cn(
+              "text-xl md:text-2xl font-extrabold truncate transition-colors",
+              activeTheme === 'default' 
+                ? "text-foreground group-hover:text-primary" 
+                : userTheme.textClassName
+            )}>
               Hey, {firstName}!
             </h1>
             {userRole !== 'koç' && userRole !== 'admin' && userRole !== 'hoca' && (

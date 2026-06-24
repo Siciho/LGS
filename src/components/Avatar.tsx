@@ -228,6 +228,629 @@ function BlizzardCanvas({ width = 80, height = 80 }: { width?: number; height?: 
   );
 }
 
+// Space / Uzay Gezgini Warp Effect
+function WarpCanvas({ width = 80, height = 80 }: { width?: number; height?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    interface Star {
+      x: number;
+      y: number;
+      z: number;
+    }
+
+    const stars: Star[] = Array.from({ length: 30 }, () => ({
+      x: (Math.random() - 0.5) * width,
+      y: (Math.random() - 0.5) * height,
+      z: Math.random() * width,
+    }));
+
+    let animationId: number;
+
+    const draw = () => {
+      ctx.fillStyle = "rgba(10, 10, 30, 0.25)";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = "#ffffff";
+      stars.forEach((s) => {
+        s.z -= 1.5;
+        if (s.z <= 0) {
+          s.x = (Math.random() - 0.5) * width;
+          s.y = (Math.random() - 0.5) * height;
+          s.z = width;
+        }
+
+        const k = width / s.z;
+        const px = s.x * k + width / 2;
+        const py = s.y * k + height / 2;
+
+        if (px >= 0 && px <= width && py >= 0 && py <= height) {
+          const size = (1 - s.z / width) * 2;
+          ctx.beginPath();
+          ctx.arc(px, py, size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => cancelAnimationFrame(animationId);
+  }, [width, height]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ width: `${width}px`, height: `${height}px` }}
+      className="absolute inset-0 rounded-full bg-slate-950 pointer-events-none"
+    />
+  );
+}
+
+// RGB Fluid Wavy Color Flow (Antigravity colors)
+function RGBWaveCanvas({ width = 80, height = 80 }: { width?: number; height?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    let offset = 0;
+    let animationId: number;
+
+    const draw = () => {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+      ctx.fillRect(0, 0, width, height);
+
+      for (let i = 0; i < 3; i++) {
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        const hue1 = (offset + i * 120) % 360;
+        const hue2 = (hue1 + 180) % 360;
+        grad.addColorStop(0, `hsla(${hue1}, 80%, 50%, 0.45)`);
+        grad.addColorStop(1, `hsla(${hue2}, 80%, 50%, 0.45)`);
+        ctx.fillStyle = grad;
+
+        ctx.beginPath();
+        ctx.moveTo(0, height);
+        for (let x = 0; x <= width; x += 5) {
+          const y = height / 2 + Math.sin(x * 0.05 + offset * 0.03 + i) * (height / 4 - i * 3);
+          ctx.lineTo(x, y);
+        }
+        ctx.lineTo(width, height);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      offset += 1.5;
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => cancelAnimationFrame(animationId);
+  }, [width, height]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ width: `${width}px`, height: `${height}px` }}
+      className="absolute inset-0 rounded-full bg-black pointer-events-none"
+    />
+  );
+}
+
+// Gold / Altın Sparks
+function GoldSparkleCanvas({ width = 80, height = 80 }: { width?: number; height?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    interface Particle {
+      angle: number;
+      radius: number;
+      speed: number;
+      size: number;
+    }
+
+    const particles: Particle[] = Array.from({ length: 25 }, () => ({
+      angle: Math.random() * Math.PI * 2,
+      radius: Math.random() * (width / 2),
+      speed: Math.random() * 0.03 + 0.01,
+      size: Math.random() * 2 + 1,
+    }));
+
+    let animationId: number;
+
+    const draw = () => {
+      ctx.fillStyle = "rgba(20, 15, 5, 0.2)";
+      ctx.fillRect(0, 0, width, height);
+
+      const glow = ctx.createRadialGradient(width/2, height/2, 2, width/2, height/2, width/2);
+      glow.addColorStop(0, "rgba(234, 179, 8, 0.3)");
+      glow.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = "#facc15";
+      ctx.shadowBlur = 4;
+      ctx.shadowColor = "#eab308";
+
+      particles.forEach((p) => {
+        p.angle += p.speed;
+        const x = width / 2 + Math.cos(p.angle) * p.radius;
+        const y = height / 2 + Math.sin(p.angle) * p.radius;
+
+        ctx.beginPath();
+        ctx.arc(x, y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.shadowBlur = 0;
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => cancelAnimationFrame(animationId);
+  }, [width, height]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ width: `${width}px`, height: `${height}px` }}
+      className="absolute inset-0 rounded-full bg-slate-950 pointer-events-none"
+    />
+  );
+}
+
+// Neon cyberpunk grid
+function NeonGridCanvas({ width = 80, height = 80 }: { width?: number; height?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    let offset = 0;
+    let animationId: number;
+
+    const draw = () => {
+      ctx.fillStyle = "rgba(10, 5, 20, 0.3)";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = "rgba(168, 85, 247, 0.25)";
+      ctx.lineWidth = 1;
+
+      for (let i = 0; i <= width; i += 10) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, height);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(width, i);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = "#ec4899";
+      ctx.lineWidth = 2;
+      ctx.shadowBlur = 6;
+      ctx.shadowColor = "#f43f5e";
+
+      ctx.beginPath();
+      ctx.moveTo(0, height / 2);
+      for (let x = 0; x <= width; x += 3) {
+        const y = height / 2 + Math.sin(x * 0.15 + offset * 0.1) * 8;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+      offset += 0.5;
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => cancelAnimationFrame(animationId);
+  }, [width, height]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ width: `${width}px`, height: `${height}px` }}
+      className="absolute inset-0 rounded-full bg-slate-950 pointer-events-none"
+    />
+  );
+}
+
+// Sunset / Gün Batımı
+function SunFlareCanvas({ width = 80, height = 80 }: { width?: number; height?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    let angle = 0;
+    let animationId: number;
+
+    const draw = () => {
+      ctx.fillStyle = "#1e0b0b";
+      ctx.fillRect(0, 0, width, height);
+
+      const grad = ctx.createRadialGradient(width/2, height/2, 2, width/2, height/2, width/2);
+      grad.addColorStop(0, "rgba(249, 115, 22, 0.45)");
+      grad.addColorStop(0.5, "rgba(236, 72, 153, 0.2)");
+      grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = "rgba(253, 186, 116, 0.35)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const a = angle + (i * Math.PI) / 4;
+        const x1 = width/2 + Math.cos(a) * 4;
+        const y1 = height/2 + Math.sin(a) * 4;
+        const x2 = width/2 + Math.cos(a) * (width/3);
+        const y2 = height/2 + Math.sin(a) * (width/3);
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+      }
+      ctx.stroke();
+
+      angle += 0.015;
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => cancelAnimationFrame(animationId);
+  }, [width, height]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ width: `${width}px`, height: `${height}px` }}
+      className="absolute inset-0 rounded-full bg-slate-950 pointer-events-none"
+    />
+  );
+}
+
+// Midnight / Gece Yarısı
+function AuroraCanvas({ width = 80, height = 80 }: { width?: number; height?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    let offset = 0;
+    let animationId: number;
+
+    const draw = () => {
+      ctx.fillStyle = "#020617";
+      ctx.fillRect(0, 0, width, height);
+
+      const grad = ctx.createLinearGradient(0, 0, width, height);
+      grad.addColorStop(0, "rgba(59, 130, 246, 0.2)");
+      grad.addColorStop(1, "rgba(99, 102, 241, 0.2)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = "rgba(34, 211, 238, 0.4)";
+      ctx.lineWidth = 3;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = "#06b6d4";
+
+      ctx.beginPath();
+      ctx.moveTo(-10, height/2);
+      for (let x = -10; x <= width + 10; x += 4) {
+        const y = height/2 + Math.sin(x * 0.06 + offset * 0.05) * 8 + Math.cos(x * 0.03 + offset * 0.03) * 4;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+      offset += 0.8;
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => cancelAnimationFrame(animationId);
+  }, [width, height]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ width: `${width}px`, height: `${height}px` }}
+      className="absolute inset-0 rounded-full bg-slate-950 pointer-events-none"
+    />
+  );
+}
+
+// Forest / Zümrüt Ormanı
+function ForestCanvas({ width = 80, height = 80 }: { width?: number; height?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    interface Leaf {
+      x: number;
+      y: number;
+      r: number;
+      speedY: number;
+      speedX: number;
+    }
+
+    const leaves: Leaf[] = Array.from({ length: 8 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * -20,
+      r: Math.random() * 2 + 1.5,
+      speedY: Math.random() * 0.4 + 0.3,
+      speedX: Math.random() * 0.2 - 0.1
+    }));
+
+    let animationId: number;
+
+    const draw = () => {
+      ctx.fillStyle = "#022c22";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = "rgba(16, 185, 129, 0.45)";
+      ctx.shadowBlur = 3;
+      ctx.shadowColor = "#10b981";
+
+      leaves.forEach((l) => {
+        ctx.beginPath();
+        ctx.arc(l.x, l.y, l.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        l.y += l.speedY;
+        l.x += l.speedX;
+
+        if (l.y > height) {
+          l.y = -5;
+          l.x = Math.random() * width;
+        }
+      });
+
+      ctx.shadowBlur = 0;
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => cancelAnimationFrame(animationId);
+  }, [width, height]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ width: `${width}px`, height: `${height}px` }}
+      className="absolute inset-0 rounded-full bg-slate-950 pointer-events-none"
+    />
+  );
+}
+
+// Bubblegum / Barbie Pembe (Kalp Animasyonlu)
+function BubblegumCanvas({ width = 80, height = 80 }: { width?: number; height?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    interface Heart {
+      x: number;
+      y: number;
+      r: number;
+      speedY: number;
+      opacity: number;
+      rot: number;
+      speedRot: number;
+    }
+
+    const hearts: Heart[] = Array.from({ length: 8 }, () => ({
+      x: Math.random() * width,
+      y: height + Math.random() * 20,
+      r: Math.random() * 3 + 4, // 4px to 7px size
+      speedY: -(Math.random() * 0.4 + 0.25),
+      opacity: Math.random() * 0.45 + 0.45, // 0.45 to 0.90 opacity
+      rot: Math.random() * Math.PI * 2,
+      speedRot: (Math.random() - 0.5) * 0.03
+    }));
+
+    let animationId: number;
+
+    const draw = () => {
+      ctx.fillStyle = "#3b0764"; // Barbie koyu pembe/mor arka planı
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.shadowBlur = 5;
+      ctx.shadowColor = "#f43f5e";
+
+      hearts.forEach((h) => {
+        ctx.save();
+        ctx.translate(h.x, h.y);
+        ctx.rotate(h.rot);
+
+        ctx.beginPath();
+        // Kalp çizimi (0,0 merkezli)
+        ctx.moveTo(0, -h.r * 0.3);
+        ctx.bezierCurveTo(-h.r / 2, -h.r * 1.1, -h.r * 1.2, -h.r * 0.25, 0, h.r);
+        ctx.bezierCurveTo(h.r * 1.2, -h.r * 0.25, h.r / 2, -h.r * 1.1, 0, -h.r * 0.3);
+        ctx.closePath();
+
+        ctx.fillStyle = `rgba(244, 63, 94, ${h.opacity})`;
+        ctx.fill();
+
+        ctx.restore();
+
+        h.y += h.speedY;
+        h.rot += h.speedRot;
+
+        if (h.y < -15) {
+          h.y = height + 10;
+          h.x = Math.random() * width;
+          h.opacity = Math.random() * 0.45 + 0.45;
+        }
+      });
+
+      ctx.shadowBlur = 0;
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => cancelAnimationFrame(animationId);
+  }, [width, height]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ width: `${width}px`, height: `${height}px` }}
+      className="absolute inset-0 rounded-full bg-slate-950 pointer-events-none"
+    />
+  );
+}
+
+// Music / Müzik Ritmi Equalizer
+function MusicEqualizerCanvas({ width = 80, height = 80 }: { width?: number; height?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    const barCount = 6;
+    const barWidth = 6;
+    const barGap = 3;
+    const heights = Array(barCount).fill(5);
+
+    let animationId: number;
+
+    const draw = () => {
+      ctx.fillStyle = "#0f051d";
+      ctx.fillRect(0, 0, width, height);
+
+      const glow = ctx.createRadialGradient(width/2, height/2, 2, width/2, height/2, width/2);
+      glow.addColorStop(0, "rgba(236, 72, 153, 0.2)");
+      glow.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, width, height);
+
+      const startX = (width - (barCount * barWidth + (barCount - 1) * barGap)) / 2;
+
+      for (let i = 0; i < barCount; i++) {
+        const target = Math.random() * (height * 0.6) + 4;
+        heights[i] += (target - heights[i]) * 0.25;
+
+        const x = startX + i * (barWidth + barGap);
+        const barHeight = heights[i];
+        const y = height - barHeight - (height * 0.15);
+
+        const barGrad = ctx.createLinearGradient(0, y, 0, y + barHeight);
+        barGrad.addColorStop(0, "#f43f5e");
+        barGrad.addColorStop(1, "#8b5cf6");
+
+        ctx.fillStyle = barGrad;
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = "#f43f5e";
+
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(x, y, barWidth, barHeight, 2);
+        } else {
+          ctx.rect(x, y, barWidth, barHeight);
+        }
+        ctx.fill();
+      }
+
+      ctx.shadowBlur = 0;
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => cancelAnimationFrame(animationId);
+  }, [width, height]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ width: `${width}px`, height: `${height}px` }}
+      className="absolute inset-0 rounded-full bg-slate-950 pointer-events-none"
+    />
+  );
+}
+
 // Particle system overlay (Front Face overlay for Lava and Frost)
 function ThemeParticleCanvas({ themeId, width = 80, height = 80 }: { themeId: string; width?: number; height?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -347,7 +970,7 @@ export default function Avatar({
   const userTheme = getThemeById(themeId);
 
   const hasActiveBadge = !!activeBadge && activeBadge !== "";
-  const isFlipTheme = themeId === "matrix" || themeId === "lava" || themeId === "frost" || hasActiveBadge;
+  const isFlipTheme = themeId !== "default" || hasActiveBadge;
 
   // Auto flip effect on mount if it's a 3D flip theme and interactive is true
   useEffect(() => {
@@ -497,6 +1120,15 @@ export default function Avatar({
                     {themeId === "matrix" && <MatrixRainCanvas width={dim} height={dim} />}
                     {themeId === "lava" && <MagmaCanvas width={dim} height={dim} />}
                     {themeId === "frost" && <BlizzardCanvas width={dim} height={dim} />}
+                    {themeId === "space" && <WarpCanvas width={dim} height={dim} />}
+                    {themeId === "rainbow" && <RGBWaveCanvas width={dim} height={dim} />}
+                    {themeId === "gold" && <GoldSparkleCanvas width={dim} height={dim} />}
+                    {themeId === "neon" && <NeonGridCanvas width={dim} height={dim} />}
+                    {themeId === "sunset" && <SunFlareCanvas width={dim} height={dim} />}
+                    {themeId === "midnight" && <AuroraCanvas width={dim} height={dim} />}
+                    {themeId === "forest" && <ForestCanvas width={dim} height={dim} />}
+                    {themeId === "bubblegum" && <BubblegumCanvas width={dim} height={dim} />}
+                    {themeId === "music" && <MusicEqualizerCanvas width={dim} height={dim} />}
                   </>
                 )}
               </>

@@ -19,6 +19,12 @@ export default defineConfig({
   server: {
     host: "::",
     port: 8080,
+    watch: {
+      ignored: ['**/wrapper/**', '**/caches/**', '**/daemon/**', '**/jdks/**']
+    }
+  },
+  optimizeDeps: {
+    entries: ['index.html']
   },
   plugins: [react()],
   resolve: {

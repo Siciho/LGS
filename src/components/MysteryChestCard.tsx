@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, Gift, Snowflake } from "lucide-react";
+import { Star, Gift, Snowflake, Palette } from "lucide-react";
 import { useAppContext } from "@/pages/AppLayout";
 import { avatars as allAvatars } from "@/data/avatars";
 import { toast } from "sonner";
@@ -12,7 +12,7 @@ export default function MysteryChestCard() {
   const { totalPoints, handleBuyMysteryChest } = useAppContext();
   const [chestState, setChestState] = useState<'idle' | 'shaking' | 'open'>('idle');
   const [reward, setReward] = useState<{ 
-    rewardType: 'avatar' | 'freeze'; 
+    rewardType: 'avatar' | 'freeze' | 'theme'; 
     rewardId?: string; 
     amount?: number; 
     rarity?: 'common' | 'rare' | 'legendary'; 
@@ -98,6 +98,27 @@ export default function MysteryChestCard() {
     const sparkles = config.sparkles;
     const paddedSparkles = Array.from({ length: 5 }, (_, i) => sparkles[i % sparkles.length]);
 
+    if (reward.rewardType === 'theme') {
+      const theme = cardThemes.find(t => t.id === reward.rewardId);
+      return {
+        title: "Yeni Bir Kart Teması Kazandın! 🎨",
+        name: theme?.name || "Bilinmeyen Tema",
+        image: null,
+        description: "Profil sayfasındaki Temalarım sekmesinden bu temayı kuşanabilirsin.",
+        rarityText: "Efsanevi Ödül",
+        borderClass: "border-purple-500 shadow-[0_0_25px_rgba(168,85,247,0.45)] bg-gradient-to-b from-purple-950 via-slate-950 to-purple-950 text-purple-100",
+        titleClass: "from-purple-400 via-pink-300 to-indigo-400",
+        glowColor: "rgba(168,85,247,0.25)",
+        iconBg: "from-purple-900 to-slate-900",
+        iconBorder: "border-purple-400 animate-pulse",
+        buttonClass: "bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-purple-500/20",
+        tagClass: "bg-purple-900/80 text-purple-200 border-purple-800",
+        emoji: "🎨",
+        sparkles: ["✨", "🎨", "🌟", "🎉", "🥳"],
+        rarity: 'legendary'
+      };
+    }
+
     if (reward.rewardType === 'avatar') {
       const avatar = allAvatars.find(a => a.id === reward.rewardId);
       return {
@@ -162,11 +183,11 @@ export default function MysteryChestCard() {
         </div>
 
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-xl text-purple-600 dark:text-purple-400">
-            <Gift className="h-6 w-6 text-purple-500" /> Gizemli Sandık
+          <CardTitle className="flex items-center gap-2 text-xl text-purple-600 dark:text-purple-400 font-extrabold">
+            <Gift className="h-6 w-6 text-purple-500 animate-bounce-slow" /> Şanslı Gizem Sandığı
           </CardTitle>
-          <CardDescription className="text-foreground/80">
-            Puanınla gizemli sandığı aç, rastgele efsanevi bir avatar veya dondurma hakkı kazan!
+          <CardDescription className="text-foreground/90 leading-relaxed text-sm">
+            Şansını dene! 🎁 Puanlarını kullanarak gizemli sandığı aç; Liderlik Tablosunu süsleyecek efsanevi <strong className="font-semibold text-purple-700 dark:text-purple-300">Kart Temaları</strong>, birbirinden havalı özel <strong className="font-semibold text-purple-700 dark:text-purple-300">Avatarlar</strong> veya serini koruyacak <strong className="font-semibold text-purple-700 dark:text-purple-300">Seri Dondurma</strong> güçlendiricileri kazanma şansı yakala!
           </CardDescription>
         </CardHeader>
 
@@ -257,7 +278,9 @@ export default function MysteryChestCard() {
               rewardDetails?.iconBg, 
               rewardDetails?.iconBorder
             )}>
-              {rewardDetails?.image ? (
+              {reward?.rewardType === 'theme' ? (
+                <Palette className="h-14 w-14 text-purple-400 animate-pulse" />
+              ) : rewardDetails?.image ? (
                 <img 
                   src={rewardDetails.image} 
                   alt="Ödül Avatar" 

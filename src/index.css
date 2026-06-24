@@ -490,4 +490,187 @@
   animation: bronze-crown-bounce 2.4s ease-in-out infinite;
 }
 
+/* --- YENİ EKLENEN: Gökkuşağı Teması Animasyonları --- */
+@keyframes rainbow-text-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-rainbow-text {
+  background-size: 200% auto;
+  animation: rainbow-text-flow 4s linear infinite;
+}
+
+@keyframes rainbow-border-flow {
+  0% { border-color: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
+  17% { border-color: #f97316; box-shadow: 0 0 12px rgba(249, 115, 22, 0.4); }
+  33% { border-color: #eab308; box-shadow: 0 0 12px rgba(234, 179, 8, 0.4); }
+  50% { border-color: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.4); }
+  67% { border-color: #3b82f6; box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
+  83% { border-color: #a855f7; box-shadow: 0 0 12px rgba(168, 85, 247, 0.4); }
+  100% { border-color: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
+}
+
+.animate-rainbow-border {
+  border-width: 2px;
+  animation: rainbow-border-flow 6s linear infinite;
+}
+
+@keyframes avatar-rainbow-glow {
+  0% { border-color: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.5); }
+  17% { border-color: #f97316; box-shadow: 0 0 6px rgba(249, 115, 22, 0.5); }
+  33% { border-color: #eab308; box-shadow: 0 0 6px rgba(234, 179, 8, 0.5); }
+  50% { border-color: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.5); }
+  67% { border-color: #3b82f6; box-shadow: 0 0 6px rgba(59, 130, 246, 0.5); }
+  83% { border-color: #a855f7; box-shadow: 0 0 6px rgba(168, 85, 247, 0.5); }
+  100% { border-color: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.5); }
+}
+
+.animate-avatar-rainbow {
+  animation: avatar-rainbow-glow 5s linear infinite;
+}
+
+/* --- YENİ EKLENEN: Premium Liderlik Kürsüsü Metalik İsim Efektleri --- */
+@keyframes metallic-shine {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.text-gold-premium {
+  background: linear-gradient(to right, #fef08a 0%, #facc15 25%, #eab308 50%, #facc15 75%, #fef08a 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)) drop-shadow(0 0 6px rgba(234, 179, 8, 0.65));
+  animation: metallic-shine 3s linear infinite;
+}
+
+.text-silver-premium {
+  background: linear-gradient(to right, #f1f5f9 0%, #94a3b8 25%, #ffffff 50%, #94a3b8 75%, #f1f5f9 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)) drop-shadow(0 0 6px rgba(148, 163, 184, 0.35));
+  animation: metallic-shine 3.2s linear infinite;
+}
+
+.text-bronze-premium {
+  background: linear-gradient(to right, #fdba74 0%, #b45309 25%, #ffedd5 50%, #b45309 75%, #fdba74 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)) drop-shadow(0 0 6px rgba(180, 83, 9, 0.4));
+  animation: metallic-shine 3.4s linear infinite;
+}
+
+/* --- YENİ EKLENEN: Yeni Temaların Çerçeve Glow Animasyonları --- */
+@keyframes avatar-sunset-glow {
+  0%, 100% { border-color: #f97316; box-shadow: 0 0 6px rgba(249, 115, 22, 0.4); }
+  50% { border-color: #ec4899; box-shadow: 0 0 14px rgba(236, 72, 153, 0.7); }
+}
+.animate-avatar-sunset {
+  animation: avatar-sunset-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes avatar-midnight-glow {
+  0%, 100% { border-color: #3b82f6; box-shadow: 0 0 6px rgba(59, 130, 246, 0.4); }
+  50% { border-color: #6366f1; box-shadow: 0 0 14px rgba(99, 102, 241, 0.7); }
+}
+.animate-avatar-midnight {
+  animation: avatar-midnight-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes avatar-forest-glow {
+  0%, 100% { border-color: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.4); }
+  50% { border-color: #22c55e; box-shadow: 0 0 14px rgba(34, 197, 94, 0.7); }
+}
+.animate-avatar-forest {
+  animation: avatar-forest-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes avatar-bubblegum-glow {
+  0%, 100% { border-color: #f43f5e; box-shadow: 0 0 6px rgba(244, 63, 94, 0.4); }
+  50% { border-color: #ec4899; box-shadow: 0 0 14px rgba(236, 72, 153, 0.7); }
+}
+.animate-avatar-bubblegum {
+  animation: avatar-bubblegum-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes avatar-music-glow {
+  0%, 100% { border-color: #f43f5e; box-shadow: 0 0 6px rgba(244, 63, 94, 0.4); }
+  50% { border-color: #8b5cf6; box-shadow: 0 0 14px rgba(139, 92, 246, 0.7); }
+}
+.animate-avatar-music {
+  animation: avatar-music-glow 2.5s ease-in-out infinite;
+}
+
+/* --- YENİ EKLENEN: Başarı Kartı Animasyonları ve Premium Efektler --- */
+@keyframes border-glow-emerald {
+  0%, 100% {
+    border-color: rgba(16, 185, 129, 0.35);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.15), inset 0 0 12px rgba(16, 185, 129, 0.05);
+  }
+  50% {
+    border-color: rgba(52, 211, 153, 0.85);
+    box-shadow: 0 0 24px rgba(16, 185, 129, 0.45), inset 0 0 16px rgba(16, 185, 129, 0.2);
+  }
+}
+
+.animate-glow-emerald {
+  animation: border-glow-emerald 3.5s ease-in-out infinite;
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(2deg);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 4s ease-in-out infinite;
+}
+
+@keyframes shine-sweep {
+  0% {
+    left: -120%;
+  }
+  100% {
+    left: 220%;
+  }
+}
+
+.achievement-shine {
+  position: relative;
+}
+
+.achievement-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -120%;
+  width: 60%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.12) 30%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.12) 70%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(25deg);
+  animation: shine-sweep 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+
 

@@ -12,8 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Swords, Trophy, Lock, History, ChevronDown, Gamepad2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Swords, Trophy, Lock, History, ChevronDown, Gamepad2, Calculator, BookOpen } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { dailyWords } from "@/data/dailywords";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -26,6 +26,8 @@ export default function PracticePage() {
   const [isSolving, setIsSolving] = useState(false);
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || "vocab-world");
   const { handleQuizCompletion, subjects: allSubjectsFromContext, dailySolvedSubjects, challengeWins } = useAppContext();
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false); 
@@ -115,10 +117,26 @@ export default function PracticePage() {
 
   return (
     <div className="space-y-6 animate-slide-up">
-      <Tabs defaultValue="vocab-world" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="gunluk-gorev">Günlük Görev</TabsTrigger>
-          <TabsTrigger value="vocab-world">Vocab World</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 h-14 bg-muted/60 p-1.5 rounded-2xl border border-border/40 shadow-inner">
+          <TabsTrigger 
+            value="gunluk-gorev"
+            className="rounded-xl font-bold py-2.5 transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(245,158,11,0.3)] hover:text-amber-500 active:scale-95 flex items-center justify-center gap-1.5"
+          >
+            <span className="text-base">🎯</span> Günlük Görev
+          </TabsTrigger>
+          <TabsTrigger 
+            value="vocab-world"
+            className="rounded-xl font-bold py-2.5 transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(6,182,212,0.3)] hover:text-cyan-500 active:scale-95 flex items-center justify-center gap-1.5"
+          >
+            <span className="text-base">🔤</span> Vocab World
+          </TabsTrigger>
+          <TabsTrigger 
+            value="mini-oyunlar"
+            className="rounded-xl font-bold py-2.5 transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(168,85,247,0.3)] hover:text-purple-500 active:scale-95 flex items-center justify-center gap-1.5"
+          >
+            <span className="text-base">🧠</span> Zihin & Kelime
+          </TabsTrigger>
         </TabsList>
 
         <div className="mt-6">
@@ -253,6 +271,42 @@ export default function PracticePage() {
           </Card>
 
           <WordSwiper />
+        </TabsContent>
+
+        <TabsContent value="mini-oyunlar" className="mt-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="border border-purple-500/20 bg-purple-500/5 shadow-md flex flex-col justify-between">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calculator className="text-purple-500 h-6 w-6" /> Çarpım Tablosu Hızı
+                </CardTitle>
+                <CardDescription>
+                  Matematiksel işlem hızını artıracak zamana karşı yarış! Doğru cevaplar süre ekler, yanlış cevaplar süre eksiltir.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <Button onClick={() => navigate('/multiplication-game')} className="w-full py-4 font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-sm">
+                  Yarışa Katıl ➔
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-amber-500/20 bg-amber-500/5 shadow-md flex flex-col justify-between">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="text-amber-500 h-6 w-6" /> Deyim Avcısı
+                </CardTitle>
+                <CardDescription>
+                  LGS Türkçe sınavında çıkan deyimleri ve anlamlarını kart eşleştirmece veya anlam testleri ile öğren!
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <Button onClick={() => navigate('/idioms-game')} className="w-full py-4 font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm">
+                  Deyimleri Avla ➔
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
         
       </Tabs>
