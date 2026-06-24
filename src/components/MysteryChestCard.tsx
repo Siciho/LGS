@@ -122,9 +122,9 @@ export default function MysteryChestCard() {
     const count = reward.amount || 1;
     let titleStr = "Seri Dondurma Kazandın! ❄️";
     let nameStr = `${count} Adet Seri Dondurma`;
-    if (count === 3) {
-      titleStr = "Nadir Seri Dondurma Paketi! ❄️❄️❄️";
-    } else if (count === 10) {
+    if (count === 2) {
+      titleStr = "Nadir Seri Dondurma Paketi! ❄️❄️";
+    } else if (count === 5) {
       titleStr = "Efsanevi Seri Dondurma Deposu! 🧊👑";
     }
     
