@@ -2,9 +2,9 @@
  * LGS Asistanım - OTA Güncelleme ve APK Hazırlama Otomasyon Betiği
  * 
  * Kullanım:
- *   node scripts/publish-ota.js "<sürüm>" "<güncelleme_açıklaması>"
+ *   node scripts/publish-ota.cjs "<sürüm>" "<güncelleme_açıklaması>"
  * Örnek:
- *   node scripts/publish-ota.js "1.1.7" "Arayüz iyileştirildi, Barbie teması güncellendi."
+ *   node scripts/publish-ota.cjs "2.0.0" "Arayüz iyileştirildi, Barbie teması güncellendi."
  */
 
 const fs = require('fs');
@@ -21,11 +21,11 @@ const changelogText = process.argv[3];
 
 if (!targetVersion || !changelogText) {
   console.error("\x1b[31mHata: Lütfen sürüm ve güncelleme açıklamasını argüman olarak girin.\x1b[0m");
-  console.log("Kullanım: node scripts/publish-ota.js <sürüm> \"<açıklama>\"");
+  console.log("Kullanım: node scripts/publish-ota.cjs <sürüm> \"<açıklama>\"");
   process.exit(1);
 }
 
-// 1. Sürüm Formatını Doğrula (örn: 1.1.7)
+// 1. Sürüm Formatını Doğrula (örn: 2.0.0)
 if (!/^\d+\.\d+\.\d+$/.test(targetVersion)) {
   console.error(`\x1b[31mHata: Geçersiz sürüm formatı '${targetVersion}'. Lütfen X.Y.Z formatında girin.\x1b[0m`);
   process.exit(1);
