@@ -8,12 +8,22 @@ import { Achievement } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getLevelInfo } from "@/utils/level";
 import { Progress } from "@/components/ui/progress";
-import { cardThemes, getThemeById } from "@/data/themes";
+import { cardThemes, getThemeById, badges } from "@/data/themes";
 import { useLocation } from "react-router-dom";
 import Avatar from "@/components/Avatar";
 
 export default function ProfilePage() {
-  const { userAvatars, handleSetAvatar, achievements, lifetimePoints, unlockedThemes, activeTheme, handleSetTheme } = useAppContext();
+  const { 
+    userAvatars, 
+    handleSetAvatar, 
+    achievements, 
+    lifetimePoints, 
+    unlockedThemes, 
+    activeTheme, 
+    handleSetTheme,
+    challengeWins,
+    handleSetBadge
+  } = useAppContext();
   const location = useLocation();
   const state = location.state as { activeTab?: string; highlightAvatarId?: string } | null;
 
@@ -162,6 +172,7 @@ export default function ProfilePage() {
                         src={avatar.image}
                         alt={avatar.name}
                         themeId={isCurrent ? (activeTheme || 'default') : 'default'}
+                        activeBadge={isCurrent ? userAvatars?.activeBadge : undefined}
                         size="lg"
                         highlight={isHighlighted}
                         interactive={false}
@@ -219,6 +230,69 @@ export default function ProfilePage() {
                           <CheckCircle className="h-4 w-4" />
                         </div>
                       )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Mücadele Rozetlerim Section */}
+          <Card className="card-canli gradient-mavi shadow-lg border-none mt-6">
+            <CardHeader>
+              <CardTitle className="text-2xl metin-beyaz font-bold flex items-center gap-2">
+                <Trophy className="h-6 w-6 text-yellow-300 animate-bounce-slow" /> Mücadele Rozetlerim
+              </CardTitle>
+              <CardDescription className="metin-acik-gri">
+                Word Challenge düellolarından kazandığın rozetleri avatarının arka yüzüne yerleştir. (Kuşanmak veya çıkarmak için tıklayın)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-4">
+                {badges.map(badge => {
+                  const isUnlocked = (challengeWins || 0) >= badge.wins;
+                  const isActive = userAvatars?.activeBadge === badge.image;
+
+                  return (
+                    <div
+                      key={badge.name}
+                      onClick={() => isUnlocked && handleSetBadge(isActive ? "" : badge.image)}
+                      className={cn(
+                        "relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-300 bg-background/90 dark:bg-background/40",
+                        isUnlocked 
+                          ? "cursor-pointer hover:scale-105 active:scale-95" 
+                          : "opacity-40 cursor-not-allowed",
+                        isActive 
+                          ? "border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.3)]" 
+                          : "border-transparent"
+                      )}
+                    >
+                      <div className="relative">
+                        <img
+                          src={badge.image}
+                          alt={badge.name}
+                          className={cn(
+                            "w-16 h-16 rounded-full object-cover aspect-square drop-shadow-md",
+                            !isUnlocked && "grayscale"
+                          )}
+                        />
+                        {isActive && (
+                          <div className="absolute -top-1 -right-1 bg-yellow-400 text-black rounded-full p-0.5 shadow-md">
+                            <CheckCircle className="h-4 w-4" />
+                          </div>
+                        )}
+                        {!isUnlocked && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full">
+                            <Lock className="h-6 w-6 text-white/80" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs font-bold text-foreground mt-1 truncate max-w-[100px]">{badge.name}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          {isUnlocked ? "Açık" : `${badge.wins} Galibiyet`}
+                        </p>
+                      </div>
                     </div>
                   );
                 })}

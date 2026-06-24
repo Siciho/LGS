@@ -17,7 +17,7 @@ import { FileOpener } from '@capacitor-community/file-opener';
 import { Capacitor } from '@capacitor/core';
 import { Button } from "@/components/ui/button";
 
-export const CURRENT_VERSION = "1.1.5";
+export const CURRENT_VERSION = "1.1.6";
 
 const isNewerVersion = (current: string, latest: string) => {
   const cParts = current.split('.').map(Number);
@@ -458,6 +458,7 @@ export default function AppLayout() {
           userRole={userRole}
           lifetimePoints={coreData.lifetimePoints}
           activeTheme={coreData.activeTheme} // ✅ Yeni prop: Aktif kart teması çerçeve efekti için
+          activeBadge={coreData.userAvatars?.activeBadge} // ✅ Yeni prop: Mücadele rozeti arka yüzü için
           latestApkUrl={updateInfo.apkUrl}
         />
         <main className="flex-1 pb-32">

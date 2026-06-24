@@ -197,6 +197,7 @@ export default function LeaderboardPage() {
                                    src={getAvatarImage(entry.user_avatar)}
                                    alt={entry.user_name}
                                    themeId={entry.active_theme || 'default'}
+                                   activeBadge={entry.user_avatar?.activeBadge}
                                    size="custom"
                                    className="w-12 h-12 shrink-0 transition-all duration-300"
                                    interactive={true}

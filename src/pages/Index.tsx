@@ -12,9 +12,21 @@ import { Briefcase, BookCopy, BarChart } from 'lucide-react';
 import { DenemeSinaviDialog, DenemeSonucu } from '@/components/DenemeSinaviDialog';
 import { supabase } from '@/supabaseClient';
 import { toast } from 'sonner';
+import StreakBoosterCard from '@/components/StreakBoosterCard';
+import StreakFreezeShield from '@/components/StreakFreezeShield';
+
 
 const Index = () => {
-  const { subjects, handleAddQuestions, tomorrowSubjects, isEvening, userId } = useAppContext();
+  const { 
+    subjects, 
+    handleAddQuestions, 
+    tomorrowSubjects, 
+    isEvening, 
+    userId,
+    streak,
+    streakFreezes,
+    totalQuestions
+  } = useAppContext();
   const navigate = useNavigate();
   const [isDenemeDialogOpen, setIsDenemeDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -61,6 +73,14 @@ const Index = () => {
   return (
     <div className="space-y-6">
       <LgsCountdown />
+
+      {/* Dynamic Streak and Freeze grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <StreakBoosterCard streak={streak || 0} />
+        <StreakFreezeShield freezes={streakFreezes || 0} />
+      </div>
+
+      {/* Weekly Duel progress card removed */}
       
       {isEvening && tomorrowSubjects && tomorrowSubjects.length > 0 && (
         <div className="animate-pulse">
@@ -81,12 +101,18 @@ const Index = () => {
 
       {/* --- BU BUTONLARIN OLDUĞU BÖLÜM --- */}
       <div className="grid grid-cols-2 gap-4">
-        <Button onClick={() => setIsDenemeDialogOpen(true)} variant="outline" className="w-full py-6 flex-col h-auto">
-            <BookCopy className="h-6 w-6 mb-2" />
+        <Button 
+          onClick={() => setIsDenemeDialogOpen(true)} 
+          className="w-full py-5 flex-col h-auto font-bold bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700 hover:from-indigo-500 hover:to-purple-600 text-white shadow-lg shadow-indigo-500/15 hover:shadow-indigo-500/25 transition-all border border-indigo-500/25 gap-1.5"
+        >
+            <BookCopy className="h-5 w-5 text-indigo-200" />
             LGS Denemesi Ekle
         </Button>
-        <Button onClick={() => navigate('/deneme-kayitlarim')} variant="outline" className="w-full py-6 flex-col h-auto">
-            <BarChart className="h-6 w-6 mb-2" />
+        <Button 
+          onClick={() => navigate('/deneme-kayitlarim')} 
+          className="w-full py-5 flex-col h-auto font-bold bg-gradient-to-br from-sky-600 via-cyan-600 to-sky-700 hover:from-sky-500 hover:to-cyan-600 text-white shadow-lg shadow-sky-500/15 hover:shadow-sky-500/25 transition-all border border-sky-500/25 gap-1.5"
+        >
+            <BarChart className="h-5 w-5 text-sky-200" />
             Deneme Kayıtları
         </Button>
       </div>

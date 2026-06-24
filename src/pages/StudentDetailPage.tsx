@@ -348,6 +348,7 @@ export default function StudentDetailPage() {
               src={getAvatarImage(studentAvatar)}
               alt={studentName}
               themeId={studentActiveTheme}
+              activeBadge={studentAvatar?.activeBadge}
               size="md"
               interactive={true}
             />

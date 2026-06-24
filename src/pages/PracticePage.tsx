@@ -19,16 +19,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { isTopicActive } from "@/curriculum";
 import ChallengeHistory from "@/components/ChallengeHistory";
-
-const badges = [
-  { wins: 0, image: '/assets/default.png', name: 'Başlangıç Ligi' },
-  { wins: 25, image: '/assets/badge25.png', name: 'Bronz Lig' },
-  { wins: 75, image: '/assets/badge75.png', name: 'Gümüş Lig' },
-  { wins: 100, image: '/assets/badge100.png', name: 'Altın Lig' },
-  { wins: 150, image: '/assets/badge150.png', name: 'Kristal Lig' },
-  { wins: 250, image: '/assets/badge250.png', name: 'Usta Ligi' },
-  { wins: 500, image: '/assets/badge500.png', name: 'Şampiyonlar Ligi' },
-];
+import { badges } from "@/data/themes";
 
 export default function PracticePage() {
   const [dailyQuestions, setDailyQuestions] = useState<Question[]>([]);
@@ -38,6 +29,19 @@ export default function PracticePage() {
   const { handleQuizCompletion, subjects: allSubjectsFromContext, dailySolvedSubjects, challengeWins } = useAppContext();
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false); 
+  const [activePreviewBadge, setActivePreviewBadge] = useState<typeof badges[0] | null>(null);
+  const [previewTimer, setPreviewTimer] = useState<any>(null);
+
+  const handleBadgeClick = (badge: typeof badges[0], isUnlocked: boolean) => {
+    if (!isUnlocked) {
+      if (previewTimer) clearTimeout(previewTimer);
+      setActivePreviewBadge(badge);
+      const timer = setTimeout(() => {
+        setActivePreviewBadge(null);
+      }, 2000);
+      setPreviewTimer(timer);
+    }
+  };
 
 
   const handleSelectSubject = (subjectId: string) => {
@@ -179,11 +183,12 @@ export default function PracticePage() {
                             const isUnlocked = (challengeWins || 0) >= badge.wins;
                             return (
                                 <Tooltip key={badge.name}>
-                                    <TooltipTrigger>
+                                    <TooltipTrigger asChild>
                                         <img 
                                             src={badge.image} 
                                             alt={badge.name} 
-                                            className={cn("w-10 h-10 rounded-full object-cover aspect-square transition-all", !isUnlocked && "grayscale opacity-40")}
+                                            onClick={() => handleBadgeClick(badge, isUnlocked)}
+                                            className={cn("w-10 h-10 rounded-full object-cover aspect-square transition-all cursor-pointer hover:scale-110 active:scale-95", !isUnlocked && "grayscale opacity-45")}
                                         />
                                     </TooltipTrigger>
                                     <TooltipContent>
@@ -192,7 +197,7 @@ export default function PracticePage() {
                                         ) : (
                                             <p className="flex items-center gap-1">
                                                 <Lock className="h-3 w-3"/>
-                                                {badge.wins} galibiyet gerekli
+                                                {badge.wins} galibiyet gerekli (Önizleme için Tıkla)
                                             </p>
                                         )}
                                     </TooltipContent>
@@ -251,6 +256,31 @@ export default function PracticePage() {
         </TabsContent>
         
       </Tabs>
+
+      {/* Floating Locked Badge Preview popup */}
+      {activePreviewBadge && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs transition-opacity duration-300 pointer-events-none"
+          style={{ animation: 'fade-in 0.2s ease-out' }}
+        >
+          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border-2 border-yellow-400/50 p-5 rounded-2xl max-w-[240px] w-full text-center shadow-[0_0_30px_rgba(250,204,21,0.35)] animate-in zoom-in-95 duration-200">
+            <div className="relative mx-auto w-20 h-20 mb-3 rounded-full overflow-hidden border-2 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.4)]">
+              <img 
+                src={activePreviewBadge.image} 
+                alt={activePreviewBadge.name} 
+                className="w-full h-full object-cover aspect-square"
+              />
+            </div>
+            <h4 className="font-black text-yellow-400 text-sm uppercase tracking-wider leading-tight">{activePreviewBadge.name}</h4>
+            <p className="text-xs text-slate-200 font-bold mt-2 flex items-center justify-center gap-1">
+              <Lock className="h-3.5 w-3.5 text-pink-400 shrink-0" /> {activePreviewBadge.wins} Galibiyet Gerekli
+            </p>
+            <p className="text-[10px] text-muted-foreground mt-3 uppercase tracking-widest font-semibold animate-pulse">
+              Rozet Önizlemesi
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

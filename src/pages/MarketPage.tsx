@@ -1,11 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Star, CheckCircle, Lock, Award, Snowflake, Flame, Palette, UserRound } from "lucide-react"; 
+import { ShoppingCart, Star, CheckCircle, Lock, Award, Snowflake, Flame, Palette, UserRound, Gift } from "lucide-react"; 
 import { useAppContext } from "./AppLayout";
 import { avatars as allAvatars } from "@/data/avatars";
 import { achievements as initialAchievementsData } from "@/data/achievements";
 import { cardThemes } from "@/data/themes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import MysteryChestCard from "@/components/MysteryChestCard";
 
 export const MarketPage = () => {
   const { totalPoints, streakFreezes, userAvatars, unlockedThemes, handleBuyStreakFreeze, handleBuyAvatar, handleBuyTheme } = useAppContext();
@@ -88,6 +89,8 @@ export const MarketPage = () => {
               </div>
             </CardContent>
           </Card>
+
+          <MysteryChestCard />
         </TabsContent>
 
         {/* 2. SEKME: AVATARLAR */}
@@ -125,35 +128,27 @@ export const MarketPage = () => {
           <Card className="shadow-card border border-border/50 dark:border-white/10">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-yellow-500" /> Başarımla Açılan Avatarlar
+                <Gift className="h-5 w-5 text-yellow-500" /> Şanslı Kutudan Çıkan Avatarlar
               </CardTitle>
-              <CardDescription>Bu avatarları özel başarımları tamamlayarak kazanabilirsin.</CardDescription>
+              <CardDescription>Bu avatarları Güçlendiriciler sekmesindeki Şanslı Kutu'yu (Gizemli Sandık) açarak kazanabilirsin.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {achievementAvatars.map(avatar => {
                 const isUnlocked = (userAvatars?.unlocked || []).includes(avatar.id);
-                const achievement = initialAchievementsData.find(a => a.id === avatar.achievementId);
                 return (
                   <div key={avatar.id} className="flex flex-col items-center gap-2 p-4 bg-muted/30 rounded-lg animate-fade-in">
                     <img src={avatar.image} alt={avatar.name} className={`w-20 h-20 rounded-full border-2 border-border object-cover ${!isUnlocked ? 'filter grayscale opacity-50' : ''}`} />
                     <h4 className="font-semibold text-sm text-center">{avatar.name}</h4>
-                    {achievement && (
-                      <p className="text-xs text-muted-foreground text-center mt-1">
-                        {achievement.requirement}
-                      </p>
-                    )}
-                    {!achievement && (
-                        <p className="text-xs text-muted-foreground text-center mt-1">
-                           Gereksinim: Başarım verisi bulunamadı.
-                        </p>
-                    )}
+                    <p className="text-xs text-muted-foreground text-center mt-1">
+                      Şanslı Kutudan Çıkar (Gizemli)
+                    </p>
                     {isUnlocked ? (
                       <Button variant="outline" disabled className="w-full">
                         <CheckCircle className="h-4 w-4 mr-2 text-success" /> Sahipsin
                       </Button>
                     ) : (
-                      <Button variant="outline" disabled className="w-full">
-                        <Lock className="h-4 w-4 mr-2" /> Başarımla Açılır
+                      <Button variant="outline" disabled className="w-full bg-slate-100/10">
+                        <Lock className="h-4 w-4 mr-2" /> Sandıktan Çıkar
                       </Button>
                     )}
                   </div>

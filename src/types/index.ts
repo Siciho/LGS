@@ -67,6 +67,7 @@ export interface ManualSchedule {
 export interface UserAvatars {
   current: string;
   unlocked: string[];
+  activeBadge?: string;
 }
 
 export interface LearnedWords {

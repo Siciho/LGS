@@ -80,11 +80,18 @@ export const useCoreData = (
             if (isPrivilegedUser) {
                 // ... (Ayrıcalıklı kullanıcı yüklemesi aynı kalır) ...
                 let savedAvatarCurrent = 'default';
+                let savedActiveBadge = '';
                 if (cloudData.avatar) {
-                    try { const parsed = typeof cloudData.avatar === 'string' ? JSON.parse(cloudData.avatar) : cloudData.avatar; if (parsed && parsed.current) { savedAvatarCurrent = parsed.current; } } catch (e) { /* Hata olursa varsayılanı kullan */ }
+                    try {
+                      const parsed = typeof cloudData.avatar === 'string' ? JSON.parse(cloudData.avatar) : cloudData.avatar;
+                      if (parsed) {
+                        if (parsed.current) savedAvatarCurrent = parsed.current;
+                        if (parsed.activeBadge) savedActiveBadge = parsed.activeBadge;
+                      }
+                    } catch (e) { /* Hata olursa varsayılanı kullan */ }
                 }
                 const allAvatarIds = allAvatars.map(avatar => avatar.id);
-                const finalPrivilegedAvatars: UserAvatars = { current: savedAvatarCurrent, unlocked: allAvatarIds };
+                const finalPrivilegedAvatars: UserAvatars = { current: savedAvatarCurrent, unlocked: allAvatarIds, activeBadge: savedActiveBadge };
                 setUserAvatars(finalPrivilegedAvatars);
                 storage.saveUserAvatars(userId, finalPrivilegedAvatars);
                 setTotalPoints(9999);
@@ -110,7 +117,7 @@ export const useCoreData = (
                 setStreak(cloudData.seri ?? 0);
                 setStreakFreezes(cloudData.seri_dondurma ?? 0);
 
-                const defaultAvatarState: UserAvatars = { current: 'default', unlocked: ['default'] };
+                const defaultAvatarState: UserAvatars = { current: 'default', unlocked: ['default'], activeBadge: '' };
                 let cloudAvatars: UserAvatars | null = null;
                 if (cloudData.avatar) {
                     try { cloudAvatars = typeof cloudData.avatar === 'string' ? JSON.parse(cloudData.avatar) : cloudData.avatar; } catch (e) { cloudAvatars = null; }
@@ -119,6 +126,7 @@ export const useCoreData = (
                 const finalAvatars: UserAvatars = {
                     current: cloudAvatars?.current || defaultAvatarState.current,
                     unlocked: cloudAvatars?.unlocked || defaultAvatarState.unlocked,
+                    activeBadge: cloudAvatars?.activeBadge || '',
                 };
                 setUserAvatars(finalAvatars);
                 storage.saveUserAvatars(userId, finalAvatars);
@@ -197,7 +205,8 @@ export const useCoreData = (
     if ((userAvatars?.unlocked || []).includes(avatarId)) {
       const newAvatarsState: UserAvatars = {
         current: avatarId,
-        unlocked: userAvatars?.unlocked || ['default']
+        unlocked: userAvatars?.unlocked || ['default'],
+        activeBadge: userAvatars?.activeBadge || ''
       };
       setUserAvatars(newAvatarsState);
       storage.saveUserAvatars(userId, newAvatarsState);
@@ -221,7 +230,8 @@ export const useCoreData = (
       const newTotalPoints = totalPoints - price; // Cüzdan azalır
       const newAvatarsState: UserAvatars = {
         current: userAvatars?.current || 'default',
-        unlocked: [...(userAvatars?.unlocked || []), avatarId]
+        unlocked: [...(userAvatars?.unlocked || []), avatarId],
+        activeBadge: userAvatars?.activeBadge || ''
       };
 
       // Lokal state'i GÜNCELLE (Cüzdan azalır, sıralama puanı (lifetimePoints) AYNI KALIR)
@@ -266,6 +276,95 @@ export const useCoreData = (
       playPurchaseSound(isMuted);
     } else {
       toast.error("Yetersiz puan!");
+    }
+  };
+
+  const handleBuyMysteryChest = async (): Promise<{ 
+    success: boolean; 
+    rewardType?: 'avatar' | 'freeze'; 
+    rewardId?: string;
+    amount?: number;
+    rarity?: 'common' | 'rare' | 'legendary';
+  } | null> => {
+    if (!userId || isPrivilegedUser) return null;
+    const price = 300;
+    
+    if (totalPoints >= price) {
+      const newTotalPoints = totalPoints - price;
+      setTotalPoints(newTotalPoints);
+      
+      const roll = Math.random();
+      let rarity: 'common' | 'rare' | 'legendary' = 'common';
+      let rewardType: 'avatar' | 'freeze' = 'freeze';
+      let rewardId: string | undefined = undefined;
+      let amount = 1;
+      
+      if (roll < 0.60) {
+        // Common: 1 Freeze (60% chance)
+        rarity = 'common';
+        rewardType = 'freeze';
+        amount = 1;
+      } else if (roll < 0.85) {
+        // Rare: 3 Freezes (25% chance)
+        rarity = 'rare';
+        rewardType = 'freeze';
+        amount = 3;
+      } else {
+        // Legendary: Avatar or 10 Freezes (15% chance)
+        rarity = 'legendary';
+        const rollableAvatars = allAvatars.filter(a => a.unlockMethod === 'purchase' || a.unlockMethod === 'achievement');
+        const lockedAvatars = rollableAvatars.filter(a => !(userAvatars?.unlocked || []).includes(a.id));
+        
+        // 70% chance of Legendary gives Avatar if any locked, otherwise 10 Freezes
+        const avatarRoll = Math.random();
+        if (avatarRoll < 0.70 && lockedAvatars.length > 0) {
+          rewardType = 'avatar';
+          const randomAvatar = lockedAvatars[Math.floor(Math.random() * lockedAvatars.length)];
+          rewardId = randomAvatar.id;
+        } else {
+          rewardType = 'freeze';
+          amount = 10;
+        }
+      }
+      
+      // Update local and remote state
+      if (rewardType === 'avatar' && rewardId) {
+        const newAvatarsState: UserAvatars = {
+          current: userAvatars?.current || 'default',
+          unlocked: [...(userAvatars?.unlocked || []), rewardId],
+          activeBadge: userAvatars?.activeBadge || ''
+        };
+        storage.saveUserAvatars(userId, newAvatarsState);
+        
+        await updateUserCloudData({
+          puan: newTotalPoints,
+          avatar: newAvatarsState
+        });
+
+        // Delay local state update to match the modal reveal animation (2100ms)
+        setTimeout(() => {
+          setUserAvatars(newAvatarsState);
+        }, 2100);
+      } else {
+        // It's freezes
+        const newStreakFreezes = streakFreezes + amount;
+        
+        await updateUserCloudData({
+          puan: newTotalPoints,
+          seri_dondurma: newStreakFreezes
+        });
+
+        // Delay local state update to match the modal reveal animation (2100ms)
+        setTimeout(() => {
+          setStreakFreezes(newStreakFreezes);
+        }, 2100);
+      }
+      
+      playPurchaseSound(isMuted);
+      return { success: true, rewardType, rewardId, amount, rarity };
+    } else {
+      toast.error("Gizemli Sandık için yetersiz puan!");
+      return null;
     }
   };
 
@@ -332,30 +431,7 @@ export const useCoreData = (
             onClick: () => navigate("/profile", { state: { activeTab: "basarimlar" } })
           }
         });
-        const avatarToUnlock = allAvatars.find(avatar => avatar.achievementId === ach.id);
-        if (avatarToUnlock && userId) {
-            setUserAvatars(currentAvatars => {
-                const newAvatarsState: UserAvatars = {
-                    current: currentAvatars.current || 'default',
-                    unlocked: [...(currentAvatars.unlocked || []), avatarToUnlock.id]
-                };
-                storage.saveUserAvatars(userId, newAvatarsState);
-                updateUserCloudData({ avatar: newAvatarsState });
-                toast.success(`Yeni bir avatar kazandın: ${avatarToUnlock.name}! 🥳`, {
-                  duration: 8000,
-                  action: {
-                    label: "Kuşan",
-                    onClick: () => navigate("/profile", { 
-                      state: { 
-                        activeTab: "avatarlar",
-                        highlightAvatarId: avatarToUnlock.id 
-                      } 
-                    })
-                  }
-                });
-                return newAvatarsState;
-            });
-        }
+
         return { ...ach, unlocked: true, unlockedAt: new Date() };
       }
       return ach;
@@ -405,6 +481,22 @@ export const useCoreData = (
     }
   };
 
+  const handleSetBadge = (badgeImage: string) => {
+    if (!userId) return;
+    const newAvatarsState: UserAvatars = {
+      current: userAvatars?.current || 'default',
+      unlocked: userAvatars?.unlocked || ['default'],
+      activeBadge: badgeImage
+    };
+    setUserAvatars(newAvatarsState);
+    storage.saveUserAvatars(userId, newAvatarsState);
+    if (!isPrivilegedUser) {
+      updateUserCloudData({ avatar: newAvatarsState });
+    }
+    toast.success(badgeImage === "" ? "Rozet kuşanımı iptal edildi!" : "Mücadele rozetin kuşanıldı!");
+    playConfirmSound(isMuted);
+  };
+
   return {
     totalPoints, setTotalPoints, // Cüzdan
     lifetimePoints, setLifetimePoints, // Sıralama Puanı (Yeni eklendi)
@@ -426,5 +518,8 @@ export const useCoreData = (
     activeTheme,
     handleSetTheme,
     handleBuyTheme,
+    handleBuyMysteryChest,
+    activeBadge: userAvatars?.activeBadge || '',
+    handleSetBadge,
   };
 };

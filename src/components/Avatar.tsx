@@ -323,10 +323,11 @@ interface AvatarProps {
   alt?: string;
   themeId?: string;
   className?: string;
-  size?: "sm" | "md" | "lg" | "xl" | "2xl";
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "custom";
   highlight?: boolean;
   onHighlightClick?: () => void;
   interactive?: boolean;
+  activeBadge?: string;
 }
 
 export default function Avatar({
@@ -338,13 +339,15 @@ export default function Avatar({
   highlight = false,
   onHighlightClick,
   interactive = true,
+  activeBadge = "",
 }: AvatarProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [showHighlight, setShowHighlight] = useState(highlight);
   const [isAnimating, setIsAnimating] = useState(false);
   const userTheme = getThemeById(themeId);
 
-  const isFlipTheme = themeId === "matrix" || themeId === "lava" || themeId === "frost";
+  const hasActiveBadge = !!activeBadge && activeBadge !== "";
+  const isFlipTheme = themeId === "matrix" || themeId === "lava" || themeId === "frost" || hasActiveBadge;
 
   // Auto flip effect on mount if it's a 3D flip theme and interactive is true
   useEffect(() => {
@@ -473,16 +476,29 @@ export default function Avatar({
             {showFrontParticles && <ThemeParticleCanvas themeId={themeId} width={dim} height={dim} />}
           </div>
 
-          {/* Back Face: Dynamic Animation Canvas (Matrix, Magma, or Blizzard) */}
+          {/* Back Face: Dynamic Animation Canvas or Badge */}
           <div 
-            className="absolute inset-0 w-full h-full rounded-full backface-hidden rotate-y-180 bg-black overflow-hidden flex items-center justify-center"
+            className="absolute inset-0 w-full h-full rounded-full backface-hidden rotate-y-180 overflow-hidden flex items-center justify-center border border-indigo-500/30 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950"
             style={{ transform: "rotateY(180deg) translateZ(2px)" }}
           >
             {isFlipped && (
               <>
-                {themeId === "matrix" && <MatrixRainCanvas width={dim} height={dim} />}
-                {themeId === "lava" && <MagmaCanvas width={dim} height={dim} />}
-                {themeId === "frost" && <BlizzardCanvas width={dim} height={dim} />}
+                {hasActiveBadge ? (
+                  <div className="relative w-full h-full flex items-center justify-center p-1.5 bg-black/40 rounded-full">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.25)_0%,transparent_70%)] animate-pulse" />
+                    <img 
+                      src={activeBadge} 
+                      alt="Rozet" 
+                      className="w-4/5 h-4/5 rounded-full object-contain drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]"
+                    />
+                  </div>
+                ) : (
+                  <>
+                    {themeId === "matrix" && <MatrixRainCanvas width={dim} height={dim} />}
+                    {themeId === "lava" && <MagmaCanvas width={dim} height={dim} />}
+                    {themeId === "frost" && <BlizzardCanvas width={dim} height={dim} />}
+                  </>
+                )}
               </>
             )}
           </div>

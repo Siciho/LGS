@@ -24,6 +24,7 @@ interface HeaderProps {
   userRole: string | null;
   lifetimePoints?: number;
   activeTheme?: string; // ✅ Yeni prop eklendi
+  activeBadge?: string; // ✅ Yeni eklendi
   latestApkUrl?: string;
 }
 
@@ -43,6 +44,7 @@ export default function Header({
   userRole,
   lifetimePoints = 0,
   activeTheme = 'default', // ✅ Yeni parametre
+  activeBadge = '', // ✅ Yeni parametre
   latestApkUrl
 }: HeaderProps) {
 
@@ -61,6 +63,7 @@ export default function Header({
           src={currentAvatar.image}
           alt="Kullanıcı Avatarı"
           themeId={activeTheme}
+          activeBadge={activeBadge}
           size="md"
           className="hover:scale-105 transition-transform duration-300"
           interactive={true}
@@ -110,8 +113,8 @@ export default function Header({
       <div className={cn(
         "grid gap-2 md:gap-4",
         isWeb && latestApkUrl 
-          ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-6" 
-          : "grid-cols-2 sm:grid-cols-3 md:grid-cols-5"
+          ? "grid-cols-2 sm:grid-cols-4" 
+          : "grid-cols-3"
       )}>
         <div className="bg-card backdrop-blur-sm p-3 md:p-4 rounded-lg border border-border transition-all duration-300">
           <div className="flex items-center gap-2 md:gap-3">
@@ -131,27 +134,6 @@ export default function Header({
             </div>
           </div>
         </div>
-        <div className="bg-card backdrop-blur-sm p-3 md:p-4 rounded-lg border border-border transition-all duration-300">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="bg-amber-500/10 p-1.5 md:p-2 rounded-lg"><Flame className="h-4 w-4 md:h-5 md:w-5 text-amber-500" /></div>
-            <div>
-              <p className="text-lg md:text-2xl font-bold text-foreground">{streak}</p>
-              <p className="text-xs md:text-sm text-muted-foreground">Seri</p>
-            </div>
-          </div>
-        </div>
-        
-        {/* --- DEĞİŞİKLİK 4: Yeni 'Seri Dondurma' kartı eklendi --- */}
-        <div className="bg-card backdrop-blur-sm p-3 md:p-4 rounded-lg border border-border transition-all duration-300">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="bg-blue-400/10 p-1.5 md:p-2 rounded-lg"><Snowflake className="h-4 w-4 md:h-5 md:w-5 text-blue-400" /></div>
-            <div>
-              <p className="text-lg md:text-2xl font-bold text-foreground">{streakFreezes}</p>
-              <p className="text-xs md:text-sm text-muted-foreground">Dondurma</p>
-            </div>
-          </div>
-        </div>
-        {/* --- DEĞİŞİKLİK 4 SONU --- */}
 
         <div className="bg-card backdrop-blur-sm p-3 md:p-4 rounded-lg border border-border transition-all duration-300">
           <div className="flex items-center gap-2 md:gap-3">

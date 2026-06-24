@@ -95,3 +95,19 @@ export const cardThemes: CardTheme[] = [
 export const getThemeById = (id: string): CardTheme => {
   return cardThemes.find(t => t.id === id) || cardThemes[0];
 };
+
+export interface Badge {
+  wins: number;
+  image: string;
+  name: string;
+}
+
+export const badges: Badge[] = [
+  { wins: 0, image: '/assets/default.png', name: 'Başlangıç Ligi' },
+  { wins: 25, image: '/assets/badge25.png', name: 'Bronz Lig' },
+  { wins: 75, image: '/assets/badge75.png', name: 'Gümüş Lig' },
+  { wins: 100, image: '/assets/badge100.png', name: 'Altın Lig' },
+  { wins: 150, image: '/assets/badge150.png', name: 'Kristal Lig' },
+  { wins: 250, image: '/assets/badge250.png', name: 'Usta Ligi' },
+  { wins: 500, image: '/assets/badge500.png', name: 'Şampiyonlar Ligi' },
+];
