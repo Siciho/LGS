@@ -39,6 +39,27 @@ export default function MultiplicationChallengePage() {
   const [dbMaxStreak, setDbMaxStreak] = useState(0);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isPlayingRef = useRef(isPlaying);
+  const timeLeftRef = useRef(timeLeft);
+  const scoreRef = useRef(score);
+  const maxStreakRef = useRef(maxStreak);
+
+  // Sync refs with state changes
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
+  useEffect(() => {
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
+
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
+
+  useEffect(() => {
+    maxStreakRef.current = maxStreak;
+  }, [maxStreak]);
 
   // Load max streak from Supabase on mount
   useEffect(() => {
@@ -109,7 +130,7 @@ export default function MultiplicationChallengePage() {
 
   // Timer Effect
   useEffect(() => {
-    if (isPlaying && timeLeft > 0) {
+    if (isPlaying) {
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
@@ -122,33 +143,44 @@ export default function MultiplicationChallengePage() {
     }
 
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     };
-  }, [isPlaying, timeLeft]);
+  }, [isPlaying]);
 
   // End the game
   const endGame = async () => {
-    if (timerRef.current) clearInterval(timerRef.current);
+    if (!isPlayingRef.current) return;
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
     setIsPlaying(false);
     setIsFinished(true);
     playSuccessSound(isMuted);
 
+    const finalScore = scoreRef.current;
+    const finalMaxStreak = maxStreakRef.current;
+
     // Persist scores via context to database
-    if (score > 0) {
-      setTotalPoints((prev: number) => prev + score);
-      setLifetimePoints((prev: number) => prev + score);
-      toast.success(`Tebrikler! Çarpım tablosundan +${score} Puan kazandın! 🥳`);
+    if (finalScore > 0) {
+      setTotalPoints((prev: number) => prev + finalScore);
+      setLifetimePoints((prev: number) => prev + finalScore);
+      toast.success(`Tebrikler! Çarpım tablosundan +${finalScore} Puan kazandın! 🥳`);
     }
 
     // Save max streak to Supabase if exceeded
-    if (maxStreak > dbMaxStreak) {
-      setDbMaxStreak(maxStreak);
+    if (finalMaxStreak > dbMaxStreak) {
+      setDbMaxStreak(finalMaxStreak);
       if (userId) {
         try {
           const todayStrDb = new Date().toISOString().split('T')[0];
           await supabase.from('tamamlanan_gunluk_gorevler').insert({
             kullanici_id: userId,
-            ders_id: `multiplication_max_streak:${maxStreak}`,
+            ders_id: `multiplication_max_streak:${finalMaxStreak}`,
             tamamlanma_tarihi: todayStrDb
           });
         } catch (e) {
@@ -189,14 +221,20 @@ export default function MultiplicationChallengePage() {
       playFailSound(isMuted);
       setIncorrectCount((prev) => prev + 1);
       setStreak(0);
-      setTimeLeft((prev) => Math.max(prev - 5, 0)); // -5s penalty
+      setTimeLeft((prev) => {
+        const nextTime = Math.max(prev - 5, 0);
+        if (nextTime <= 0) {
+          endGame();
+        }
+        return nextTime;
+      });
     }
 
     // Go to next question after animation delay
     setTimeout(() => {
       setSelectedAnswer(null);
       setShowFeedback(null);
-      if (timeLeft > 0) {
+      if (isPlayingRef.current && timeLeftRef.current > 0) {
         setCurrentQuestion(generateQuestion());
       }
     }, 800);
