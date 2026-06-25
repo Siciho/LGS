@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { storage } from '@/utils/storage';
 import { supabase } from '@/supabaseClient';
 import { toast } from 'sonner';
@@ -8,6 +8,7 @@ import { avatars as allAvatars } from "@/data/avatars";
 import { playPurchaseSound, playConfirmSound } from "@/utils/sounds";
 import { cardThemes } from '@/data/themes';
 import { useNavigate } from 'react-router-dom';
+import SwipeableToast from '@/components/SwipeableToast';
 
 export const useCoreData = (
   userId: string | null,
@@ -457,11 +458,16 @@ export const useCoreData = (
 
       if (conditionMet) {
         newAchievementsUnlocked = true;
-        toast.info(`Başarım Kazanıldı: ${ach.title} 🏆`, {
-          action: {
-            label: "Görüntüle",
-            onClick: () => navigate("/profile", { state: { activeTab: "basarimlar" } })
-          }
+        toast.custom((t) => React.createElement(SwipeableToast, {
+          id: t,
+          title: "Başarım Kazanıldı! 🏆",
+          description: ach.title,
+          variant: "achievement",
+          icon: "🏆",
+          onClick: () => navigate("/profile", { state: { activeTab: "basarimlar" } })
+        }), {
+          duration: 6000,
+          position: "top-center"
         });
 
         return { ...ach, unlocked: true, unlockedAt: new Date() };

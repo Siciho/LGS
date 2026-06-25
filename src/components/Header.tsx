@@ -68,7 +68,7 @@ export default function Header({
           className="hover:scale-105 transition-transform duration-300"
           interactive={true}
         />
-        <Link to="/profile" className="flex-1 min-w-0 group hover:opacity-90 transition-opacity">
+        <Link to="/profile" className="block flex-1 min-w-0 group hover:opacity-90 transition-opacity">
           <div className="flex items-center gap-1.5 min-w-0">
             <h1 className={cn(
               "text-lg sm:text-xl md:text-2xl font-extrabold truncate transition-colors min-w-0",

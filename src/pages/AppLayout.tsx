@@ -1,7 +1,7 @@
 // src/pages/AppLayout.tsx
 
 import { Outlet, useOutletContext, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { storage } from "@/utils/storage";
 import { toast } from 'sonner';
 import { SolvedStat, Challenge } from '@/types';
@@ -34,6 +34,7 @@ const isNewerVersion = (current: string, latest: string) => {
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import ChallengeNotification from "@/components/ChallengeNotification";
+import SwipeableToast from '@/components/SwipeableToast';
 import { useAuthContext } from "@/contexts/AuthContext"; 
 import { useStudyData } from '@/hooks/useStudyData';
 import { useCoreData } from '@/hooks/useCoreData';
@@ -71,7 +72,11 @@ export default function AppLayout() {
     progress: number;
     errorMessage?: string;
   }>({ status: 'idle', progress: 0 });
-  
+  const hasCheckedStreakRef = useRef(false);
+
+  useEffect(() => {
+    hasCheckedStreakRef.current = false;
+  }, [userId]);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -207,9 +212,25 @@ export default function AppLayout() {
 
         if (newDailySolvedCount === 3) {
             coreData.setStreak(prev => prev + 1);
-            toast.success("Günlük seri arttı! 🔥");
+            toast.custom((t) => (
+              <SwipeableToast
+                id={t}
+                title="Seri Artışı! 🔥"
+                description="Günlük serin arttı! Harika gidiyorsun."
+                variant="success"
+                icon="🔥"
+              />
+            ), { duration: 6000, position: "top-center" });
         } else {
-            toast.info("Harika bir paket tamamladın, devam et! 🎉");
+            toast.custom((t) => (
+              <SwipeableToast
+                id={t}
+                title="Tebrikler! 🎉"
+                description="Harika bir paket tamamladın, devam et!"
+                variant="info"
+                icon="🎉"
+              />
+            ), { duration: 6000, position: "top-center" });
         }
     }
   });
@@ -261,7 +282,10 @@ export default function AppLayout() {
   }, [navigate]);
 
   useEffect(() => {
+    if (hasCheckedStreakRef.current) return;
+
     if (userId && userRole !== 'koç' && userRole !== 'admin' && !studyData.isLoading && coreData.isCloudDataLoaded && studyData.lastActiveDate && coreData.setStreak) {
+      hasCheckedStreakRef.current = true;
       const { lastActiveDate, setLastActiveDate } = studyData;
       const { streak, streakFreezes, setStreak, setStreakFreezes } = coreData;
       const today = new Date();
@@ -280,7 +304,15 @@ export default function AppLayout() {
               supabase.from('kullanicilar').update({ son_aktif_tarih: yesterdayStr }).eq('id', userId).then(({ error }) => {
                 if (error) console.error("Dondurma tarihi güncelleme hatası:", error);
               });
-              toast.info("Bir gün ara verdin ama Seri Dondurma serini kurtardı! ❄️");
+              toast.custom((t) => (
+                <SwipeableToast
+                  id={t}
+                  title="Seri Kurtarıldı! ❄️"
+                  description="Bir gün ara verdin ama Seri Dondurma serini korudu."
+                  variant="success"
+                  icon="❄️"
+                />
+              ), { duration: 6000, position: "top-center" });
             } else {
               setStreak(0);
               setLastActiveDate(yesterdayStr);
@@ -289,7 +321,15 @@ export default function AppLayout() {
                 if (error) console.error("Seri sıfırlama tarihi güncelleme hatası:", error);
               });
               playFailSound(isMuted);
-              toast.error("Serin sıfırlandı! 😢");
+              toast.custom((t) => (
+                <SwipeableToast
+                  id={t}
+                  title="Seri Sıfırlandı! 😢"
+                  description="Aktif serin maalesef sıfırlandı. Yeni bir seri başlat!"
+                  variant="avatar"
+                  icon="😢"
+                />
+              ), { duration: 6000, position: "top-center" });
             }
           }
         }
@@ -327,7 +367,15 @@ export default function AppLayout() {
   const handleClaimGift = async () => {
     if (coreData.claimGiftPoints) {
       await coreData.claimGiftPoints();
-      toast.success("Ödül başarıyla hesabınıza eklendi! 🎉");
+      toast.custom((t) => (
+        <SwipeableToast
+          id={t}
+          title="Ödül Alındı! 🎉"
+          description="Ödül başarıyla hesabınıza eklendi."
+          variant="success"
+          icon="🎉"
+        />
+      ), { duration: 6000, position: "top-center" });
     }
   };
   

@@ -297,16 +297,16 @@ export default function ProfilePage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-6">
-          <TabsTrigger value="avatarlar" className="flex items-center gap-2">
-            <UserRound className="h-4 w-4" />
+          <TabsTrigger value="avatarlar" className="flex items-center gap-2 data-[state=active]:text-violet-400 data-[state=active]:font-black">
+            <UserRound className="h-4 w-4 text-violet-500" />
             Avatarlarım
           </TabsTrigger>
-          <TabsTrigger value="temalar" className="flex items-center gap-2">
-            <Palette className="h-4 w-4" />
+          <TabsTrigger value="temalar" className="flex items-center gap-2 data-[state=active]:text-pink-400 data-[state=active]:font-black">
+            <Palette className="h-4 w-4 text-pink-500" />
             Temalarım
           </TabsTrigger>
-          <TabsTrigger value="basarimlar" className="flex items-center gap-2">
-            <Trophy className="h-4 w-4" />
+          <TabsTrigger value="basarimlar" className="flex items-center gap-2 data-[state=active]:text-emerald-400 data-[state=active]:font-black">
+            <Trophy className="h-4 w-4 text-emerald-500" />
             Başarımlarım
           </TabsTrigger>
         </TabsList>

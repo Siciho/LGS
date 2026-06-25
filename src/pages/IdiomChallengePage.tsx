@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, BookOpen, Check, RefreshCw, Star, Swords, Award } from "lucide-react";
 import { playSuccessSound, playFailSound, playConfirmSound, playSwipeSound } from "@/utils/sounds";
 import { toast } from "sonner";
+import SwipeableToast from '@/components/SwipeableToast';
 import { cn } from "@/lib/utils";
 
 import deyimGif from "../../assets/deyim.gif";
@@ -301,7 +302,15 @@ export default function IdiomChallengePage() {
     if (finalScore > 0) {
       setTotalPoints((prev: number) => prev + finalScore);
       setLifetimePoints((prev: number) => prev + finalScore);
-      toast.success(`Harika! Deyim oyunundan +${finalScore} Puan kazandın! 📚`);
+      toast.custom((t) => (
+        <SwipeableToast
+          id={t}
+          title="Harika! 📚"
+          description={`Deyim oyunundan +${finalScore} Puan cüzdanına eklendi.`}
+          variant="success"
+          icon="📚"
+        />
+      ), { duration: 6000, position: "top-center" });
     }
   };
 

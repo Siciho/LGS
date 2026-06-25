@@ -14,6 +14,7 @@ import { Challenge } from '@/types';
 import { cn } from '@/lib/utils';
 // --- DEĞİŞİKLİK 1: Gerekli ses fonksiyonları import edildi ---
 import { playSwipeSound, playSuccessSound } from '@/utils/sounds';
+import SwipeableToast from '@/components/SwipeableToast';
 
 // Listenizi (onkayit_ogrenciler_rows.csv) buraya yapıştırın
 const DUMMY_NAMES = [
@@ -168,7 +169,15 @@ export default function WordQuizPage() {
         if (setTotalPoints && setLifetimePoints && earnedPoints > 0) {
           setTotalPoints(prev => prev + earnedPoints);
           setLifetimePoints(prev => prev + earnedPoints);
-          toast.success(`${earnedPoints} puan kazandın! 🪙`);
+          toast.custom((t) => (
+            <SwipeableToast
+              id={t}
+              title="Puan Kazandın! 🪙"
+              description={`Kelime çalışmasından +${earnedPoints} puan cüzdanına eklendi.`}
+              variant="success"
+              icon="🪙"
+            />
+          ), { duration: 6000, position: "top-center" });
           
           // Log to cozulen_sorular so it counts in monthly/weekly leaderboard
           try {

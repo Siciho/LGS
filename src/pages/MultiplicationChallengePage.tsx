@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Trophy, Timer, ArrowLeft, RotateCcw, Zap, CheckCircle2, XCircle } from "lucide-react";
 import { playSuccessSound, playFailSound, playConfirmSound } from "@/utils/sounds";
 import { toast } from "sonner";
+import SwipeableToast from '@/components/SwipeableToast';
 
 interface Question {
   num1: number;
@@ -89,18 +90,34 @@ export default function MultiplicationChallengePage() {
   }, [userId]);
 
   // Generate a random multiplication question
-  const generateQuestion = (): Question => {
-    // Standard multiplication table numbers between 2 and 12
-    const num1 = Math.floor(Math.random() * 11) + 2; 
-    const num2 = Math.floor(Math.random() * 11) + 2;
+  const generateQuestion = (currentStreakVal?: number): Question => {
+    const streakToUse = currentStreakVal !== undefined ? currentStreakVal : streak;
+    
+    let num1, num2;
+    if (streakToUse >= 40) {
+      // 2-digit by 2-digit numbers: 10 to 99
+      num1 = Math.floor(Math.random() * 90) + 10;
+      num2 = Math.floor(Math.random() * 90) + 10;
+    } else {
+      // Standard multiplication table numbers between 2 and 12
+      num1 = Math.floor(Math.random() * 11) + 2; 
+      num2 = Math.floor(Math.random() * 11) + 2;
+    }
     const correctAnswer = num1 * num2;
 
     // Generate distractors
     const distractors = new Set<number>();
     while (distractors.size < 3) {
-      // Create reasonable distractors close to correct answer or common mistakes
-      const diff = (Math.floor(Math.random() * 7) - 3) * (Math.random() > 0.5 ? 1 : num1);
-      const opt = correctAnswer + (diff === 0 ? 5 : diff);
+      let diff;
+      if (streakToUse >= 40) {
+        // Distractors close to the correct answer for 2-digit x 2-digit
+        const step = Math.random() > 0.5 ? 10 : 1;
+        const multiplier = Math.floor(Math.random() * 9) - 4; // -4 to 4
+        diff = multiplier * step;
+      } else {
+        diff = (Math.floor(Math.random() * 7) - 3) * (Math.random() > 0.5 ? 1 : num1);
+      }
+      const opt = correctAnswer + (diff === 0 ? 7 : diff);
       if (opt > 0 && opt !== correctAnswer) {
         distractors.add(opt);
       }
@@ -125,7 +142,7 @@ export default function MultiplicationChallengePage() {
     setMaxStreak(0);
     setSelectedAnswer(null);
     setShowFeedback(null);
-    setCurrentQuestion(generateQuestion());
+    setCurrentQuestion(generateQuestion(0));
   };
 
   // Timer Effect
@@ -169,7 +186,15 @@ export default function MultiplicationChallengePage() {
     if (finalScore > 0) {
       setTotalPoints((prev: number) => prev + finalScore);
       setLifetimePoints((prev: number) => prev + finalScore);
-      toast.success(`Tebrikler! Çarpım tablosundan +${finalScore} Puan kazandın! 🥳`);
+      toast.custom((t) => (
+        <SwipeableToast
+          id={t}
+          title="Tebrikler! 🥳"
+          description={`Çarpım tablosundan +${finalScore} Puan cüzdanına eklendi.`}
+          variant="success"
+          icon="🥳"
+        />
+      ), { duration: 6000, position: "top-center" });
     }
 
     // Save max streak to Supabase if exceeded
@@ -196,20 +221,21 @@ export default function MultiplicationChallengePage() {
 
     setSelectedAnswer(option);
     const isCorrect = option === currentQuestion.correctAnswer;
+    let nextStreakValue = 0;
 
     if (isCorrect) {
       setShowFeedback("correct");
       setCorrectCount((prev) => prev + 1);
-      setStreak((prev) => {
-        const newStreak = prev + 1;
-        if (newStreak > maxStreak) setMaxStreak(newStreak);
-        return newStreak;
-      });
+      
+      const newStreak = streak + 1;
+      nextStreakValue = newStreak;
+      setStreak(newStreak);
+      if (newStreak > maxStreak) setMaxStreak(newStreak);
 
       // Calculate score based on new streak
-      const newStreak = streak + 1;
       let earnedPoints = 1;
-      if (newStreak >= 20) earnedPoints = 9;
+      if (newStreak >= 40) earnedPoints = 15;
+      else if (newStreak >= 20) earnedPoints = 9;
       else if (newStreak >= 15) earnedPoints = 7;
       else if (newStreak >= 10) earnedPoints = 5;
       else if (newStreak >= 5) earnedPoints = 3;
@@ -221,6 +247,7 @@ export default function MultiplicationChallengePage() {
       playFailSound(isMuted);
       setIncorrectCount((prev) => prev + 1);
       setStreak(0);
+      nextStreakValue = 0;
       setTimeLeft((prev) => {
         const nextTime = Math.max(prev - 5, 0);
         if (nextTime <= 0) {
@@ -235,7 +262,7 @@ export default function MultiplicationChallengePage() {
       setSelectedAnswer(null);
       setShowFeedback(null);
       if (isPlayingRef.current && timeLeftRef.current > 0) {
-        setCurrentQuestion(generateQuestion());
+        setCurrentQuestion(generateQuestion(nextStreakValue));
       }
     }, 800);
   };

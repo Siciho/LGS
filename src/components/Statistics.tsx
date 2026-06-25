@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Subject, StudySession } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ChevronDown, BarChart3, TrendingUp, TrendingDown, Info, Calendar, Trophy, Star } from "lucide-react";
+import { ChevronDown, BarChart3, TrendingUp, TrendingDown, Info, Calendar, Trophy, Star, BookOpen } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -127,8 +127,14 @@ export default function Statistics({ subjects, sessions }: StatisticsProps) {
 
       <Tabs defaultValue="charts" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="charts">Grafik Analizi</TabsTrigger>
-          <TabsTrigger value="topics">Ders İlerlemesi</TabsTrigger>
+          <TabsTrigger value="charts" className="flex items-center gap-2 data-[state=active]:text-blue-400 data-[state=active]:font-black">
+            <BarChart3 className="h-4 w-4 text-blue-500" />
+            Grafik Analizi
+          </TabsTrigger>
+          <TabsTrigger value="topics" className="flex items-center gap-2 data-[state=active]:text-amber-400 data-[state=active]:font-black">
+            <BookOpen className="h-4 w-4 text-amber-500" />
+            Ders İlerlemesi
+          </TabsTrigger>
         </TabsList>
 
         {/* 1. SEKME: Grafik Analizleri */}

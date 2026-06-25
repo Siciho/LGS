@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { useAppContext } from './AppLayout';
 import { supabase } from '@/supabaseClient';
 import { toast } from 'sonner';
+import SwipeableToast from '@/components/SwipeableToast';
 import { playSuccessSound, playFailSound, playConfirmSound } from '@/utils/sounds';
 import { Trophy, HelpCircle, ArrowLeft, RefreshCw, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -288,7 +289,15 @@ export default function DailyScramblePage() {
       if (earnedPoints > 0 && setTotalPoints && setLifetimePoints) {
         setTotalPoints(prev => prev + earnedPoints);
         setLifetimePoints(prev => prev + earnedPoints);
-        toast.success(`Günlük görev tamamlandı! +${earnedPoints} Puan cüzdanınıza eklendi! 🎉`);
+        toast.custom((t) => (
+          <SwipeableToast
+            id={t}
+            title="Görev Tamamlandı! 🎉"
+            description={`Günlük görevden +${earnedPoints} Puan cüzdanınıza eklendi.`}
+            variant="success"
+            icon="🎉"
+          />
+        ), { duration: 6000, position: "top-center" });
       }
 
       // 4. Update daily solved subjects locally to sync the state across tabs instantly
