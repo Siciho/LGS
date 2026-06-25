@@ -69,9 +69,9 @@ export default function Header({
           interactive={true}
         />
         <Link to="/profile" className="flex-1 min-w-0 group hover:opacity-90 transition-opacity">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 min-w-0">
             <h1 className={cn(
-              "text-xl md:text-2xl font-extrabold truncate transition-colors",
+              "text-lg sm:text-xl md:text-2xl font-extrabold truncate transition-colors min-w-0",
               activeTheme === 'default' 
                 ? "text-foreground group-hover:text-primary" 
                 : userTheme.textClassName
