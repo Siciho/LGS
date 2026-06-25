@@ -7,10 +7,11 @@ import { supabase } from "@/supabaseClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Timer, ArrowLeft, RotateCcw, Zap, CheckCircle2, XCircle } from "lucide-react";
+import { Trophy, Timer, ArrowLeft, RotateCcw, Zap, CheckCircle2, XCircle, BookOpen } from "lucide-react";
 import { playSuccessSound, playFailSound, playConfirmSound } from "@/utils/sounds";
 import { toast } from "sonner";
 import SwipeableToast from '@/components/SwipeableToast';
+import { cn } from "@/lib/utils";
 
 interface Question {
   num1: number;
@@ -38,6 +39,7 @@ export default function MultiplicationChallengePage() {
 
   // Highest streak from Supabase
   const [dbMaxStreak, setDbMaxStreak] = useState(0);
+  const [gameMode, setGameMode] = useState<"championship" | "practice" | null>(null);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const isPlayingRef = useRef(isPlaying);
@@ -90,11 +92,15 @@ export default function MultiplicationChallengePage() {
   }, [userId]);
 
   // Generate a random multiplication question
-  const generateQuestion = (currentStreakVal?: number): Question => {
+  const generateQuestion = (currentStreakVal?: number, modeOverride?: "championship" | "practice"): Question => {
     const streakToUse = currentStreakVal !== undefined ? currentStreakVal : streak;
+    const modeToUse = modeOverride !== undefined ? modeOverride : gameMode;
     
     let num1, num2;
-    if (streakToUse >= 40) {
+    if (modeToUse === "practice") {
+      num1 = Math.floor(Math.random() * 9) + 1; // 1 to 9
+      num2 = Math.floor(Math.random() * 10) + 1; // 1 to 10
+    } else if (streakToUse >= 40) {
       // 2-digit by 2-digit numbers: 10 to 99
       num1 = Math.floor(Math.random() * 90) + 10;
       num2 = Math.floor(Math.random() * 90) + 10;
@@ -109,7 +115,7 @@ export default function MultiplicationChallengePage() {
     const distractors = new Set<number>();
     while (distractors.size < 3) {
       let diff;
-      if (streakToUse >= 40) {
+      if (modeToUse !== "practice" && streakToUse >= 40) {
         // Distractors close to the correct answer for 2-digit x 2-digit
         const step = Math.random() > 0.5 ? 10 : 1;
         const multiplier = Math.floor(Math.random() * 9) - 4; // -4 to 4
@@ -130,11 +136,12 @@ export default function MultiplicationChallengePage() {
   };
 
   // Start the game
-  const startGame = () => {
+  const startGame = (mode: "championship" | "practice" = "championship") => {
     playConfirmSound(isMuted);
+    setGameMode(mode);
     setIsPlaying(true);
     setIsFinished(false);
-    setTimeLeft(60);
+    setTimeLeft(mode === "practice" ? 999999 : 60);
     setScore(0);
     setCorrectCount(0);
     setIncorrectCount(0);
@@ -142,12 +149,12 @@ export default function MultiplicationChallengePage() {
     setMaxStreak(0);
     setSelectedAnswer(null);
     setShowFeedback(null);
-    setCurrentQuestion(generateQuestion(0));
+    setCurrentQuestion(generateQuestion(0, mode));
   };
 
   // Timer Effect
   useEffect(() => {
-    if (isPlaying) {
+    if (isPlaying && gameMode === "championship") {
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
@@ -165,7 +172,7 @@ export default function MultiplicationChallengePage() {
         timerRef.current = null;
       }
     };
-  }, [isPlaying]);
+  }, [isPlaying, gameMode]);
 
   // End the game
   const endGame = async () => {
@@ -182,37 +189,46 @@ export default function MultiplicationChallengePage() {
     const finalScore = scoreRef.current;
     const finalMaxStreak = maxStreakRef.current;
 
-    // Persist scores via context to database
-    if (finalScore > 0) {
-      setTotalPoints((prev: number) => prev + finalScore);
-      setLifetimePoints((prev: number) => prev + finalScore);
-      toast.custom((t) => (
-        <SwipeableToast
-          id={t}
-          title="Tebrikler! 🥳"
-          description={`Çarpım tablosundan +${finalScore} Puan cüzdanına eklendi.`}
-          variant="success"
-          icon="🥳"
-        />
-      ), { duration: 6000, position: "top-center" });
-    }
+    if (gameMode === "championship") {
+      // Persist scores via context to database
+      if (finalScore > 0) {
+        setTotalPoints((prev: number) => prev + finalScore);
+        setLifetimePoints((prev: number) => prev + finalScore);
+        toast.custom((t) => (
+          <SwipeableToast
+            id={t}
+            title="Tebrikler! 🥳"
+            description={`Çarpım tablosundan +${finalScore} Puan cüzdanına eklendi.`}
+            variant="success"
+            icon="🥳"
+          />
+        ), { duration: 6000, position: "top-center" });
+      }
 
-    // Save max streak to Supabase if exceeded
-    if (finalMaxStreak > dbMaxStreak) {
-      setDbMaxStreak(finalMaxStreak);
-      if (userId) {
-        try {
-          const todayStrDb = new Date().toISOString().split('T')[0];
-          await supabase.from('tamamlanan_gunluk_gorevler').insert({
-            kullanici_id: userId,
-            ders_id: `multiplication_max_streak:${finalMaxStreak}`,
-            tamamlanma_tarihi: todayStrDb
-          });
-        } catch (e) {
-          console.error("Save max streak error:", e);
+      // Save max streak to Supabase if exceeded
+      if (finalMaxStreak > dbMaxStreak) {
+        setDbMaxStreak(finalMaxStreak);
+        if (userId) {
+          try {
+            const todayStrDb = new Date().toISOString().split('T')[0];
+            await supabase.from('tamamlanan_gunluk_gorevler').insert({
+              kullanici_id: userId,
+              ders_id: `multiplication_max_streak:${finalMaxStreak}`,
+              tamamlanma_tarihi: todayStrDb
+            });
+          } catch (e) {
+            console.error("Save max streak error:", e);
+          }
         }
       }
     }
+  };
+
+  const handleBackToSelect = () => {
+    playConfirmSound(isMuted);
+    setIsPlaying(false);
+    setIsFinished(false);
+    setGameMode(null);
   };
 
   // Handle Answer Selection
@@ -232,36 +248,41 @@ export default function MultiplicationChallengePage() {
       setStreak(newStreak);
       if (newStreak > maxStreak) setMaxStreak(newStreak);
 
-      // Calculate score based on new streak
-      let earnedPoints = 1;
-      if (newStreak >= 40) earnedPoints = 15;
-      else if (newStreak >= 20) earnedPoints = 9;
-      else if (newStreak >= 15) earnedPoints = 7;
-      else if (newStreak >= 10) earnedPoints = 5;
-      else if (newStreak >= 5) earnedPoints = 3;
+      if (gameMode === "championship") {
+        // Calculate score based on new streak
+        let earnedPoints = 1;
+        if (newStreak >= 40) earnedPoints = 15;
+        else if (newStreak >= 20) earnedPoints = 9;
+        else if (newStreak >= 15) earnedPoints = 7;
+        else if (newStreak >= 10) earnedPoints = 5;
+        else if (newStreak >= 5) earnedPoints = 3;
 
-      setScore((prev) => prev + earnedPoints);
-      setTimeLeft((prev) => Math.min(prev + 2, 90)); // Add +2s time bonus
+        setScore((prev) => prev + earnedPoints);
+        setTimeLeft((prev) => Math.min(prev + 2, 90)); // Add +2s time bonus
+      }
     } else {
       setShowFeedback("incorrect");
       playFailSound(isMuted);
       setIncorrectCount((prev) => prev + 1);
       setStreak(0);
       nextStreakValue = 0;
-      setTimeLeft((prev) => {
-        const nextTime = Math.max(prev - 5, 0);
-        if (nextTime <= 0) {
-          endGame();
-        }
-        return nextTime;
-      });
+
+      if (gameMode === "championship") {
+        setTimeLeft((prev) => {
+          const nextTime = Math.max(prev - 5, 0);
+          if (nextTime <= 0) {
+            endGame();
+          }
+          return nextTime;
+        });
+      }
     }
 
     // Go to next question after animation delay
     setTimeout(() => {
       setSelectedAnswer(null);
       setShowFeedback(null);
-      if (isPlayingRef.current && timeLeftRef.current > 0) {
+      if (isPlayingRef.current && (gameMode === "practice" || timeLeftRef.current > 0)) {
         setCurrentQuestion(generateQuestion(nextStreakValue));
       }
     }, 800);
@@ -313,16 +334,20 @@ export default function MultiplicationChallengePage() {
         <Button 
           variant="outline" 
           size="icon" 
-          onClick={() => navigate("/practice", { state: { activeTab: "mini-oyunlar" } })}
+          onClick={() => (isPlaying || isFinished ? handleBackToSelect() : navigate("/practice", { state: { activeTab: "mini-oyunlar" } }))}
           className="h-10 w-10 rounded-full border-purple-500/30 text-purple-500 hover:text-white hover:bg-purple-600 hover:border-purple-600 active:scale-95 transition-all shadow-[0_0_15px_rgba(168,85,247,0.15)]"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-purple-400 via-pink-500 to-cyan-400 bg-clip-text text-transparent">
-            Çarpım Tablosu Hız Şampiyonası
+            {gameMode === "practice" ? "Çarpım Tablosu Alıştırma Modu" : "Çarpım Tablosu Hız Şampiyonası"}
           </h1>
-          <p className="text-sm text-muted-foreground font-medium">İşlem hızını artır ve ekstra puanları topla!</p>
+          <p className="text-sm text-muted-foreground font-medium">
+            {gameMode === "practice" 
+              ? "Puan kaygısı olmadan 1-9 arası çarpım tablosu alıştırması yap!" 
+              : "İşlem hızını artır ve ekstra puanları topla!"}
+          </p>
         </div>
       </div>
 
@@ -343,23 +368,33 @@ export default function MultiplicationChallengePage() {
             <div>
               <CardTitle className="text-2xl font-extrabold text-white">Hazır Mısın?</CardTitle>
               <CardDescription className="text-sm mt-1 max-w-md mx-auto text-slate-300 font-medium">
-                60 saniye içinde yapabildiğin kadar çarpma işlemini doğru cevapla. Hızlı ol, seriler oluştur ve kat kat puan kazan!
+                Süreye karşı yarışarak puan toplamak için **Yarışı Başlat** seçeneğini, 1-9 arası rakamlarla sınırsız ve puansız alıştırma yapmak için **Pratik Yap** seçeneğini kullan.
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-6 pb-8">
             <div className="bg-purple-950/20 p-4 rounded-xl space-y-3 border border-purple-500/20">
-              <h4 className="font-bold text-sm text-purple-400">Oyun Kuralları:</h4>
+              <h4 className="font-bold text-sm text-purple-400">Mod Detayları:</h4>
               <ul className="text-sm space-y-2 list-disc list-inside text-slate-300 font-medium">
-                <li>Her doğru cevap taban **+1 Puan** kazandırır.</li>
-                <li>Doğru cevaplar sürene **+2 saniye** ekler.</li>
-                <li>Hatalı cevaplar sürenden **-5 saniye** düşürür.</li>
-                <li>Her 5'li doğru seride (Streak) kazanç artar: 5 seride **3**, 10 seride **5**, 15 seride **7**, 20+ seride **9 Puan**!</li>
+                <li><span className="font-bold text-purple-400">Şampiyona Modu:</span> Süreli yarış, doğru serisine göre katlanarak artan puanlar ve sıralama kaydı.</li>
+                <li><span className="font-bold text-purple-400">Alıştırma Modu:</span> 1-9 arası rakamların 1-10 arası sayılarla sınırsız çarpımı, ateşli seri barı. Puan verilmez.</li>
               </ul>
             </div>
-            <Button onClick={startGame} className="w-full py-6 text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg shadow-purple-500/20 rounded-xl transition-all hover:scale-[1.01] active:scale-95">
-              Yarışı Başlat!
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button 
+                onClick={() => startGame("championship")} 
+                className="flex-1 py-6 text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg shadow-purple-500/20 rounded-xl transition-all hover:scale-[1.01] active:scale-95"
+              >
+                ⚡ Yarışı Başlat!
+              </Button>
+              <Button 
+                onClick={() => startGame("practice")} 
+                variant="outline"
+                className="flex-1 py-6 text-lg font-bold border-purple-500/30 text-purple-400 hover:text-white hover:bg-purple-950/40 rounded-xl transition-all hover:scale-[1.01] active:scale-95"
+              >
+                📖 Pratik Yap
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : isPlaying ? (
@@ -367,23 +402,35 @@ export default function MultiplicationChallengePage() {
         <div className="space-y-6">
           {/* Top Status Bar */}
           <div className="grid grid-cols-3 gap-4">
-            <Card className="p-3 text-center border-purple-500/10 bg-card/50">
-              <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Süre</span>
-              <div className="text-xl font-bold flex items-center justify-center gap-1.5 mt-1 text-amber-500">
-                <Timer className="h-4 w-4" />
-                <span>{timeLeft} sn</span>
-              </div>
-            </Card>
+            {gameMode === "practice" ? (
+              <Card className="p-3 text-center border-purple-500/10 bg-card/50">
+                <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Mod</span>
+                <div className="text-sm font-bold flex items-center justify-center gap-1 mt-1.5 text-purple-400">
+                  <BookOpen className="h-4 w-4" />
+                  <span>Alıştırma</span>
+                </div>
+              </Card>
+            ) : (
+              <Card className="p-3 text-center border-purple-500/10 bg-card/50">
+                <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Süre</span>
+                <div className="text-xl font-bold flex items-center justify-center gap-1.5 mt-1 text-amber-500">
+                  <Timer className="h-4 w-4" />
+                  <span>{timeLeft} sn</span>
+                </div>
+              </Card>
+            )}
 
             <Card className="p-3 text-center border-purple-500/10 bg-card/50">
-              <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Puan</span>
+              <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                {gameMode === "practice" ? "Doğru Sayısı" : "Puan"}
+              </span>
               <div className="text-xl font-bold mt-1 text-green-500">
-                <span>{score} Puan</span>
+                <span>{gameMode === "practice" ? `${correctCount} Doğru` : `${score} Puan`}</span>
               </div>
             </Card>
 
             <Card className="p-3 text-center border-purple-500/10 bg-card/50">
-              <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Seri (Streak)</span>
+              <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Aktif Seri</span>
               <div className="text-xl font-bold flex items-center justify-center gap-1 mt-1 text-purple-500">
                 <Zap className="h-4 w-4 fill-purple-500" />
                 <span>{streak}</span>
@@ -391,8 +438,32 @@ export default function MultiplicationChallengePage() {
             </Card>
           </div>
 
-          {/* Time Progress Bar */}
-          <Progress value={(timeLeft / 60) * 100} className="h-2 bg-muted transition-all" />
+          {/* Time Progress Bar / Practice Streak Fire Bar */}
+          {gameMode === "practice" ? (
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-xs text-muted-foreground font-bold">
+                <span>Seri Barı (Pratik)</span>
+                <span className="flex items-center gap-1 text-amber-500">
+                  {streak >= 10 ? "🔥 ATEŞLENDİN! 🔥" : `${streak} / 10`}
+                </span>
+              </div>
+              <div className="h-4 w-full bg-slate-950/60 rounded-full border border-purple-500/15 overflow-hidden relative p-0.5 shadow-[inset_0_1px_3px_rgba(0,0,0,0.8)]">
+                <div 
+                  className={cn(
+                    "h-full rounded-full transition-all duration-300",
+                    streak >= 10 && "animate-pulse"
+                  )}
+                  style={{
+                    width: `${Math.max(Math.min(streak, 10) * 10, streak > 0 ? 8 : 0)}%`,
+                    backgroundColor: streak > 0 ? `hsl(${Math.max(60 - (streak - 1) * 6.6, 0)}, 100%, 50%)` : '#1e293b',
+                    boxShadow: streak > 0 ? `0 0 12px hsl(${Math.max(60 - (streak - 1) * 6.6, 0)}, 100%, 50%, 0.7)` : 'none'
+                  }}
+                />
+              </div>
+            </div>
+          ) : (
+            <Progress value={(timeLeft / 60) * 100} className="h-2 bg-muted transition-all" />
+          )}
 
           {/* Question Card */}
           {currentQuestion && (
@@ -447,30 +518,66 @@ export default function MultiplicationChallengePage() {
               );
             })}
           </div>
+
+          {gameMode === "practice" && (
+            <div className="pt-2 flex justify-center">
+              <Button 
+                onClick={endGame} 
+                variant="ghost" 
+                className="text-red-400 hover:text-red-300 hover:bg-red-950/20 font-bold px-6 py-2 rounded-xl transition-all animate-pulse"
+              >
+                Pratiği Bitir
+              </Button>
+            </div>
+          )}
         </div>
       ) : (
         // Finished Screen
         <Card className="border-purple-500/30 bg-slate-900/60 backdrop-blur-md shadow-2xl relative overflow-hidden">
           <CardHeader className="text-center space-y-4 py-8">
-            <div className="mx-auto h-20 w-20 rounded-full bg-yellow-500/10 flex items-center justify-center text-4xl shadow-lg border border-yellow-500/30 shadow-[0_0_20px_rgba(234,179,8,0.2)] animate-bounce-slow">
-              <Trophy className="h-10 w-10 text-yellow-500" />
+            <div className="mx-auto h-20 w-20 rounded-full bg-purple-500/10 flex items-center justify-center text-4xl shadow-lg border border-purple-500/30 shadow-[0_0_20px_rgba(168,85,247,0.2)] animate-bounce-slow">
+              {gameMode === "practice" ? (
+                <BookOpen className="h-10 w-10 text-purple-500" />
+              ) : (
+                <Trophy className="h-10 w-10 text-yellow-500" />
+              )}
             </div>
             <div>
-              <CardTitle className="text-3xl font-black bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent">Süre Bitti!</CardTitle>
-              <CardDescription className="text-sm mt-1 text-slate-300 font-medium">Yarışı başarıyla tamamladın.</CardDescription>
+              <CardTitle className="text-3xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-cyan-400 bg-clip-text text-transparent">
+                {gameMode === "practice" ? "Alıştırma Tamamlandı!" : "Süre Bitti!"}
+              </CardTitle>
+              <CardDescription className="text-sm mt-1 text-slate-300 font-medium">
+                {gameMode === "practice" ? "Kendini geliştirmek için harika bir çalışma yaptın." : "Yarışı başarıyla tamamladın."}
+              </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-6 pb-8">
             {/* Stats display */}
             <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="p-4 bg-slate-950/45 rounded-2xl border border-purple-500/10">
-                <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Kazanılan Puan</span>
-                <p className="text-3xl font-black text-green-400 mt-1">+{score}</p>
-              </div>
-              <div className="p-4 bg-slate-950/45 rounded-2xl border border-purple-500/10">
-                <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">En Yüksek Seri</span>
-                <p className="text-3xl font-black text-purple-400 mt-1">{maxStreak}</p>
-              </div>
+              {gameMode === "practice" ? (
+                <div className="p-4 bg-slate-950/45 rounded-2xl border border-purple-500/10 col-span-2">
+                  <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Mod</span>
+                  <p className="text-xl font-black text-purple-400 mt-1">Alıştırma Modu</p>
+                  <span className="text-xs text-slate-400 font-medium">Bu moddan puan veya sıralama derecesi kazanılmaz.</span>
+                </div>
+              ) : (
+                <>
+                  <div className="p-4 bg-slate-950/45 rounded-2xl border border-purple-500/10">
+                    <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Kazanılan Puan</span>
+                    <p className="text-3xl font-black text-green-400 mt-1">+{score}</p>
+                  </div>
+                  <div className="p-4 bg-slate-950/45 rounded-2xl border border-purple-500/10">
+                    <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">En Yüksek Seri</span>
+                    <p className="text-3xl font-black text-purple-400 mt-1">{maxStreak}</p>
+                  </div>
+                </>
+              )}
+              {gameMode === "practice" && (
+                <div className="p-3 bg-slate-950/30 rounded-xl border border-purple-500/5 col-span-2">
+                  <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">En Yüksek Seri</span>
+                  <p className="text-2xl font-bold text-purple-400 mt-1">{maxStreak}</p>
+                </div>
+              )}
               <div className="p-3 bg-slate-950/30 rounded-xl border border-purple-500/5">
                 <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Doğru Cevap</span>
                 <p className="text-2xl font-bold text-green-500 mt-1">{correctCount}</p>
@@ -484,14 +591,14 @@ export default function MultiplicationChallengePage() {
             {/* Actions */}
             <div className="flex gap-4">
               <Button 
-                onClick={() => navigate("/practice", { state: { activeTab: "mini-oyunlar" } })} 
+                onClick={handleBackToSelect} 
                 variant="outline" 
                 className="flex-1 py-6 font-bold rounded-xl border-purple-500/20 text-purple-400 hover:text-white hover:bg-purple-950/50"
               >
                 Geri Dön
               </Button>
               <Button 
-                onClick={startGame} 
+                onClick={() => startGame(gameMode || "championship")} 
                 className="flex-1 py-6 font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg rounded-xl transition-all hover:scale-[1.01] active:scale-95"
               >
                 <RotateCcw className="h-4 w-4 mr-2" /> Tekrar Oyna

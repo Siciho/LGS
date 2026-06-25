@@ -24,7 +24,7 @@ export const idioms: Idiom[] = [
     id: 2,
     idiom: "Göz boyamak",
     meaning: "Kandırmak, yanıltmak amacıyla bir şeyi iyi veya kötü göstererek aldatmak.",
-    hint: "Vitrinleri süsleyerek ve yapay ışıklar kullanarak müşterilerin...",
+    hint: "Vitrinleri süsleyerek ve yapay ışıklar kullanan satıcı...",
     distractors: [
       "Bir konuyu ayrıntılarıyla incelemek.",
       "Başkalarının saygısını ve sevgisini kazanmak.",
@@ -35,7 +35,7 @@ export const idioms: Idiom[] = [
     id: 3,
     idiom: "Ağzı açık kalmak",
     meaning: "Çok şaşırmak, şaşkınlıktan ne yapacağını bilememek.",
-    hint: "Sihirbazın yaptığı numaraları görünce çocukların...",
+    hint: "Sihirbazın yaptığı numaraları gören çocuklar...",
     distractors: [
       "Çok konuşup çevresindekileri rahatsız etmek.",
       "Sır saklamayı beceremeyip her şeyi anlatmak.",
@@ -90,7 +90,7 @@ export const idioms: Idiom[] = [
     id: 8,
     idiom: "Çam devirmek",
     meaning: "Başkalarını kıracak, üzecek veya pot kıracak sözleri farkında olmadan söylemek.",
-    hint: "Müdürün yanında eski hatalardan bahsederek yine büyük bir...",
+    hint: "Müdürün yanında eski hatalardan bahsederek yine...",
     distractors: [
       "Ormandaki ağaçları kesip zarar vermek.",
       "Büyük bir işi başarıyla sonuçlandırmak.",
@@ -112,7 +112,7 @@ export const idioms: Idiom[] = [
     id: 10,
     idiom: "Göze girmek",
     meaning: "Davranışları veya başarısıyla birinin sevgi, takdir ve güvenini kazanmak.",
-    hint: "Son projede gösterdiği üstün performansla yöneticisinin...",
+    hint: "Son projede gösterdiği üstün performansla nihayet...",
     distractors: [
       "Birine fark ettirmeden gizlice bakmak.",
       "Görme bozukluğu yaşamaya başlamak.",
@@ -123,7 +123,7 @@ export const idioms: Idiom[] = [
     id: 11,
     idiom: "Gözden düşmek",
     meaning: "Daha önce duyulan sevgi, güven ve rağbeti davranışları nedeniyle kaybetmek.",
-    hint: "Sürekli yalan söylediği ortaya çıkınca arkadaşlarının...",
+    hint: "Sürekli yalan söylediği ortaya çıkınca nihayet...",
     distractors: [
       "Ağlarken gözyaşlarını tutamamak.",
       "Uykusuzluktan dolayı göz kapakları ağırlaşmak.",
@@ -189,7 +189,7 @@ export const idioms: Idiom[] = [
     id: 17,
     idiom: "Yaka silkmek",
     meaning: "Bıkmak, usanmak, artık dayanamayacak hale gelip bezmek.",
-    hint: "Onun bu bitmek bilmeyen şikayetlerinden herkes...",
+    hint: "Onun bu bitmek bilmeyen şikayetlerinden dolayı herkes...",
     distractors: [
       "Elbisesinin yakasını temizleyip düzeltmek.",
       "Birine karşı saygısını göstermek için eğilmek.",
@@ -266,7 +266,7 @@ export const idioms: Idiom[] = [
     id: 24,
     idiom: "Nabız yoklamak",
     meaning: "Eğilimleri, düşünceleri veya niyetleri anlamaya çalışmak.",
-    hint: "Yeni teklifi sunmadan önce ortakların...",
+    hint: "Yeni teklifi sunmadan önce sessizce...",
     distractors: [
       "Doktorun hastanın kalp atışını kontrol etmesi.",
       "Birini korkutarak ondan bilgi sızdırmak.",
@@ -288,7 +288,7 @@ export const idioms: Idiom[] = [
     id: 26,
     idiom: "Sırtı yere gelmemek",
     meaning: "Güçlü olmak, sarsılmamak, yenilgiye uğramamak.",
-    hint: "Bu disiplinle çalışmaya devam ederse onun asla...",
+    hint: "Bu disiplinle çalışmaya devam ettiği sürece asla...",
     distractors: [
       "Çok yorulup dinlenmek için uzanamamak.",
       "Sırt ağrılarından dolayı rahatsız olmak.",
@@ -343,7 +343,7 @@ export const idioms: Idiom[] = [
     id: 31,
     idiom: "Ağzında bakla ıslanmamak",
     meaning: "Sır saklayamamak, duyduğu bir şeyi hemen başkalarına anlatmak.",
-    hint: "Ona güvenip hiçbir şey söyleme çünkü onun...",
+    hint: "Sırrı hemen herkese yaydı çünkü hiçbir zaman...",
     distractors: [
       "Çok obur olup sürekli yemek yemek istemek.",
       "Konuşurken kelimeleri yuvarlayıp anlaşılmaz konuşmak.",
@@ -363,7 +363,7 @@ export const idioms: Idiom[] = [
   },
   {
     id: 33,
-    idiom: "Ayak sürümek (sürümek)",
+    idiom: "Ayak sürümek",
     meaning: "Bir işi yapmamak için direnmek veya ağırdan almak, geciktirmek.",
     hint: "Verilen yeni görevi yapmamak için günlerdir...",
     distractors: [
@@ -376,7 +376,7 @@ export const idioms: Idiom[] = [
     id: 34,
     idiom: "Göz kulak olmak",
     meaning: "Bir şeyi veya bir kimseyi korumak, gözetmek ve kollamak.",
-    hint: "Ben pazara gidene kadar kardeşine...",
+    hint: "Annesi pazara gidene kadar o küçük kardeşine...",
     distractors: [
       "Duyma ve görme duyularını aynı anda kullanmak.",
       "Birinin gizli sırlarını öğrenmeye çalışmak.",
@@ -387,7 +387,7 @@ export const idioms: Idiom[] = [
     id: 35,
     idiom: "İçi içine sığmamak",
     meaning: "Aşırı sevinç, coşku veya heyecandan ötürü yerinde duramamak.",
-    hint: "LGS sonuçlarının açıklanacağını öğrenen öğrencinin...",
+    hint: "LGS sonuçlarının açıklanacağını öğrenen öğrenci sevinçten...",
     distractors: [
       "Çok kilo alıp kıyafetlerine sığamamak.",
       "Karın ağrısı veya mide rahatsızlığı çekmek.",
@@ -398,7 +398,7 @@ export const idioms: Idiom[] = [
     id: 36,
     idiom: "Kabına sığmamak",
     meaning: "Coşku, heyecan veya sabırsızlıktan ötürü duygularını engelleyememek, taşkınlık yapmak.",
-    hint: "Şampiyonluk kupasını kaldırınca futbolcular...",
+    hint: "Şampiyonluk kupasını kaldırınca futbolcu adeta...",
     distractors: [
       "Kap kacak ölçülerini aşacak kadar yemek yapmak.",
       "Çok sinirlenip etrafındaki eşyaları kırmak.",
@@ -475,7 +475,7 @@ export const idioms: Idiom[] = [
     id: 43,
     idiom: "Yere göğe sığdıramamak",
     meaning: "Çok beğenmek, çok övmek, kendisine aşırı derecede değer verdiğini göstermek.",
-    hint: "Yeni aldığı arabayı herkese ballandıra ballandıra anlatıyor, adeta...",
+    hint: "Yeni aldığı arabayı herkese ballandıra ballandıra anlattı, adeta...",
     distractors: [
       "Bir yerin çok geniş ve ferah olduğunu belirtmek.",
       "Bir eşyayı koyacak yer bulamayıp sıkıntı yaşamak.",
@@ -585,7 +585,7 @@ export const idioms: Idiom[] = [
     id: 53,
     idiom: "Kirişe asılmak",
     meaning: "Var gücüyle çalışmak, tüm enerjisini bir işe vermek.",
-    hint: "Sınava son iki ay kala tüm gücümüzle...",
+    hint: "Sınava son iki ay kala o tüm gücüyle...",
     distractors: [
       "Spor yaparken barfiks demirine asılı kalmak.",
       "İnşaatta kullanılan ahşap kirişleri sabitlemek.",
@@ -605,7 +605,7 @@ export const idioms: Idiom[] = [
   },
   {
     id: 55,
-    idiom: "Rahata ermek / kavuşmak",
+    idiom: "Rahata kavuşmak",
     meaning: "Sıkıntı, dert veya zor günlerin ardından huzura, bolluğa ulaşmak.",
     hint: "Borçlarını tamamen ödeyip bitirince nihayet...",
     distractors: [

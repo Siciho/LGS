@@ -57,6 +57,9 @@ export type AppContextType =
   };
 
 export default function AppLayout() {
+  const auth = useAuthContext();
+  const { userId, userName, userRole } = auth;
+
   const [isInitialized, setIsInitialized] = useState(false);
   const [isMuted, setIsMuted] = useState(() => storage.loadIsMuted());
   const [theme, setTheme] = useState<'light' | 'dark' | null>(null);
@@ -86,8 +89,6 @@ export default function AppLayout() {
   }, [location.pathname]);
 
   const isHomePage = location.pathname === '/' || location.pathname === '/derslerim';
-  const auth = useAuthContext();
-  const { userId, userName, userRole } = auth;
 
   useEffect(() => {
     const fetchLatestVersionInfo = async () => {

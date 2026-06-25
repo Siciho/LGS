@@ -1,6 +1,6 @@
 // src/pages/IdiomChallengePage.tsx
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "./AppLayout";
 import { supabase } from "@/supabaseClient";
@@ -24,6 +24,99 @@ interface MatchingItem {
   text: string;
   type: "idiom" | "meaning";
   matched: boolean;
+}
+
+function conjugateVerb(verb: string, pattern: "past-3sg" | "past-3sg-neg"): string {
+  let isNegative = false;
+  let base = verb.trim();
+  
+  if (base.endsWith("mamak")) {
+    isNegative = true;
+    base = base.slice(0, -5);
+  } else if (base.endsWith("memek")) {
+    isNegative = true;
+    base = base.slice(0, -5);
+  } else if (base.endsWith("mak")) {
+    base = base.slice(0, -3);
+  } else if (base.endsWith("mek")) {
+    base = base.slice(0, -3);
+  } else {
+    return verb;
+  }
+
+  const vowels = "aıeioöuüAEİOÖUÜ";
+  let lastVowel = "";
+  for (let i = base.length - 1; i >= 0; i--) {
+    if (vowels.includes(base[i])) {
+      lastVowel = base[i].toLowerCase();
+      break;
+    }
+  }
+
+  if (pattern === "past-3sg-neg") {
+    isNegative = true;
+  }
+
+  if (isNegative) {
+    const backVowels = ["a", "ı", "o", "u"];
+    if (backVowels.includes(lastVowel)) {
+      base += "ma";
+      lastVowel = "a";
+    } else {
+      base += "me";
+      lastVowel = "e";
+    }
+  }
+
+  // Find last vowel again
+  for (let i = base.length - 1; i >= 0; i--) {
+    if (vowels.includes(base[i])) {
+      lastVowel = base[i].toLowerCase();
+      break;
+    }
+  }
+
+  const voicelessConsonants = "fstkçşhpFSTKÇŞHP";
+  const lastChar = base[base.length - 1];
+  const suffixConsonant = voicelessConsonants.includes(lastChar) ? "t" : "d";
+
+  let suffixVowel = "ı";
+  if (lastVowel === "a" || lastVowel === "ı") {
+    suffixVowel = "ı";
+  } else if (lastVowel === "e" || lastVowel === "i") {
+    suffixVowel = "i";
+  } else if (lastVowel === "o" || lastVowel === "u") {
+    suffixVowel = "u";
+  } else if (lastVowel === "ö" || lastVowel === "ü") {
+    suffixVowel = "ü";
+  }
+
+  return base + suffixConsonant + suffixVowel;
+}
+
+function conjugateIdiom(idiom: string, pattern: "past-3sg" | "past-3sg-neg" = "past-3sg"): string {
+  const normalized = idiom.trim();
+
+  // Handle nominal exceptions
+  if (normalized.toLowerCase() === "bal dök yala") {
+    return "bal dök yalaydı";
+  }
+  if (normalized.toLowerCase() === "tereyağından kıl çeker gibi") {
+    return "tereyağından kıl çeker gibiydi";
+  }
+  if (normalized.toLowerCase() === "dostlar alışverişte görsün") {
+    return "dostlar alışverişte görsün diyeydi";
+  }
+
+  // Find the last word to conjugate
+  const words = normalized.split(/\s+/);
+  if (words.length === 0) return idiom;
+
+  const lastWord = words[words.length - 1];
+  const conjugatedLastWord = conjugateVerb(lastWord, pattern);
+  
+  words[words.length - 1] = conjugatedLastWord;
+  return words.join(" ");
 }
 
 export default function IdiomChallengePage() {
@@ -69,6 +162,34 @@ export default function IdiomChallengePage() {
   // --- RED FLASH & SHAKE STATE ---
   const [showRedFlash, setShowRedFlash] = useState(false);
   const [mismatchedIndices, setMismatchedIndices] = useState<{ left: number; right: number } | null>(null);
+
+  // Generate options for the current quiz question
+  const quizOptions = useMemo(() => {
+    const currentQuestion = quizQuestions[currentQuizIndex];
+    if (!currentQuestion) return [];
+    
+    // Distractors are other random idioms
+    const otherIdioms = idioms
+      .filter(i => i.id !== currentQuestion.id)
+      .map(i => i.idiom);
+      
+    // Pick 3 random ones
+    const randomDistractors: string[] = [];
+    const temp = [...otherIdioms];
+    for (let i = 0; i < 3; i++) {
+      if (temp.length === 0) break;
+      const idx = Math.floor(Math.random() * temp.length);
+      randomDistractors.push(temp[idx]);
+      temp.splice(idx, 1);
+    }
+    
+    const pattern = currentQuestion.id === 57 ? "past-3sg-neg" : "past-3sg";
+    const correctConjugated = conjugateIdiom(currentQuestion.idiom, pattern);
+    const distractorsConjugated = randomDistractors.map(d => conjugateIdiom(d, pattern));
+
+    // Combine correct idiom and distractors, and sort alphabetically
+    return [correctConjugated, ...distractorsConjugated].sort((a, b) => a.localeCompare(b));
+  }, [quizQuestions, currentQuizIndex]);
 
   // Setup Quiz Game
   const startQuizMode = async () => {
@@ -187,7 +308,9 @@ export default function IdiomChallengePage() {
     
     setSelectedOption(option);
     const currentQuestion = quizQuestions[currentQuizIndex];
-    const isCorrect = option === currentQuestion.meaning;
+    const pattern = currentQuestion.id === 57 ? "past-3sg-neg" : "past-3sg";
+    const correctConjugated = conjugateIdiom(currentQuestion.idiom, pattern);
+    const isCorrect = option === correctConjugated;
 
     if (isCorrect) {
       setQuizFeedback("correct");
@@ -440,13 +563,13 @@ export default function IdiomChallengePage() {
           {quizQuestions.length > 0 && (
             <Card className="border-amber-500/30 bg-slate-900/60 backdrop-blur-md shadow-2xl relative overflow-hidden rounded-2xl">
               <CardContent className="pt-8 pb-6 text-center space-y-4">
-                <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Deyim</span>
-                <h2 className="text-3xl font-extrabold text-white italic">
-                  "{quizQuestions[currentQuizIndex].idiom}"
+                <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Boşluğu Doldur</span>
+                <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-relaxed">
+                  "{quizQuestions[currentQuizIndex].hint.replace(/\.\.\./g, '').trim()} ...................."
                 </h2>
                 <div className="bg-amber-500/10 p-4 rounded-xl border border-amber-500/20 text-sm text-slate-300 font-medium">
-                  <span className="font-extrabold text-amber-500 mr-1">İpucu/Örnek:</span>
-                  {quizQuestions[currentQuizIndex].hint}
+                  <span className="font-extrabold text-amber-500 mr-1">Anlamı:</span>
+                  {quizQuestions[currentQuizIndex].meaning}
                 </div>
               </CardContent>
             </Card>
@@ -455,33 +578,33 @@ export default function IdiomChallengePage() {
           {/* Options List */}
           {quizQuestions.length > 0 && (
             <div className="space-y-3">
-              {[quizQuestions[currentQuizIndex].meaning, ...quizQuestions[currentQuizIndex].distractors]
-                .sort((a, b) => a.localeCompare(b)) // Simple alphabetical sort to shuffle options consistently
-                .map((option, idx) => {
-                  const isSelected = selectedOption === option;
-                  const isCorrect = option === quizQuestions[currentQuizIndex].meaning;
-                  
-                  let btnVariant: "outline" | "default" | "success" | "destructive" = "outline";
-                  if (selectedOption !== null) {
-                    if (isCorrect) btnVariant = "success";
-                    else if (isSelected) btnVariant = "destructive";
-                  }
+              {quizOptions.map((option, idx) => {
+                const isSelected = selectedOption === option;
+                const pattern = quizQuestions[currentQuizIndex].id === 57 ? "past-3sg-neg" : "past-3sg";
+                const correctConjugated = conjugateIdiom(quizQuestions[currentQuizIndex].idiom, pattern);
+                const isCorrect = option === correctConjugated;
+                
+                let btnVariant: "outline" | "default" | "success" | "destructive" = "outline";
+                if (selectedOption !== null) {
+                  if (isCorrect) btnVariant = "success";
+                  else if (isSelected) btnVariant = "destructive";
+                }
 
-                  return (
-                    <Button
-                      key={idx}
-                      variant={btnVariant}
-                      onClick={() => handleQuizAnswer(option)}
-                      disabled={selectedOption !== null}
-                      className={cn(
-                        "w-full min-h-16 py-3 px-4 text-left justify-start font-bold text-wrap rounded-xl border border-amber-500/20 bg-slate-900/40 hover:bg-amber-500/5 hover:border-amber-500/40 transition-all text-white",
-                        isSelected && !isCorrect && "animate-shake border-red-500 ring-2 ring-red-500/40 bg-red-500/15 dark:bg-red-500/25 text-red-600 dark:text-red-400"
-                      )}
-                    >
-                      {option}
-                    </Button>
-                  );
-                })}
+                return (
+                  <Button
+                    key={idx}
+                    variant={btnVariant}
+                    onClick={() => handleQuizAnswer(option)}
+                    disabled={selectedOption !== null}
+                    className={cn(
+                      "w-full min-h-16 py-3 px-4 text-left justify-start font-bold text-wrap rounded-xl border border-amber-500/20 bg-slate-900/40 hover:bg-amber-500/5 hover:border-amber-500/40 transition-all text-white",
+                      isSelected && !isCorrect && "animate-shake border-red-500 ring-2 ring-red-500/40 bg-red-500/15 dark:bg-red-500/25 text-red-600 dark:text-red-400"
+                    )}
+                  >
+                    {option}
+                  </Button>
+                );
+              })}
             </div>
           )}
         </div>
