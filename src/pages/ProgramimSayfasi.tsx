@@ -174,47 +174,46 @@ export default function ProgramimSayfasi() {
   };
 
   return (
-    <div className="space-y-6 animate-slide-up max-w-3xl mx-auto p-6 relative bg-gradient-to-br from-slate-950 via-indigo-950/10 to-slate-950 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-lg pb-24">
+    <div className="space-y-6 animate-slide-up max-w-3xl mx-auto p-2 xs:p-4 sm:p-6 relative bg-gradient-to-br from-slate-950 via-indigo-950/10 to-slate-950 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-lg pb-24">
       <Tabs defaultValue="ders-programi">
-        <TabsList className="grid w-full grid-cols-2 h-14 bg-muted/60 p-1.5 rounded-2xl border border-border/40 shadow-inner">
+        <TabsList className="grid w-full grid-cols-2 h-12 sm:h-14 bg-muted/60 p-1.5 rounded-2xl border border-border/40 shadow-inner">
           <TabsTrigger 
             value="ders-programi"
-            className="rounded-xl font-bold py-2.5 transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(99,102,241,0.3)] hover:text-indigo-500 active:scale-95 flex items-center justify-center gap-1.5"
+            className="rounded-xl font-bold py-1.5 sm:py-2.5 text-xs sm:text-sm transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(99,102,241,0.3)] hover:text-indigo-500 active:scale-95 flex items-center justify-center gap-1 sm:gap-1.5"
           >
-            <span className="text-base">📅</span> Ders Programım
+            <span className="text-sm sm:text-base">📅</span> Ders Programım
           </TabsTrigger>
           <TabsTrigger 
             value="calisma-plani"
-            className="rounded-xl font-bold py-2.5 transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(16,185,129,0.3)] hover:text-emerald-500 active:scale-95 flex items-center justify-center gap-1.5"
+            className="rounded-xl font-bold py-1.5 sm:py-2.5 text-xs sm:text-sm transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(16,185,129,0.3)] hover:text-emerald-500 active:scale-95 flex items-center justify-center gap-1 sm:gap-1.5"
           >
-            <span className="text-base">🎯</span> Çalışma Planım
+            <span className="text-sm sm:text-base">🎯</span> Çalışma Planım
           </TabsTrigger>
         </TabsList>
 
         {/* DERS PROGRAMIM SEKMESİ */}
         <TabsContent value="ders-programi">
-          <Card className="border-indigo-500/20 bg-slate-900/60 backdrop-blur-md shadow-2xl rounded-2xl overflow-hidden mt-6">
-            <CardHeader className="border-b border-indigo-500/10 pb-4">
-              <div className="flex justify-between items-center">
+          <Card className="border-indigo-500/20 bg-slate-900/60 backdrop-blur-md shadow-2xl rounded-2xl overflow-hidden mt-4 sm:mt-6 border-none sm:border">
+            <CardHeader className="border-b border-indigo-500/10 pb-4 p-3 xs:p-4 sm:p-6">
+              <div className="flex justify-between items-center gap-2">
                 <div>
-                    <CardTitle className="text-xl font-extrabold text-white">Haftalık Ders Programı</CardTitle>
-                    <CardDescription className="text-slate-300 text-sm font-medium">Okul ders programını buradan yönetebilirsin.</CardDescription>
+                    <CardTitle className="text-lg xs:text-xl font-extrabold text-white">Haftalık Ders Programı</CardTitle>
+                    <CardDescription className="text-slate-300 text-xs xs:text-sm font-medium">Okul ders programını buradan yönetebilirsin.</CardDescription>
                 </div>
                 {isEditingManual ? (
-                  <div className="flex gap-2">
-                    <Button variant="secondary" size="sm" onClick={handleCancelEdit} className="rounded-lg font-semibold"><X className="h-4 w-4 mr-2"/>İptal</Button>
-                    <Button size="sm" onClick={handleSaveManualSchedule} className="bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white font-bold rounded-lg shadow-md"><Save className="h-4 w-4 mr-2"/>Kaydet</Button>
+                  <div className="flex gap-1.5 sm:gap-2 shrink-0">
+                    <Button variant="secondary" size="sm" onClick={handleCancelEdit} className="rounded-lg font-semibold h-8 sm:h-9 text-xs sm:text-sm px-2 sm:px-3"><X className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>İptal</Button>
+                    <Button size="sm" onClick={handleSaveManualSchedule} className="bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white font-bold rounded-lg shadow-md h-8 sm:h-9 text-xs sm:text-sm px-2 sm:px-3"><Save className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>Kaydet</Button>
                   </div>
                 ) : (
-                  <Button variant="outline" size="sm" onClick={handleEditClick} className="border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10 rounded-lg font-bold"><Pencil className="h-4 w-4 mr-2"/>Düzenle</Button>
+                  <Button variant="outline" size="sm" onClick={handleEditClick} className="border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10 rounded-lg font-bold h-8 sm:h-9 text-xs sm:text-sm px-2 sm:px-3 shrink-0"><Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2"/>Düzenle</Button>
                 )}
               </div>
             </CardHeader>
-            <CardContent className="p-4 md:p-6">
-                <div className="bg-slate-950/50 rounded-xl p-1.5 mb-6 border border-slate-800 shadow-inner">
-                    <div className="grid grid-cols-6 md:grid-cols-5 gap-1.5">
-                        {weekDays.map((day, idx) => {
-                          const colSpan = idx < 3 ? "col-span-2 md:col-span-1" : "col-span-3 md:col-span-1";
+            <CardContent className="p-2 xs:p-4 sm:p-6">
+                <div className="bg-slate-950/50 rounded-xl p-1 sm:p-1.5 mb-4 sm:mb-6 border border-slate-800 shadow-inner">
+                    <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
+                        {weekDays.map((day) => {
                           const isSelected = selectedDay === day;
                           return (
                             <Button 
@@ -223,21 +222,20 @@ export default function ProgramimSayfasi() {
                                 size="sm"
                                 onClick={() => setSelectedDay(day)}
                                 className={cn(
-                                  "font-bold rounded-lg transition-all duration-200 py-2.5 h-auto w-full",
-                                  colSpan,
+                                  "font-bold rounded-lg transition-all duration-200 py-1.5 sm:py-2.5 px-1 text-xs sm:text-sm h-auto w-full",
                                   isSelected 
                                     ? "shadow-md bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-extrabold" 
                                     : "text-slate-400 hover:text-white hover:bg-slate-800"
                                 )}
                             >
-                                <span className="hidden md:inline">{day}</span>
-                                <span className="md:hidden">{dayShortNames[day] || day}</span>
+                                <span className="hidden xs:inline">{day}</span>
+                                <span className="xs:hidden">{dayShortNames[day] || day}</span>
                             </Button>
                           );
                         })}
                     </div>
                 </div>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {lessonsForSelectedDay.length > 0 ? (
                   lessonsForSelectedDay.map((lesson, lessonIndex) => {
                     const visuals = getSubjectVisuals(lesson.subject);
@@ -245,29 +243,29 @@ export default function ProgramimSayfasi() {
                       <div 
                         key={lessonIndex} 
                         className={cn(
-                          "flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl border bg-slate-950/20 border-l-4 shadow-sm transition-all duration-200 border-slate-800",
+                          "flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl border bg-slate-950/20 border-l-4 shadow-sm transition-all duration-200 border-slate-800",
                           visuals.sideBorder
                         )}
                       >
                         <div className="flex items-center gap-2 shrink-0">
                           <div className={cn(
-                            "flex items-center justify-center h-8 w-8 rounded-full font-extrabold text-sm shrink-0",
+                            "flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 rounded-full font-extrabold text-xs sm:text-sm shrink-0",
                             visuals.bg, visuals.text
                           )}>
                             {lessonIndex + 1}
                           </div>
-                          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 sm:hidden">. Ders</span>
+                          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 sm:hidden">. Ders</span>
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-3 flex-1">
+                        <div className="grid grid-cols-2 gap-2 sm:gap-3 flex-1">
                           <div className="relative">
                             <Input
                               value={lesson.subject}
                               onChange={(e) => handleManualEditChange(selectedDay, lessonIndex, 'subject', e.target.value)}
-                              placeholder="Ders Adı (Örn: MAT)"
-                              className="uppercase h-10 pr-8 font-semibold tracking-wide bg-slate-950/50 border-slate-800 text-white"
+                              placeholder="Ders Adı"
+                              className="uppercase h-9 sm:h-10 pr-7 text-xs sm:text-sm font-semibold tracking-wide bg-slate-950/50 border-slate-800 text-white"
                             />
-                            <span className="absolute right-2.5 top-2.5 text-base pointer-events-none" role="img" aria-label="subject icon">
+                            <span className="absolute right-2 top-2 sm:top-2.5 text-sm sm:text-base pointer-events-none" role="img" aria-label="subject icon">
                               {visuals.icon}
                             </span>
                           </div>
@@ -275,7 +273,7 @@ export default function ProgramimSayfasi() {
                             value={lesson.teacher}
                             onChange={(e) => handleManualEditChange(selectedDay, lessonIndex, 'teacher', e.target.value)}
                             placeholder="Öğretmen"
-                            className="uppercase h-10 font-medium bg-slate-950/50 border-slate-800 text-white"
+                            className="uppercase h-9 sm:h-10 text-xs sm:text-sm font-medium bg-slate-950/50 border-slate-800 text-white"
                           />
                         </div>
                       </div>
@@ -283,37 +281,37 @@ export default function ProgramimSayfasi() {
                       <div 
                         key={lessonIndex} 
                         className={cn(
-                          "flex items-center gap-4 p-3.5 rounded-xl border-l-4 shadow-md bg-slate-950/30 hover:bg-slate-900/30 transition-all duration-300 border border-slate-800/50 hover:translate-x-1",
+                          "flex items-center gap-2.5 sm:gap-4 p-2 sm:p-3.5 rounded-xl border-l-4 shadow-md bg-slate-950/30 hover:bg-slate-900/30 transition-all duration-300 border border-slate-800/50 hover:translate-x-1",
                           visuals.sideBorder
                         )}
                       >
                         {/* Ders Numarası */}
                         <div className={cn(
-                          "flex items-center justify-center h-9 w-9 rounded-full font-black text-sm shrink-0 shadow-inner",
+                          "flex items-center justify-center h-7 w-7 sm:h-9 sm:w-9 rounded-full font-black text-xs sm:text-sm shrink-0 shadow-inner",
                           visuals.bg, visuals.text
                         )}>
                           {lessonIndex + 1}
                         </div>
 
                         {/* Ders İkonu */}
-                        <div className="text-2xl shrink-0 p-1 bg-slate-900/60 rounded-lg border border-slate-800">
+                        <div className="text-lg sm:text-2xl shrink-0 p-1 bg-slate-900/60 rounded-lg border border-slate-800">
                           {visuals.icon}
                         </div>
 
                         {/* Ders ve Öğretmen Bilgisi */}
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-extrabold text-base tracking-tight truncate text-white leading-tight">
+                          <h4 className="font-extrabold text-sm sm:text-base tracking-tight truncate text-white leading-tight">
                             {lesson.subject ? visuals.label : "Boş Ders"}
                           </h4>
                           {lesson.subject && (
-                            <div className="flex items-center gap-2 mt-1 flex-wrap">
-                              <span className="text-[10px] font-black uppercase tracking-widest bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 text-slate-400">
+                            <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1 flex-wrap">
+                              <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 text-slate-400">
                                 {lesson.subject}
                               </span>
                               {lesson.teacher && (
                                 <>
                                   <span className="text-slate-600 text-xs">•</span>
-                                  <p className="text-xs text-slate-300 flex items-center gap-1 font-medium truncate max-w-[150px]">
+                                  <p className="text-[10px] sm:text-xs text-slate-300 flex items-center gap-1 font-medium truncate max-w-[150px]">
                                     <User className="h-3 w-3 inline text-slate-400" />
                                     {lesson.teacher}
                                   </p>
@@ -337,33 +335,33 @@ export default function ProgramimSayfasi() {
 
         {/* ÇALIŞMA PLANIM SEKMESİ */}
         <TabsContent value="calisma-plani">
-          <Card className="border-emerald-500/20 bg-slate-900/60 backdrop-blur-md shadow-2xl rounded-2xl overflow-hidden mt-6">
-            <CardHeader className="border-b border-emerald-500/10 pb-4">
-              <CardTitle className="text-xl font-extrabold text-white">Kişisel Çalışma Planı</CardTitle>
-              <CardDescription className="text-slate-300 text-sm font-medium">Kendi çalışma rutinini oluştur ve takip et.</CardDescription>
+          <Card className="border-emerald-500/20 bg-slate-900/60 backdrop-blur-md shadow-2xl rounded-2xl overflow-hidden mt-4 sm:mt-6 border-none sm:border">
+            <CardHeader className="border-b border-emerald-500/10 pb-4 p-3 xs:p-4 sm:p-6">
+              <CardTitle className="text-lg xs:text-xl font-extrabold text-white">Kişisel Çalışma Planı</CardTitle>
+              <CardDescription className="text-slate-300 text-xs xs:text-sm font-medium">Kendi çalışma rutinini oluştur ve takip et.</CardDescription>
             </CardHeader>
-            <CardContent className="pt-6">
+            <CardContent className="p-2 xs:p-4 sm:p-6 pt-4 xs:pt-6">
               {sortedPlanDays.length > 0 ? (
                 sortedPlanDays.map(day => (
-                  <div key={day} className="mb-6 last:mb-0">
-                    <h3 className="font-extrabold mb-3 border-b border-slate-800 pb-2 text-lg text-emerald-400">{day}</h3>
-                    <div className="space-y-3">
+                  <div key={day} className="mb-4 sm:mb-6 last:mb-0">
+                    <h3 className="font-extrabold mb-2 sm:mb-3 border-b border-slate-800 pb-1.5 sm:pb-2 text-base sm:text-lg text-emerald-400">{day}</h3>
+                    <div className="space-y-2 sm:space-y-3">
                       {(customPlan?.[day] || []).sort((a,b) => a.timeRange.localeCompare(b.timeRange)).map(entry => (
-                        <div key={entry.id} className="flex items-center justify-between border-l-4 border-emerald-500 bg-slate-950/40 p-4 rounded-r-xl hover:bg-slate-900/40 transition-all border border-slate-800/40">
-                           <div className="flex items-center gap-4">
-                            <div className="flex flex-col items-center justify-center p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-                                <Clock className="h-5 w-5 text-emerald-400 mb-1"/>
-                                <p className="text-[10px] font-mono font-bold text-slate-300">{entry.timeRange.split(' - ')[0]}</p>
+                        <div key={entry.id} className="flex items-center justify-between border-l-4 border-emerald-500 bg-slate-950/40 p-2.5 sm:p-4 rounded-r-xl hover:bg-slate-900/40 transition-all border border-slate-800/40">
+                           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+                            <div className="flex flex-col items-center justify-center p-1.5 sm:p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20 shrink-0">
+                                <Clock className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-emerald-400 mb-0.5 sm:mb-1"/>
+                                <p className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-300">{entry.timeRange.split(' - ')[0]}</p>
                             </div>
-                            <div>
-                                <p className="font-extrabold flex items-center gap-2 text-white">
-                                    <BookOpen className="h-4 w-4 text-slate-400"/>
-                                    {getSubjectName(entry.subjectId)}
+                            <div className="min-w-0">
+                                <p className="font-extrabold flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-white truncate">
+                                    <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-400 shrink-0"/>
+                                    <span className="truncate">{getSubjectName(entry.subjectId)}</span>
                                 </p>
-                                <p className="text-xs font-semibold text-slate-400 mt-0.5">{entry.studyType}</p>
+                                <p className="text-[10px] sm:text-xs font-semibold text-slate-400 mt-0.5 truncate">{entry.studyType}</p>
                             </div>
                           </div>
-                          <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg" onClick={() => handleRemovePlanEntry(entry.id)}>
+                          <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg h-8 w-8 sm:h-9 sm:w-9 shrink-0 ml-2" onClick={() => handleRemovePlanEntry(entry.id)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -382,10 +380,10 @@ export default function ProgramimSayfasi() {
 
           <Button
             onClick={() => setIsPlanDialogOpen(true)}
-            className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-lg z-10 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white animate-pulse-glow"
+            className="fixed bottom-24 right-4 sm:right-6 h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-lg z-10 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white animate-pulse-glow"
             variant="hero"
           >
-            <Plus className="h-6 w-6" />
+            <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
           </Button>
         </TabsContent>
       </Tabs>
