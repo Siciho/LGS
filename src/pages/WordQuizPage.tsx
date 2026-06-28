@@ -229,9 +229,21 @@ export default function WordQuizPage() {
 
         return (
             <div className="text-center p-4 animate-slide-up">
-                <Card className={`max-w-md mx-auto ${iAmWinner ? 'border-green-500' : 'border-red-500'}`}>
-                    <CardHeader>
-                        <CardTitle className="flex items-center justify-center gap-2">
+                <Card className={cn(
+                  "max-w-md mx-auto border-2 backdrop-blur-md shadow-2xl relative overflow-hidden rounded-3xl bg-slate-900/85", 
+                  iAmWinner 
+                    ? 'border-emerald-500/50 shadow-emerald-500/5' 
+                    : 'border-rose-500/50 shadow-rose-500/5'
+                )}>
+                  {/* Decorative Top Gradient Line */}
+                  <div className={cn(
+                    "absolute top-0 left-0 right-0 h-1.5 shadow-[0_1px_5px_rgba(0,0,0,0.2)]",
+                    iAmWinner 
+                      ? "bg-gradient-to-r from-emerald-500 via-teal-500 to-green-500" 
+                      : "bg-gradient-to-r from-rose-500 via-pink-500 to-red-500"
+                  )} />
+                  <CardHeader className="relative z-10">
+                      <CardTitle className="flex items-center justify-center gap-2">
                            {iAmWinner ? <Trophy className="h-6 w-6 text-yellow-500" /> : <Shield className="h-6 w-6 text-red-500" />}
                            {iAmWinner ? "Kazandın!" : "Kaybettin"}
                         </CardTitle>
@@ -261,8 +273,15 @@ export default function WordQuizPage() {
     return (
         <>
           <div className="text-center p-4 animate-slide-up">
-              <Card className="max-w-md mx-auto">
-                  <CardHeader>
+              <Card className="max-w-md mx-auto border-2 border-slate-800 bg-slate-900/85 backdrop-blur-md shadow-2xl relative overflow-hidden rounded-3xl">
+                  {/* Decorative Top Gradient Line */}
+                  <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-[0_1px_5px_rgba(99,102,241,0.3)]" />
+                  
+                  {/* Background Glows */}
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/5 rounded-full filter blur-3xl pointer-events-none -mr-12 -mt-12" />
+                  <div className="absolute bottom-0 left-0 w-36 h-36 bg-purple-500/5 rounded-full filter blur-2xl pointer-events-none -ml-8 -mb-8" />
+                  
+                  <CardHeader className="relative z-10">
                       <CardTitle>Test Tamamlandı!</CardTitle>
                       <CardDescription>Ünite {unitId} kelime testini bitirdin.</CardDescription>
                   </CardHeader>
@@ -368,15 +387,22 @@ export default function WordQuizPage() {
       translate="no"
       onContextMenu={(e) => e.preventDefault()}
     >
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
+      <Card className="max-w-2xl mx-auto border-2 border-slate-800 bg-slate-900/85 backdrop-blur-md shadow-2xl relative overflow-hidden rounded-3xl">
+        {/* Decorative Top Gradient Line */}
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-[0_1px_5px_rgba(99,102,241,0.3)]" />
+        
+        {/* Background Glows */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full filter blur-3xl pointer-events-none -mr-16 -mt-16" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/5 rounded-full filter blur-2xl pointer-events-none -ml-12 -mb-12" />
+        
+        <CardHeader className="relative z-10">
             <Progress value={progress} className="h-2 mb-4" />
-            <CardTitle className="text-center text-4xl font-bold tracking-wider notranslate" translate="no">
+            <CardTitle className="text-center text-4xl font-extrabold tracking-wider notranslate bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent py-2 font-sans" translate="no">
               {currentQuestion.word}
             </CardTitle>
-            <CardDescription className="text-center">Doğru anlamı seç.</CardDescription>
+            <CardDescription className="text-center text-slate-400">Doğru anlamı seç.</CardDescription>
         </CardHeader>
-         <CardContent className="grid grid-cols-2 gap-4 pt-4">
+         <CardContent className="grid grid-cols-2 gap-4 pt-4 relative z-10">
              {currentQuestion.options.map((option: string, index: number) => {
                  const isSelected = selectedAnswer === option;
                  const isCorrect = currentQuestion.correctMeaning === option;
@@ -386,7 +412,7 @@ export default function WordQuizPage() {
                    <Button 
                      key={index} 
                      variant={buttonVariant} 
-                     className="h-24 text-lg text-wrap hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 shadow-sm hover:shadow-[0_0_15px_rgba(99,102,241,0.2)]" 
+                     className="h-24 text-lg text-wrap rounded-2xl border border-slate-800/80 hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 shadow-sm hover:shadow-[0_8px_20px_rgba(99,102,241,0.2)]" 
                      onClick={() => handleAnswerClick(option)} 
                      disabled={showResult}
                    >
