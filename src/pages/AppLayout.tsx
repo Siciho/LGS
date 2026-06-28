@@ -17,7 +17,7 @@ import { FileOpener } from '@capacitor-community/file-opener';
 import { Capacitor } from '@capacitor/core';
 import { Button } from "@/components/ui/button";
 
-export const CURRENT_VERSION = "2.0.1";
+export const CURRENT_VERSION = "2.0.2";
 
 const isNewerVersion = (current: string, latest: string) => {
   const cParts = current.split('.').map(Number);
