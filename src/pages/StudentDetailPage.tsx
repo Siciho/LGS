@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { supabase } from '@/supabaseClient';
+import { supabase, supabaseUrl, supabaseAnonKey } from '@/supabaseClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ArrowLeft, CheckCircle, XCircle, ChevronDown, TrendingUp, TrendingDown, AlertTriangle, BookCopy, Award } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
@@ -171,14 +171,31 @@ export default function StudentDetailPage() {
         }
         const token = session.access_token;
         
-        // Edge Function'a timeFilter state'i gönderiliyor
-        const edgeFunctionPromise = supabase.functions.invoke('student-report', {
-            headers: { Authorization: `Bearer ${token}` },
-            body: { 
-              student_id: studentId,
-              time_frame: timeFilter // Filtre bilgisi
+        // Edge Function'a timeFilter state'i gönderiliyor (Güvenilir fetch kullanımı)
+        const edgeFunctionPromise = (async () => {
+          try {
+            const res = await fetch(`${supabaseUrl}/functions/v1/student-report`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                'apikey': supabaseAnonKey
+              },
+              body: JSON.stringify({
+                student_id: studentId,
+                time_frame: timeFilter
+              })
+            });
+            if (!res.ok) {
+              const body = await res.json().catch(() => ({}));
+              return { data: null, error: { message: body.error || `HTTP Hata: ${res.status}` } };
             }
-        });
+            const data = await res.json();
+            return { data, error: null };
+          } catch (err: any) {
+            return { data: null, error: { message: err.message || "Ağ hatası oluştu." } };
+          }
+        })();
         
         // Denemeler her zaman hepsi çekilir
         const denemelerPromise = supabase.rpc('get_student_denemeler', { p_student_id: studentId });
@@ -255,7 +272,7 @@ export default function StudentDetailPage() {
         
       } catch (e: any) {
         console.error("Veri çekilirken hata:", e);
-        setError(e.message.includes("Yetkiniz yok") ? e.message : "Rapor verileri yüklenirken bir hata oluştu.");
+        setError(e.message || "Rapor verileri yüklenirken bir hata oluştu.");
       } finally {
         setLoading(false);
       }
