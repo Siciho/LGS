@@ -200,10 +200,10 @@ export default function StudentDetailPage() {
         // Denemeler her zaman hepsi çekilir
         const denemelerPromise = supabase.rpc('get_student_denemeler', { p_student_id: studentId });
 
-        // Öğrencinin profil bilgilerini çek
+        // Öğrencinin profil bilgilerini çek (ad_soyad da eklendi)
         const profilePromise = supabase
           .from('kullanicilar')
-          .select('puan, toplam_kazanilan_puan, avatar, active_theme')
+          .select('ad_soyad, puan, toplam_kazanilan_puan, avatar, active_theme')
           .eq('id', studentId)
           .maybeSingle();
 
@@ -232,36 +232,46 @@ export default function StudentDetailPage() {
           setStudentAvatar(avatarData);
         }
 
-        // Edge Function sonuçlarını işle
+        let allRecords: any[] = [];
+        let fetchedStudentName = "";
+
+        // Edge Function sonuçlarını işle (Başarısız olursa doğrudan veri tabanı sorgusuna güvenli geçiş yap)
         if (edgeFunctionResult.error) {
-          // Edge Function'dan gelen özel hatayı yakala
-          let errorMessage = edgeFunctionResult.error.message;
-          const context = edgeFunctionResult.error.context;
-          if (context) {
-            if (typeof context.json === 'function') {
-              try {
-                const body = await context.json();
-                if (body && body.error) {
-                  errorMessage = body.error;
-                }
-              } catch (_) {
-                try {
-                  const text = await context.text();
-                  if (text) errorMessage = text;
-                } catch (_) {}
-              }
-            } else if ((context as any).responseBody) {
-              const body = (context as any).responseBody;
-              if (body && body.error) {
-                errorMessage = body.error;
-              }
-            }
+          console.warn("Edge Function başarısız oldu, doğrudan veri tabanından çözülen sorular çekiliyor...", edgeFunctionResult.error.message);
+          
+          fetchedStudentName = profileResult.data?.ad_soyad || "Öğrenci";
+
+          // Çözülen soruları doğrudan istemciden çek
+          let fallbackQuery = supabase
+            .from('cozulen_sorular')
+            .select('*')
+            .eq('kullanici_id', studentId);
+
+          if (timeFilter === 'week') {
+            const startOfWeek = getMonday(new Date());
+            fallbackQuery = fallbackQuery.gte('eklenme_zamani', startOfWeek.toISOString());
+          } else if (timeFilter && timeFilter.startsWith('month-')) {
+            const monthIndex = parseInt(timeFilter.split('-')[1]) - 1;
+            const currentYear = new Date().getFullYear();
+            const startDate = new Date(currentYear, monthIndex, 1);
+            const endDate = new Date(currentYear, monthIndex + 1, 1);
+            fallbackQuery = fallbackQuery
+              .gte('eklenme_zamani', startDate.toISOString())
+              .lt('eklenme_zamani', endDate.toISOString());
           }
-          throw new Error(errorMessage);
+
+          const { data: fallbackRecords, error: fallbackError } = await fallbackQuery;
+          if (fallbackError) {
+            // Eğer doğrudan sorgu da yetki/RLS vb. nedeniyle başarısız olursa, Edge Function hatasını fırlat
+            throw new Error(`Edge Function hatası: ${edgeFunctionResult.error.message}. (Veri tabanı hatası: ${fallbackError.message})`);
+          }
+          allRecords = fallbackRecords || [];
+        } else {
+          allRecords = edgeFunctionResult.data.records || [];
+          fetchedStudentName = edgeFunctionResult.data.student_name;
         }
         
-        const { records: allRecords, student_name } = edgeFunctionResult.data;
-        setStudentName(student_name);
+        setStudentName(fetchedStudentName);
         
         // Deneme sonuçlarını işle
         if (denemelerResult.error) throw new Error(denemelerResult.error.message);
