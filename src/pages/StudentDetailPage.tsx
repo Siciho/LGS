@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase, supabaseUrl, supabaseAnonKey } from '@/supabaseClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowLeft, CheckCircle, XCircle, ChevronDown, TrendingUp, TrendingDown, AlertTriangle, BookCopy, Award } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, ChevronDown, TrendingUp, TrendingDown, AlertTriangle, BookCopy, Award, Printer } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -152,6 +152,350 @@ export default function StudentDetailPage() {
   const [studentLifetimePoints, setStudentLifetimePoints] = useState<number>(0);
   const [studentAvatar, setStudentAvatar] = useState<UserAvatars | null>(null);
   const [studentActiveTheme, setStudentActiveTheme] = useState<string>("default");
+
+  const handlePrintReport = () => {
+    if (!report) {
+      toast.error("Rapor verisi henüz yüklenmedi.");
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast.error("Yazdırma penceresi açılamadı. Lütfen tarayıcınızın pop-up engelleyicisini kontrol edin.");
+      return;
+    }
+
+    const overallCorrect = report.overall_stats.reduce((sum, stat) => sum + stat.correct_questions, 0);
+    const overallIncorrect = report.overall_stats.reduce((sum, stat) => sum + stat.incorrect_questions, 0);
+    const overallTotal = overallCorrect + overallIncorrect;
+    const overallSuccessRate = overallTotal > 0 ? Math.round((overallCorrect / overallTotal) * 100) : 0;
+
+    const subjectsHtml = report.overall_stats.map(stat => {
+      const total = stat.correct_questions + stat.incorrect_questions;
+      const successRate = total > 0 ? Math.round((stat.correct_questions / total) * 100) : 0;
+      
+      const subjectTopics = topicsBySubject[stat.subject_id] || [];
+      const topicsHtml = subjectTopics.length > 0 
+        ? `<div class="topics-list">
+             <strong style="display: block; margin-bottom: 6px; color: #475569;">Konu Detayları:</strong>
+             ${subjectTopics.map(t => {
+               const tTotal = t.total_correct + t.total_incorrect;
+               const tRate = tTotal > 0 ? Math.round((t.total_correct / tTotal) * 100) : 0;
+               return `<div class="topic-item">
+                 <span>${t.topic}</span>
+                 <span class="font-bold">${t.total_correct} Doğru / ${t.total_incorrect} Yanlış (%${tRate} Başarı)</span>
+               </div>`;
+             }).join('')}
+           </div>`
+        : '<div class="no-topics">Bu ders için konu detayı bulunmuyor.</div>';
+
+      return `
+        <div class="subject-card">
+          <div class="subject-header">
+            <span class="subject-name">${stat.subject_name}</span>
+            <span class="subject-rate">%${successRate} Başarı</span>
+          </div>
+          <div class="subject-body">
+            <p style="margin: 0 0 10px 0; font-size: 14px;">
+              <strong>Toplam Soru:</strong> ${total} | 
+              <span style="color: #10b981; font-weight: bold;">Doğru:</span> ${stat.correct_questions} | 
+              <span style="color: #ef4444; font-weight: bold;">Yanlış:</span> ${stat.incorrect_questions}
+            </p>
+            ${topicsHtml}
+          </div>
+        </div>
+      `;
+    }).join('') || '<p class="no-data">Seçilen zaman aralığında manuel soru kaydı bulunamadı.</p>';
+
+    const denemelerHtml = denemeler.map(deneme => {
+      const denemeNet = deneme.sonuclar?.reduce((sum, s) => sum + s.net_sayisi, 0) || 0;
+      const sonuclarList = deneme.sonuclar?.map(s => {
+        return `
+          <tr>
+            <td style="text-align: left;">${getSubjectName(s.ders_id)}</td>
+            <td class="text-center" style="color: #10b981; font-weight: bold;">${s.dogru_sayisi}</td>
+            <td class="text-center" style="color: #ef4444; font-weight: bold;">${s.yanlis_sayisi}</td>
+            <td class="text-center font-bold" style="color: #1e1b4b;">${s.net_sayisi.toFixed(2)}</td>
+          </tr>
+        `;
+      }).join('') || '';
+
+      return `
+        <div class="deneme-card">
+          <div class="deneme-header">
+            <span>${deneme.deneme_adi}</span>
+            <span>Toplam Net: ${denemeNet.toFixed(2)}</span>
+          </div>
+          <p class="deneme-date">Sınav Tarihi: ${new Date(deneme.deneme_tarihi).toLocaleDateString('tr-TR')}</p>
+          <div style="padding: 15px;">
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th style="text-align: left;">Ders Adı</th>
+                  <th class="text-center">Doğru</th>
+                  <th class="text-center">Yanlış</th>
+                  <th class="text-center">Net</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sonuclarList}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }).join('') || '<p class="no-data">Girilmiş deneme sınavı bulunamadı.</p>';
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${studentName} - Rapor Çıktısı</title>
+        <meta charset="utf-8">
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            margin: 40px;
+            line-height: 1.6;
+            background-color: #ffffff;
+          }
+          .no-print-bar {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f1f5f9;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+          }
+          .btn {
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+          }
+          .btn:hover {
+            background-color: #4338ca;
+          }
+          .btn-secondary {
+            background-color: #64748b;
+          }
+          .btn-secondary:hover {
+            background-color: #475569;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #1e1b4b;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+          }
+          .header p {
+            margin: 4px 0 0 0;
+            color: #64748b;
+            font-size: 14px;
+          }
+          .info-block {
+            text-align: right;
+            font-size: 14px;
+            color: #475569;
+          }
+          .info-block p {
+            margin: 3px 0;
+          }
+          .student-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+          }
+          .student-card h2 {
+            margin: 0 0 10px 0;
+            color: #1e1b4b;
+            font-size: 20px;
+            font-weight: 700;
+          }
+          .student-meta {
+            font-size: 14px;
+            color: #4f46e5;
+            font-weight: 600;
+            margin-bottom: 20px;
+          }
+          .stats-grid {
+            display: grid;
+            grid-template-cols: repeat(3, 1fr);
+            gap: 15px;
+          }
+          .stat-item {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+          }
+          .stat-item .val {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e1b4b;
+          }
+          .stat-item .lbl {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 4px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+          }
+          .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e1b4b;
+            margin-top: 35px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #cbd5e1;
+            padding-bottom: 6px;
+            page-break-after: avoid;
+          }
+          .subject-card, .deneme-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background: #ffffff;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            page-break-inside: avoid;
+          }
+          .subject-header, .deneme-header {
+            background: #f8fafc;
+            padding: 12px 18px;
+            font-weight: 700;
+            font-size: 15px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #e2e8f0;
+            color: #1e1b4b;
+          }
+          .subject-body {
+            padding: 18px;
+          }
+          .topics-list {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 13px;
+            border: 1px solid #f1f5f9;
+          }
+          .topic-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed #e2e8f0;
+            padding: 6px 0;
+          }
+          .topic-item:last-child {
+            border-bottom: none;
+          }
+          .deneme-date {
+            font-size: 12px;
+            color: #64748b;
+            margin: 12px 18px 0 18px;
+            font-weight: 500;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          th, td {
+            border: 1px solid #e2e8f0;
+            padding: 10px 14px;
+            font-size: 13px;
+          }
+          th {
+            background: #f8fafc;
+            font-weight: 700;
+            color: #475569;
+          }
+          .text-center { text-align: center; }
+          .font-bold { font-weight: bold; }
+          .no-data, .no-topics {
+            color: #94a3b8;
+            font-style: italic;
+            font-size: 13px;
+          }
+          @media print {
+            .no-print-bar {
+              display: none !important;
+            }
+            body {
+              margin: 20px;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="no-print-bar">
+          <button class="btn" onclick="window.print()">Raporu Yazdır / PDF Kaydet</button>
+          <button class="btn btn-secondary" onclick="window.close()">Pencereyi Kapat</button>
+        </div>
+        
+        <div class="header">
+          <div>
+            <h1>LGS ASİSTANIN</h1>
+            <p>Öğrenci Gelişim ve Değerlendirme Raporu</p>
+          </div>
+          <div class="info-block">
+            <p><strong>Tarih:</strong> ${new Date().toLocaleDateString('tr-TR')}</p>
+            <p><strong>Rapor Dönemi:</strong> ${selectedFilterLabel}</p>
+          </div>
+        </div>
+
+        <div class="student-card">
+          <h2>Öğrenci: ${studentName}</h2>
+          <div class="student-meta">
+            Seviye: LVL ${getLevelInfo(studentLifetimePoints).level} (${getLevelInfo(studentLifetimePoints).title}) • Toplam Puan: ${studentLifetimePoints}
+          </div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="val">${overallTotal}</div>
+              <div class="lbl">Çözülen Soru</div>
+            </div>
+            <div class="stat-item">
+              <div class="val" style="color: #10b981;">${overallCorrect}</div>
+              <div class="lbl">Doğru Soru</div>
+            </div>
+            <div class="stat-item">
+              <div class="val" style="color: #4f46e5;">%${overallSuccessRate}</div>
+              <div class="lbl">Başarı Oranı</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">Manuel Soru Çözüm Analizi</div>
+        ${subjectsHtml}
+
+        <div class="section-title" style="page-break-before: always;">Deneme Sınavları Geçmişi</div>
+        ${denemelerHtml}
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
 
   useEffect(() => {
     if (!studentId) return;
@@ -457,16 +801,26 @@ export default function StudentDetailPage() {
                       <CardTitle>Manuel Soru Analizi</CardTitle>
                       <CardDescription>Öğrencinin manuel olarak girdiği soru kayıtları.</CardDescription>
                   </div>
-                  <Select value={timeFilter} onValueChange={setTimeFilter}>
-                      <SelectTrigger className="w-full md:w-[200px]">
-                          <SelectValue placeholder="Zaman Aralığı Seç" />
-                      </SelectTrigger>
-                      <SelectContent>
-                          {filterOptions.map(option => (
-                              <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                          ))}
-                      </SelectContent>
-                  </Select>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                      <Select value={timeFilter} onValueChange={setTimeFilter}>
+                          <SelectTrigger className="w-full md:w-[200px]">
+                              <SelectValue placeholder="Zaman Aralığı Seç" />
+                          </SelectTrigger>
+                          <SelectContent>
+                              {filterOptions.map(option => (
+                                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                              ))}
+                          </SelectContent>
+                      </Select>
+                      <Button
+                          onClick={handlePrintReport}
+                          variant="outline"
+                          className="flex items-center gap-2 font-semibold shadow-sm"
+                      >
+                          <Printer className="h-4 w-4" />
+                          Raporu Yazdır
+                      </Button>
+                  </div>
               </div>
           </CardHeader>
       </Card>
