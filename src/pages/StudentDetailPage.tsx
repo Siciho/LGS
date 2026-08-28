@@ -637,7 +637,10 @@ export default function StudentDetailPage() {
       const overallStatsMap: { [key: string]: SubjectStat } = {};
       const topicStatsMap: { [key: string]: TopicStat } = {};
       
-      allRecords.forEach((record: any) => {
+      const EXCLUDED_TOPICS = ["Günlük Test", "Günlük Cümle Avı", "Kelime Düellosu", "Kelime Çalışması"];
+      const filteredRecords = allRecords.filter(record => !EXCLUDED_TOPICS.includes(record.konu));
+      
+      filteredRecords.forEach((record: any) => {
           if (!overallStatsMap[record.ders_id]) {
               const subject = allSubjectsData.find(s => s.id === record.ders_id);
               overallStatsMap[record.ders_id] = { subject_id: record.ders_id, subject_name: subject?.name || 'Bilinmeyen Ders', total_questions: 0, correct_questions: 0, incorrect_questions: 0 };
