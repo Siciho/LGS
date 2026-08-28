@@ -160,6 +160,7 @@ export default function StudentDetailPage() {
   const [studentAvatar, setStudentAvatar] = useState<UserAvatars | null>(null);
   const [studentActiveTheme, setStudentActiveTheme] = useState<string>("default");
   const [books, setBooks] = useState<Book[]>([]);
+  const [rawRecords, setRawRecords] = useState<any[]>([]);
 
   const handlePrintReport = () => {
     if (!report) {
@@ -173,16 +174,58 @@ export default function StudentDetailPage() {
       return;
     }
 
-    const overallCorrect = report.overall_stats.reduce((sum, stat) => sum + stat.correct_questions, 0);
-    const overallIncorrect = report.overall_stats.reduce((sum, stat) => sum + stat.incorrect_questions, 0);
-    const overallTotal = overallCorrect + overallIncorrect;
-    const overallSuccessRate = overallTotal > 0 ? Math.round((overallCorrect / overallTotal) * 100) : 0;
+    // Veli raporu için günlük otomatik aktiviteleri filtrele (Bilgi kirliliğini engellemek için)
+    const EXCLUDED_TOPICS = ["Günlük Test", "Günlük Cümle Avı", "Kelime Düellosu", "Kelime Çalışması"];
+    const printRecords = rawRecords.filter(record => !EXCLUDED_TOPICS.includes(record.konu));
 
-    const subjectsHtml = report.overall_stats.map(stat => {
+    // Manuel çözülen soruların istatistiklerini hesapla
+    const printOverallStatsMap: { [key: string]: SubjectStat } = {};
+    const printTopicStatsMap: { [key: string]: TopicStat[] } = {};
+
+    printRecords.forEach((record: any) => {
+      if (!printOverallStatsMap[record.ders_id]) {
+        const subject = allSubjectsData.find(s => s.id === record.ders_id);
+        printOverallStatsMap[record.ders_id] = {
+          subject_id: record.ders_id,
+          subject_name: subject?.name || 'Bilinmeyen Ders',
+          total_questions: 0,
+          correct_questions: 0,
+          incorrect_questions: 0
+        };
+      }
+      printOverallStatsMap[record.ders_id].correct_questions += record.dogru_sayisi;
+      printOverallStatsMap[record.ders_id].incorrect_questions += record.yanlis_sayisi;
+      printOverallStatsMap[record.ders_id].total_questions += record.dogru_sayisi + record.yanlis_sayisi;
+
+      if (!printTopicStatsMap[record.ders_id]) {
+        printTopicStatsMap[record.ders_id] = [];
+      }
+      const existingTopic = printTopicStatsMap[record.ders_id].find(t => t.topic === record.konu);
+      if (existingTopic) {
+        existingTopic.total_correct += record.dogru_sayisi;
+        existingTopic.total_incorrect += record.yanlis_sayisi;
+      } else {
+        const subject = allSubjectsData.find(s => s.id === record.ders_id);
+        printTopicStatsMap[record.ders_id].push({
+          subject_id: record.ders_id,
+          subject_name: subject?.name || 'Bilinmeyen Ders',
+          topic: record.konu,
+          total_correct: record.dogru_sayisi,
+          total_incorrect: record.yanlis_sayisi
+        });
+      }
+    });
+
+    const printOverallCorrect = Object.values(printOverallStatsMap).reduce((sum, stat) => sum + stat.correct_questions, 0);
+    const printOverallIncorrect = Object.values(printOverallStatsMap).reduce((sum, stat) => sum + stat.incorrect_questions, 0);
+    const printOverallTotal = printOverallCorrect + printOverallIncorrect;
+    const printOverallSuccessRate = printOverallTotal > 0 ? Math.round((printOverallCorrect / printOverallTotal) * 100) : 0;
+
+    const subjectsHtml = Object.values(printOverallStatsMap).map(stat => {
       const total = stat.correct_questions + stat.incorrect_questions;
       const successRate = total > 0 ? Math.round((stat.correct_questions / total) * 100) : 0;
       
-      const subjectTopics = topicsBySubject[stat.subject_id] || [];
+      const subjectTopics = printTopicStatsMap[stat.subject_id] || [];
       const topicsHtml = subjectTopics.length > 0 
         ? `<div class="topics-list">
              <strong style="display: block; margin-bottom: 6px; color: #475569;">Konu Detayları:</strong>
@@ -493,15 +536,15 @@ export default function StudentDetailPage() {
           </div>
           <div class="stats-grid">
             <div class="stat-item">
-              <div class="val">${overallTotal}</div>
+              <div class="val">${printOverallTotal}</div>
               <div class="lbl">Çözülen Soru</div>
             </div>
             <div class="stat-item">
-              <div class="val" style="color: #10b981;">${overallCorrect}</div>
+              <div class="val" style="color: #10b981;">${printOverallCorrect}</div>
               <div class="lbl">Doğru Soru</div>
             </div>
             <div class="stat-item">
-              <div class="val" style="color: #4f46e5;">%${overallSuccessRate}</div>
+              <div class="val" style="color: #4f46e5;">%${printOverallSuccessRate}</div>
               <div class="lbl">Başarı Oranı</div>
             </div>
           </div>
@@ -660,6 +703,7 @@ export default function StudentDetailPage() {
         setDenemeler(denemelerResult.data || []);
 
         // Gelen ham veriyi işleyerek raporları oluştur
+        setRawRecords(allRecords);
         processRecords(allRecords);
         
       } catch (e: any) {
@@ -673,12 +717,9 @@ export default function StudentDetailPage() {
     // Rapor oluşturma mantığını ayrı bir fonksiyona taşıdık
     const processRecords = (allRecords: any[]) => {
       const overallStatsMap: { [key: string]: SubjectStat } = {};
-      const topicStatsMap: { [key: string]: TopicStat } = {};
+      const topicStatsMap: { [key: string]: TopicStat[] } = {};
       
-      const EXCLUDED_TOPICS = ["Günlük Test", "Günlük Cümle Avı", "Kelime Düellosu", "Kelime Çalışması"];
-      const filteredRecords = allRecords.filter(record => !EXCLUDED_TOPICS.includes(record.konu));
-      
-      filteredRecords.forEach((record: any) => {
+      allRecords.forEach((record: any) => {
           if (!overallStatsMap[record.ders_id]) {
               const subject = allSubjectsData.find(s => s.id === record.ders_id);
               overallStatsMap[record.ders_id] = { subject_id: record.ders_id, subject_name: subject?.name || 'Bilinmeyen Ders', total_questions: 0, correct_questions: 0, incorrect_questions: 0 };
@@ -688,16 +729,27 @@ export default function StudentDetailPage() {
           overallStatsMap[record.ders_id].total_questions += record.dogru_sayisi + record.yanlis_sayisi;
 
           const topicKey = `${record.ders_id}-${record.konu}`;
-          if (!topicStatsMap[topicKey]) {
-              const subject = allSubjectsData.find(s => s.id === record.ders_id);
-              topicStatsMap[topicKey] = { subject_id: record.ders_id, subject_name: subject?.name || 'Bilinmeyen Ders', topic: record.konu, total_correct: 0, total_incorrect: 0 };
+          if (!topicStatsMap[record.ders_id]) {
+              topicStatsMap[record.ders_id] = [];
           }
-          topicStatsMap[topicKey].total_correct += record.dogru_sayisi;
-          topicStatsMap[topicKey].total_incorrect += record.yanlis_sayisi;
+          const existingTopic = topicStatsMap[record.ders_id].find(t => t.topic === record.konu);
+          if (existingTopic) {
+              existingTopic.total_correct += record.dogru_sayisi;
+              existingTopic.total_incorrect += record.yanlis_sayisi;
+          } else {
+              const subject = allSubjectsData.find(s => s.id === record.ders_id);
+              topicStatsMap[record.ders_id].push({
+                  subject_id: record.ders_id,
+                  subject_name: subject?.name || 'Bilinmeyen Ders',
+                  topic: record.konu,
+                  total_correct: record.dogru_sayisi,
+                  total_incorrect: record.yanlis_sayisi
+              });
+          }
       });
       
       const finalOverallStats = Object.values(overallStatsMap);
-      const finalTopicReport = Object.values(topicStatsMap);
+      const finalTopicReport = Object.values(topicStatsMap).flat();
 
       setReport({
           overall_stats: finalOverallStats,
