@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase, supabaseUrl, supabaseAnonKey } from '@/supabaseClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowLeft, CheckCircle, XCircle, ChevronDown, TrendingUp, TrendingDown, AlertTriangle, BookCopy, Award, Printer } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, ChevronDown, TrendingUp, TrendingDown, AlertTriangle, BookCopy, Award, Printer, BookOpen } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -55,6 +55,13 @@ interface TopicStat {
   topic: string;
   total_correct: number;
   total_incorrect: number;
+}
+interface Book {
+  id: number;
+  kitap_adi: string;
+  sayfa_sayisi: number;
+  aciklama: string;
+  eklenme_tarihi: string;
 }
 
 const PIE_COLORS = ['#00C49F', '#FF8042'];
@@ -152,6 +159,7 @@ export default function StudentDetailPage() {
   const [studentLifetimePoints, setStudentLifetimePoints] = useState<number>(0);
   const [studentAvatar, setStudentAvatar] = useState<UserAvatars | null>(null);
   const [studentActiveTheme, setStudentActiveTheme] = useState<string>("default");
+  const [books, setBooks] = useState<Book[]>([]);
 
   const handlePrintReport = () => {
     if (!report) {
@@ -245,6 +253,19 @@ export default function StudentDetailPage() {
         </div>
       `;
     }).join('') || '<p class="no-data">Girilmiş deneme sınavı bulunamadı.</p>';
+
+    const booksHtml = books.map(book => {
+      return `
+        <div class="subject-card" style="padding: 15px;">
+          <div style="display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px;">
+            <span style="font-size: 15px; color: #1e1b4b;">${book.kitap_adi}</span>
+            <span style="font-size: 13px; color: #475569;">${book.sayfa_sayisi} Sayfa</span>
+          </div>
+          ${book.aciklama ? `<p style="margin: 0; font-size: 13px; font-style: italic; color: #475569; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #f1f5f9;">"${book.aciklama}"</p>` : ''}
+          <p style="margin: 6px 0 0 0; font-size: 11px; color: #64748b;">Kayıt Tarihi: ${new Date(book.eklenme_tarihi).toLocaleDateString('tr-TR')}</p>
+        </div>
+      `;
+    }).join('') || '<p class="no-data">Okunan kitap kaydı bulunamadı.</p>';
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -491,6 +512,9 @@ export default function StudentDetailPage() {
 
         <div class="section-title" style="page-break-before: always;">Deneme Sınavları Geçmişi</div>
         ${denemelerHtml}
+
+        <div class="section-title" style="page-break-before: always;">Okuduğu Kitaplar</div>
+        ${booksHtml}
       </body>
       </html>
     `);
@@ -551,10 +575,18 @@ export default function StudentDetailPage() {
           .eq('id', studentId)
           .maybeSingle();
 
-        const [edgeFunctionResult, denemelerResult, profileResult] = await Promise.all([
+        // Okuduğu kitapları çek
+        const booksPromise = supabase
+          .from('okunan_kitaplar')
+          .select('*')
+          .eq('kullanici_id', studentId)
+          .order('eklenme_tarihi', { ascending: false });
+
+        const [edgeFunctionResult, denemelerResult, profileResult, booksResult] = await Promise.all([
           edgeFunctionPromise, 
           denemelerPromise,
-          profilePromise
+          profilePromise,
+          booksPromise
         ]);
 
         // Profil sonuçlarını işle
@@ -574,6 +606,12 @@ export default function StudentDetailPage() {
             }
           }
           setStudentAvatar(avatarData);
+        }
+
+        if (booksResult.error) {
+          console.warn("Öğrenci kitapları çekilemedi:", booksResult.error.message);
+        } else {
+          setBooks(booksResult.data || []);
         }
 
         let allRecords: any[] = [];
@@ -792,6 +830,43 @@ export default function StudentDetailPage() {
                 </div>
               );
             })
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Okuduğu Kitaplar Raporu */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-emerald-500" />
+            Okuduğu Kitaplar
+          </CardTitle>
+          <CardDescription>Öğrencinin okuduğunu beyan ettiği kitaplar ve düşünceleri.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {books.length === 0 ? (
+            <p className="text-center text-muted-foreground p-4">Bu öğrenci henüz hiç kitap kaydı eklememiş.</p>
+          ) : (
+            books.map(book => (
+              <div key={book.id} className="p-3 bg-muted/50 rounded-lg">
+                <div className="flex justify-between items-start gap-4">
+                  <div>
+                    <h4 className="font-semibold text-base text-foreground">{book.kitap_adi}</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Sayfa Sayısı: {book.sayfa_sayisi} sayfa
+                    </p>
+                    {book.aciklama && (
+                      <p className="text-sm italic text-muted-foreground mt-2 bg-background/50 p-2.5 rounded border border-border/50">
+                        "{book.aciklama}"
+                      </p>
+                    )}
+                    <p className="text-[10px] text-muted-foreground mt-1.5">
+                      Eklendiği Tarih: {new Date(book.eklenme_tarihi).toLocaleDateString('tr-TR')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))
           )}
         </CardContent>
       </Card>

@@ -8,9 +8,13 @@ import DailyQuote from '@/components/ui/DailyQuote';
 import LgsCountdown from '@/components/ui/LgsCountdown';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Briefcase, BookCopy, BarChart } from 'lucide-react';
+import { Briefcase, BookCopy, BarChart, BookOpen, Library, Trash2 } from 'lucide-react';
 import { DenemeSinaviDialog, DenemeSonucu } from '@/components/DenemeSinaviDialog';
 import { supabase } from '@/supabaseClient';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import StreakBoosterCard from '@/components/StreakBoosterCard';
 import StreakFreezeShield from '@/components/StreakFreezeShield';
@@ -30,6 +34,78 @@ const Index = () => {
   const navigate = useNavigate();
   const [isDenemeDialogOpen, setIsDenemeDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  const [isBookDialogOpen, setIsBookDialogOpen] = useState(false);
+  const [isBookListOpen, setIsBookListOpen] = useState(false);
+  const [bookName, setBookName] = useState("");
+  const [pageCount, setPageCount] = useState("");
+  const [bookComment, setBookComment] = useState("");
+  const [isSavingBook, setIsSavingBook] = useState(false);
+  const [booksList, setBooksList] = useState<any[]>([]);
+  const [isLoadingBooks, setIsLoadingBooks] = useState(false);
+
+  const handleSaveBook = async () => {
+    if (!userId) return;
+    if (!bookName.trim() || !pageCount) {
+      toast.error("Lütfen kitap adı ve sayfa sayısını girin.");
+      return;
+    }
+    setIsSavingBook(true);
+    try {
+      const { error } = await supabase.from('okunan_kitaplar').insert({
+        kullanici_id: userId,
+        kitap_adi: bookName,
+        sayfa_sayisi: parseInt(pageCount),
+        aciklama: bookComment
+      });
+      if (error) throw error;
+      toast.success(`"${bookName}" başarıyla okunan kitaplara eklendi!`);
+      setIsBookDialogOpen(false);
+      setBookName("");
+      setPageCount("");
+      setBookComment("");
+    } catch (err: any) {
+      console.error("Kitap kaydedilirken hata:", err);
+      toast.error("Kitap kaydedilemedi: " + err.message);
+    } finally {
+      setIsSavingBook(false);
+    }
+  };
+
+  const handleOpenBookList = async () => {
+    setIsBookListOpen(true);
+    if (!userId) return;
+    setIsLoadingBooks(true);
+    try {
+      const { data, error } = await supabase
+        .from('okunan_kitaplar')
+        .select('*')
+        .eq('kullanici_id', userId)
+        .order('eklenme_tarihi', { ascending: false });
+      if (error) throw error;
+      setBooksList(data || []);
+    } catch (err: any) {
+      console.error("Kitaplar yüklenirken hata:", err);
+      toast.error("Kitap listesi yüklenemedi.");
+    } finally {
+      setIsLoadingBooks(false);
+    }
+  };
+
+  const handleDeleteBook = async (bookId: number) => {
+    try {
+      const { error } = await supabase
+        .from('okunan_kitaplar')
+        .delete()
+        .eq('id', bookId);
+      if (error) throw error;
+      setBooksList(prev => prev.filter(b => b.id !== bookId));
+      toast.success("Kitap başarıyla silindi.");
+    } catch (err: any) {
+      console.error("Kitap silinirken hata:", err);
+      toast.error("Kitap silinemedi.");
+    }
+  };
 
   const handleSaveDeneme = async (sonuclar: DenemeSonucu, denemeAdi: string, denemeTarihi: Date) => {
     if (!userId) {
@@ -115,6 +191,20 @@ const Index = () => {
             <BarChart className="h-5 w-5 text-sky-200" />
             Deneme Kayıtları
         </Button>
+        <Button 
+          onClick={() => setIsBookDialogOpen(true)} 
+          className="w-full py-5 flex-col h-auto font-bold bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/15 hover:shadow-emerald-500/25 transition-all border border-emerald-500/25 gap-1.5"
+        >
+            <BookOpen className="h-5 w-5 text-emerald-200" />
+            Okuduğum Kitabı Ekle
+        </Button>
+        <Button 
+          onClick={handleOpenBookList} 
+          className="w-full py-5 flex-col h-auto font-bold bg-gradient-to-br from-amber-600 via-orange-600 to-amber-700 hover:from-amber-500 hover:to-orange-600 text-white shadow-lg shadow-amber-500/15 hover:shadow-amber-500/25 transition-all border border-amber-500/25 gap-1.5"
+        >
+            <Library className="h-5 w-5 text-amber-200" />
+            Okuduğum Kitaplar
+        </Button>
       </div>
       
       {subjects && (
@@ -135,6 +225,125 @@ const Index = () => {
         onSave={handleSaveDeneme}
         isSaving={isSaving}
       />
+
+      {/* KİTAP EKLEME DIALOGU */}
+      <Dialog open={isBookDialogOpen} onOpenChange={setIsBookDialogOpen}>
+        <DialogContent className="max-w-md rounded-2xl p-6">
+          <DialogHeader className="space-y-2">
+            <DialogTitle className="text-xl font-bold tracking-tight">Okuduğum Kitabı Ekle</DialogTitle>
+            <DialogDescription className="text-sm">
+              Okuduğunuz kitabı sayfa sayısı ve görüşlerinizle birlikte kaydedin.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 my-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="book-name" className="font-bold">Kitap Adı</Label>
+              <Input
+                id="book-name"
+                placeholder="Örn: Nutuk, Küçük Prens"
+                value={bookName}
+                onChange={(e) => setBookName(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-1.5">
+              <Label htmlFor="page-count" className="font-bold">Sayfa Sayısı</Label>
+              <Input
+                id="page-count"
+                type="number"
+                placeholder="Örn: 150"
+                value={pageCount}
+                onChange={(e) => setPageCount(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="book-comment" className="font-bold">Düşünceleriniz / Açıklama</Label>
+              <Textarea
+                id="book-comment"
+                placeholder="Kitap hakkında 1-2 cümlelik düşünceniz veya hissettikleriniz..."
+                value={bookComment}
+                onChange={(e) => setBookComment(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
+            <Button
+              variant="outline"
+              disabled={isSavingBook}
+              onClick={() => setIsBookDialogOpen(false)}
+              className="w-full sm:w-auto font-semibold"
+            >
+              İptal
+            </Button>
+            <Button
+              disabled={isSavingBook}
+              onClick={handleSaveBook}
+              className="w-full sm:w-auto font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md"
+            >
+              {isSavingBook ? "Kaydediliyor..." : "Kitabı Kaydet"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* OKUNAN KİTAPLAR LİSTESİ DIALOGU */}
+      <Dialog open={isBookListOpen} onOpenChange={setIsBookListOpen}>
+        <DialogContent className="max-w-md rounded-2xl p-6">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold tracking-tight">Okuduğum Kitaplar</DialogTitle>
+            <DialogDescription className="text-sm">
+              Şimdiye kadar okuduğunuz ve kaydettiğiniz kitaplar.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="my-4 max-h-[350px] overflow-y-auto space-y-3 pr-1">
+            {isLoadingBooks ? (
+              <p className="text-center text-muted-foreground py-4 text-sm">Kitaplar yükleniyor...</p>
+            ) : booksList.length === 0 ? (
+              <p className="text-center text-muted-foreground py-4 text-sm">Henüz kaydedilmiş kitap bulunmuyor.</p>
+            ) : (
+              booksList.map(book => (
+                <div key={book.id} className="p-3 bg-muted/40 rounded-xl border border-border/50 flex justify-between items-start gap-2">
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-sm text-foreground">{book.kitap_adi}</h4>
+                    <p className="text-xs text-muted-foreground font-semibold">Sayfa Sayısı: {book.sayfa_sayisi}</p>
+                    {book.aciklama && (
+                      <p className="text-xs text-muted-foreground italic mt-1 bg-background/50 p-2 rounded-lg border border-border/20">
+                        "{book.aciklama}"
+                      </p>
+                    )}
+                    <p className="text-[10px] text-muted-foreground/75 mt-0.5">
+                      Kayıt Tarihi: {new Date(book.eklenme_tarihi).toLocaleDateString('tr-TR')}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive hover:bg-destructive/10 h-7 w-7 flex-shrink-0"
+                    onClick={() => handleDeleteBook(book.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+
+          <DialogFooter className="mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setIsBookListOpen(false)}
+              className="w-full font-semibold"
+            >
+              Kapat
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
