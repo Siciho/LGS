@@ -179,17 +179,16 @@ export default function WordQuizPage() {
             />
           ), { duration: 6000, position: "top-center" });
           
-          // Log to cozulen_sorular so it counts in monthly/weekly leaderboard
+          // Log to kelime_calismalari so it tracks vocabulary progress independently
           try {
-            await supabase.from('cozulen_sorular').insert({
+            await supabase.from('kelime_calismalari').insert({
               kullanici_id: userId,
-              ders_id: 'english',
               dogru_sayisi: finalCorrectCount,
               yanlis_sayisi: questions.length - finalCorrectCount,
-              konu: challengeId ? 'Kelime Düellosu' : 'Kelime Çalışması'
+              aktivite_tipi: challengeId ? 'Kelime Düellosu' : 'Kelime Çalışması'
             });
           } catch (e) {
-            console.error("Error logging word quiz to cozulen_sorular:", e);
+            console.error("Error logging word quiz to kelime_calismalari:", e);
           }
         }
 

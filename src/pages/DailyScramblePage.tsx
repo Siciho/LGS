@@ -268,13 +268,12 @@ export default function DailyScramblePage() {
     const earnedPoints = score * 10;
 
     try {
-      // 1. Log to cozulen_sorular (for leaderboards)
-      await supabase.from('cozulen_sorular').insert({
+      // 1. Log to kelime_calismalari (for independent tracking)
+      await supabase.from('kelime_calismalari').insert({
         kullanici_id: userId,
-        ders_id: 'english',
         dogru_sayisi: score,
         yanlis_sayisi: questions.length - score,
-        konu: 'Günlük Cümle Avı'
+        aktivite_tipi: 'Günlük Cümle Avı'
       });
 
       // 2. Mark daily scramble completed in database

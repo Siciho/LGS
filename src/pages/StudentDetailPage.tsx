@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase, supabaseUrl, supabaseAnonKey } from '@/supabaseClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowLeft, CheckCircle, XCircle, ChevronDown, TrendingUp, TrendingDown, AlertTriangle, BookCopy, Award, Printer, BookOpen } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, ChevronDown, TrendingUp, TrendingDown, AlertTriangle, BookCopy, Award, Printer, BookOpen, Swords } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -62,6 +62,13 @@ interface Book {
   sayfa_sayisi: number;
   aciklama: string;
   eklenme_tarihi: string;
+}
+interface WordStudy {
+  id: number;
+  dogru_sayisi: number;
+  yanlis_sayisi: number;
+  aktivite_tipi: string;
+  tarih: string;
 }
 
 const PIE_COLORS = ['#00C49F', '#FF8042'];
@@ -161,6 +168,7 @@ export default function StudentDetailPage() {
   const [studentActiveTheme, setStudentActiveTheme] = useState<string>("default");
   const [books, setBooks] = useState<Book[]>([]);
   const [rawRecords, setRawRecords] = useState<any[]>([]);
+  const [wordStudies, setWordStudies] = useState<WordStudy[]>([]);
 
   const handlePrintReport = () => {
     if (!report) {
@@ -625,11 +633,19 @@ export default function StudentDetailPage() {
           .eq('kullanici_id', studentId)
           .order('eklenme_tarihi', { ascending: false });
 
-        const [edgeFunctionResult, denemelerResult, profileResult, booksResult] = await Promise.all([
+        // Kelime çalışmalarını çek
+        const wordStudiesPromise = supabase
+          .from('kelime_calismalari')
+          .select('*')
+          .eq('kullanici_id', studentId)
+          .order('tarih', { ascending: false });
+
+        const [edgeFunctionResult, denemelerResult, profileResult, booksResult, wordStudiesResult] = await Promise.all([
           edgeFunctionPromise, 
           denemelerPromise,
           profilePromise,
-          booksPromise
+          booksPromise,
+          wordStudiesPromise
         ]);
 
         // Profil sonuçlarını işle
@@ -655,6 +671,12 @@ export default function StudentDetailPage() {
           console.warn("Öğrenci kitapları çekilemedi:", booksResult.error.message);
         } else {
           setBooks(booksResult.data || []);
+        }
+
+        if (wordStudiesResult.error) {
+          console.warn("Kelime çalışmaları çekilemedi:", wordStudiesResult.error.message);
+        } else {
+          setWordStudies(wordStudiesResult.data || []);
         }
 
         let allRecords: any[] = [];
@@ -919,6 +941,39 @@ export default function StudentDetailPage() {
                 </div>
               </div>
             ))
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Uygulama İçi Kelime Çalışmaları */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Swords className="h-5 w-5 text-indigo-500" />
+            Uygulama İçi Kelime Çalışmaları
+          </CardTitle>
+          <CardDescription>Öğrencinin kelime düelloları ve kelime çalışma geçmişi.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {wordStudies.length === 0 ? (
+            <p className="text-center text-muted-foreground p-4">Bu öğrenci henüz hiç kelime çalışması yapmamış.</p>
+          ) : (
+            <div className="space-y-2 text-sm">
+              {wordStudies.map(study => (
+                <div key={study.id} className="p-3 bg-muted/50 rounded-lg flex justify-between items-center">
+                  <div>
+                    <h4 className="font-semibold">{study.aktivite_tipi}</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Tarih: {new Date(study.tarih).toLocaleDateString('tr-TR')}
+                    </p>
+                  </div>
+                  <div className="flex gap-3 text-xs">
+                    <span className="text-green-500 font-bold">{study.dogru_sayisi} Doğru</span>
+                    <span className="text-red-500 font-bold">{study.yanlis_sayisi} Yanlış</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>
